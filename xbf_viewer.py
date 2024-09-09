@@ -190,7 +190,6 @@ def display_frame(node, frame, transform):
         pygame.draw.line(WINDOW, (0,0,255), v0pos, v1pos)
         pygame.draw.line(WINDOW, (0,0,255), v0pos, v2pos)
         pygame.draw.line(WINDOW, (0,0,255), v2pos, v1pos)
-        #file.write("f "+str()+" "+str(face.longs[1]+1+VertexTotal)+" "+str(face.longs[2]+1+VertexTotal)+"\n")
     
 def viewer(node):
     pygame.init()
@@ -204,10 +203,6 @@ def viewer(node):
                 pygame.quit()
                 return
             
-        # Processing
-        # This section will be built out later
-    
-        # Render elements of the game
         WINDOW.fill((30, 30, 30))
         
         global time
@@ -219,12 +214,7 @@ def viewer(node):
         pygame.display.update()
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("file")
-    # args = parser.parse_args()
-
-    #filename = "GU_wormhead_H0_base.xbf"
-    #filename = "AT_MGT_H0_base.xbf"
+    
     filename = 'Data/3DData1/Buildings/AT_conyard_H0.XbF'
 
     with open(filename, "rb") as xbfFile:
@@ -238,8 +228,4 @@ if __name__ == '__main__':
         xbfObject.readFrom(xbfFile)
 
         viewer(xbfObject)
-
-        # xbfname = os.path.splitext(file)[0]
-        # with open(xbfname+".obj", "w") as f:
-        #     xbfObject.writeToObj(f)
 
