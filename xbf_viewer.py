@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 import struct
 import numpy as np
-import argparse
-import os
-import sys
 import math
 import pygame
-from pygame.locals import *
+from pygame.locals import QUIT
 
 def readInt(file):
 	return struct.unpack("<i", file.read(4))[0]
@@ -48,21 +45,17 @@ class Face:
         self.longs = struct.unpack("<5i", xbfFile.read(4 * 5))
         self.floats = struct.unpack("<6f", xbfFile.read(4 * 6))
 
-VertexTotal = 0 #for writing out to obj
-
-class Object:
+class Node:
     def __init__(self):
         self.children = []
         self.vertices = []
         self.faces = []
+        self.vertexAnimation=None
+        self.vertexAnimationCount=None
 
     def readFrom(self, file):
         vertexCount = readInt(file)
         flags = readInt(file)
-        hasPrelight = bool(flags & 1)
-        hasFaceData = bool(flags & 2)
-        hasVertexAnimation = bool(flags & 4)
-        hasKeyAnimation = bool(flags & 8)
         faceCount = readInt(file)
         childCount = readInt(file)
         self.transform = readMatrix(file)
@@ -70,7 +63,7 @@ class Object:
         self.name = file.read(nameLength)
 
         for i in range(childCount):
-            child = Object()
+            child = Node()
             child.readFrom(file)
             self.children.append(child)
 
@@ -83,6 +76,11 @@ class Object:
             face = Face()
             face.readFrom(file)
             self.faces.append(face)
+            
+        hasPrelight = bool(flags & 1)
+        hasFaceData = bool(flags & 2)
+        hasVertexAnimation = bool(flags & 4)
+        hasKeyAnimation = bool(flags & 8)
 
         if hasPrelight:
             rgb = [readInt(file) for i in range(vertexCount)]
@@ -90,8 +88,6 @@ class Object:
         if hasFaceData:
             faceData = [readInt(file) for i in range(faceCount)]
 
-        self.vertexAnimation=None
-        self.vertexAnimationCount=None
         if hasVertexAnimation:
             frameCount = readInt(file)
             count = readInt(file)
@@ -119,33 +115,6 @@ class Object:
                     readInt16(file)
                 for i in range(actual):
                     struct.unpack("<12f", file.read(4 * 12))
-
-    def writeToObj(self, file, transform=None, resetTotal=True):
-        global VertexTotal
-        if resetTotal:
-            VertexTotal = 0
-
-        np_transform = np.array(self.transform)
-        np_transform.shape=(4,4)
-
-        if transform is not None:
-            np_transform = np_transform.dot(transform)
-
-        name = self.name.decode()
-        file.write("o "+name+"\n")
-
-        for vertex in self.vertices:
-            np_point = np.array([vertex.vertices[0], vertex.vertices[1], vertex.vertices[2], 1])
-            np_result = np_point.dot(np_transform)
-            file.write("v "+str(np_result[0])+" "+str(np_result[1])+" "+str(np_result[2])+" "+str(np_result[3])+"\n")
-        file.write("\n")
-        for face in self.faces:
-            file.write("f "+str(face.longs[0]+1+VertexTotal)+" "+str(face.longs[1]+1+VertexTotal)+" "+str(face.longs[2]+1+VertexTotal)+"\n")
-        file.write("\n")
-        VertexTotal += len(self.vertices)
-
-        for child in self.children:
-            child.writeToObj(file, np_transform, False)
 
 def recursive_display(obj, frame, transform=None):
     
@@ -183,7 +152,7 @@ def get_vertex_pos(obj, frame, ver, transform):
 
 def display_frame(obj, frame, transform):
     
-    if obj.vertexAnimation == None:
+    if obj.vertexAnimation is None:
         return
     frames = len(obj.vertexAnimation)
     frame = frame%frames
@@ -233,7 +202,7 @@ def viewer(obj):
         for event in pygame.event.get() :
             if event.type == QUIT :
                 pygame.quit()
-                sys.exit()
+                return
             
         # Processing
         # This section will be built out later
@@ -254,20 +223,18 @@ if __name__ == '__main__':
     # parser.add_argument("file")
     # args = parser.parse_args()
 
-    wd=os.path.dirname(os.path.realpath(__file__))
     #filename = "GU_wormhead_H0_base.xbf"
     #filename = "AT_MGT_H0_base.xbf"
-    filename = "AT_conyard_H0_base.xbf"
-    file = os.path.join(wd,filename)
+    filename = 'Data/3DData1/Buildings/AT_conyard_H0.XbF'
 
-    with open(file, "rb") as xbfFile:
+    with open(filename, "rb") as xbfFile:
         version = readInt(xbfFile)
         appDataSize = readInt(xbfFile)
         xbfFile.read(appDataSize)
         textureNameDataSize = readInt(xbfFile)
         xbfFile.read(textureNameDataSize)
 
-        xbfObject = Object()
+        xbfObject = Node()
         xbfObject.readFrom(xbfFile)
 
         viewer(xbfObject)
