@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 import struct
 import numpy as np
 import math
@@ -116,16 +116,16 @@ class Node:
                 for i in range(actual):
                     struct.unpack("<12f", file.read(4 * 12))
 
-def recursive_display(obj, frame, transform=None):
+def recursive_display(node, frame, transform=None):
     
-    np_transform = np.array(obj.transform)
+    np_transform = np.array(node.transform)
     np_transform.shape=(4,4)
 
     if transform is not None:
         np_transform = np_transform.dot(transform)
 
-    display_frame(obj, frame, np_transform)
-    for child in obj.children:
+    display_frame(node, frame, np_transform)
+    for child in node.children:
         recursive_display(child, frame, np_transform)
 
 offsetx = 1280/2.0
@@ -141,30 +141,30 @@ def transform_vertex(p):
     rotp = ca * p[0] + sa * p[2]
     return (rotp * scale + offsetx, -p[1] * scale + offsety)
 
-def get_vertex_pos(obj, frame, ver, transform):    
-    posx = obj.vertexAnimation[frame][ver][0]
-    posy = obj.vertexAnimation[frame][ver][1]
-    posz = obj.vertexAnimation[frame][ver][2]
+def get_vertex_pos(node, frame, ver, transform):    
+    posx = node.vertexAnimation[frame][ver][0]
+    posy = node.vertexAnimation[frame][ver][1]
+    posz = node.vertexAnimation[frame][ver][2]
     np_point = np.array([posx, posy, posz, 1])
     np_result = np_point.dot(transform)
-    #testnorm = obj.vertexAnimation[frame][ver][3]
+    #testnorm = node.vertexAnimation[frame][ver][3]
     return np_result
 
-def display_frame(obj, frame, transform):
+def display_frame(node, frame, transform):
     
-    if obj.vertexAnimation is None:
+    if node.vertexAnimation is None:
         return
-    frames = len(obj.vertexAnimation)
+    frames = len(node.vertexAnimation)
     frame = frame%frames
-    vertcount = obj.vertexAnimationCount
+    vertcount = node.vertexAnimationCount
 
     #time = math.pi * 0.5
     for ver in range(vertcount):
 
-        worldpos = get_vertex_pos(obj, frame, ver, transform)
+        worldpos = get_vertex_pos(node, frame, ver, transform)
         curpos = transform_vertex(worldpos)
-        normx = obj.vertexAnimation[frame][ver][3]
-        normy = obj.vertexAnimation[frame][ver][4]
+        normx = node.vertexAnimation[frame][ver][3]
+        normy = node.vertexAnimation[frame][ver][4]
 
         #curpos=(nor1 * 2 + 1280/2.0, nor2 * 2 + 720/10.0)
         #curpos=(ver*10 + 1280/2.0, testnorm * 2 + 720/10.0)
@@ -180,19 +180,19 @@ def display_frame(obj, frame, transform):
 
         prevpos=curpos
     
-    for face in obj.faces:
+    for face in node.faces:
         v0 = face.longs[0]
         v1 = face.longs[1]
         v2 = face.longs[2]
-        v0pos = transform_vertex(get_vertex_pos(obj, frame, v0, transform))
-        v1pos = transform_vertex(get_vertex_pos(obj, frame, v1, transform))
-        v2pos = transform_vertex(get_vertex_pos(obj, frame, v2, transform))
+        v0pos = transform_vertex(get_vertex_pos(node, frame, v0, transform))
+        v1pos = transform_vertex(get_vertex_pos(node, frame, v1, transform))
+        v2pos = transform_vertex(get_vertex_pos(node, frame, v2, transform))
         pygame.draw.line(WINDOW, (0,0,255), v0pos, v1pos)
         pygame.draw.line(WINDOW, (0,0,255), v0pos, v2pos)
         pygame.draw.line(WINDOW, (0,0,255), v2pos, v1pos)
         #file.write("f "+str()+" "+str(face.longs[1]+1+VertexTotal)+" "+str(face.longs[2]+1+VertexTotal)+"\n")
     
-def viewer(obj):
+def viewer(node):
     pygame.init()
     global WINDOW
     WINDOW = pygame.display.set_mode((1280, 720))
@@ -214,7 +214,7 @@ def viewer(obj):
         time = pygame.time.get_ticks()
         
         curframe = math.floor(time*0.01)
-        recursive_display(obj, curframe)
+        recursive_display(node, curframe)
 
         pygame.display.update()
 
