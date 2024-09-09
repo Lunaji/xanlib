@@ -34,7 +34,7 @@ class Vertex:
         self.vertices = None
 
     def readFrom(self, file):
-        self.vertices = struct.unpack("<6f", xbfFile.read(4 * 6))
+        self.vertices = struct.unpack("<6f", file.read(4 * 6))
 
 class Face:
     def __init__(self):
@@ -42,8 +42,8 @@ class Face:
         self.floats = []
 
     def readFrom(self, file):
-        self.longs = struct.unpack("<5i", xbfFile.read(4 * 5))
-        self.floats = struct.unpack("<6f", xbfFile.read(4 * 6))
+        self.longs = struct.unpack("<5i", file.read(4 * 5))
+        self.floats = struct.unpack("<6f", file.read(4 * 6))
 
 class Node:
     def __init__(self):
@@ -53,68 +53,99 @@ class Node:
         self.vertexAnimation=None
         self.vertexAnimationCount=None
 
-    def readFrom(self, file):
-        vertexCount = readInt(file)
-        flags = readInt(file)
-        faceCount = readInt(file)
-        childCount = readInt(file)
-        self.transform = readMatrix(file)
-        nameLength = readInt(file)
-        self.name = file.read(nameLength)
+def read_node(file):
+    vertexCount = readInt(file)
+    if vertexCount == -1:
+        return None
+    node = Node()
+    flags = readInt(file)
+    faceCount = readInt(file)
+    childCount = readInt(file)
+    node.transform = readMatrix(file)
+    nameLength = readInt(file)
+    node.name = file.read(nameLength)
+    
+    for i in range(childCount):
+        child = read_node(file)
+        node.children.append(child)
 
-        for i in range(childCount):
-            child = Node()
-            child.readFrom(file)
-            self.children.append(child)
+    for i in range(vertexCount):
+        vertex = Vertex()
+        vertex.readFrom(file)
+        node.vertices.append(vertex)
 
-        for i in range(vertexCount):
-            vertex = Vertex()
-            vertex.readFrom(file)
-            self.vertices.append(vertex)
+    for i in range(faceCount):
+        face = Face()
+        face.readFrom(file)
+        node.faces.append(face)
+        
+    hasPrelight = bool(flags & 1)
+    hasFaceData = bool(flags & 2)
+    hasVertexAnimation = bool(flags & 4)
+    hasKeyAnimation = bool(flags & 8)
 
-        for i in range(faceCount):
-            face = Face()
-            face.readFrom(file)
-            self.faces.append(face)
-            
-        hasPrelight = bool(flags & 1)
-        hasFaceData = bool(flags & 2)
-        hasVertexAnimation = bool(flags & 4)
-        hasKeyAnimation = bool(flags & 8)
+    if hasPrelight:
+        rgb = [readInt(file) for i in range(vertexCount)]
 
-        if hasPrelight:
-            rgb = [readInt(file) for i in range(vertexCount)]
+    if hasFaceData:
+        faceData = [readInt(file) for i in range(faceCount)]
 
-        if hasFaceData:
-            faceData = [readInt(file) for i in range(faceCount)]
+    if hasVertexAnimation:
+        frameCount = readInt(file)
+        count = readInt(file)
+        actual = readInt(file)
+        keyList = [readUInt(file) for i in range(actual)]
+        if count < 0: #compressed
+            scale = readUInt(file)
+            node.vertexAnimationCount = int(readUInt(file)/actual)
+            node.vertexAnimation = [[[readInt16(file), readInt16(file), readInt16(file), readUInt8(file), readUInt8(file)] for i in range(node.vertexAnimationCount)] for i in range(actual)]
+            if (scale & 0x80000000): #interpolated
+                interpolationData = [readUInt(file) for i in range(frameCount)]
 
-        if hasVertexAnimation:
-            frameCount = readInt(file)
-            count = readInt(file)
+    if hasKeyAnimation:
+        frameCount = readInt(file)
+        keynimationflags = readInt(file)
+        if keynimationflags==-1:
+            for i in range(frameCount+1):
+                for j in range(16): readInt(file)
+        elif keynimationflags==-2:
+            for i in range(frameCount+1):
+                for j in range(12): readInt(file)
+        else:
             actual = readInt(file)
-            keyList = [readUInt(file) for i in range(actual)]
-            if count < 0: #compressed
-                scale = readUInt(file)
-                self.vertexAnimationCount = int(readUInt(file)/actual)
-                self.vertexAnimation = [[[readInt16(file), readInt16(file), readInt16(file), readUInt8(file), readUInt8(file)] for i in range(self.vertexAnimationCount)] for i in range(actual)]
-                if (scale & 0x80000000): #interpolated
-                    interpolationData = [readUInt(file) for i in range(frameCount)]
+            for i in range(frameCount+1):
+                readInt16(file)
+            for i in range(actual):
+                struct.unpack("<12f", file.read(4 * 12))
+                
+    return node
 
-        if hasKeyAnimation:
-            frameCount = readInt(file)
-            keynimationflags = readInt(file)
-            if keynimationflags==-1:
-                for i in range(frameCount+1):
-                    for j in range(16): readInt(file)
-            elif keynimationflags==-2:
-                for i in range(frameCount+1):
-                    for j in range(12): readInt(file)
-            else:
-                actual = readInt(file)
-                for i in range(frameCount+1):
-                    readInt16(file)
-                for i in range(actual):
-                    struct.unpack("<12f", file.read(4 * 12))
+class Scene:
+    def __init__(self):
+        self.nodes = []
+
+def load_xbf(filename):
+    scene = Scene()
+    scene.file = filename  
+    with open(filename, 'rb') as f:
+        scene.version = readInt(f)
+        FXDataSize = readInt(f)
+        scene.FXData = f.read(FXDataSize)
+        textureNameDataSize = readInt(f)
+        scene.textureNameData = f.read(textureNameDataSize)
+        while True:
+            try:
+                node = read_node(f)
+                if node is None:
+                    #Verify eof?
+                    return scene
+                scene.nodes.append(node)
+            except Exception as e:
+                scene.error = e
+                print('Error while parsing node:')
+                print(e)
+                scene.unparsed = f.read()
+                return scene
 
 def recursive_display(node, frame, transform=None):
     
@@ -216,16 +247,7 @@ def viewer(node):
 if __name__ == '__main__':
     
     filename = 'Data/3DData1/Buildings/AT_conyard_H0.XbF'
-
-    with open(filename, "rb") as xbfFile:
-        version = readInt(xbfFile)
-        appDataSize = readInt(xbfFile)
-        xbfFile.read(appDataSize)
-        textureNameDataSize = readInt(xbfFile)
-        xbfFile.read(textureNameDataSize)
-
-        xbfObject = Node()
-        xbfObject.readFrom(xbfFile)
-
-        viewer(xbfObject)
-
+    
+    scene = load_xbf(filename)
+    
+    viewer(scene.nodes[0]) #assuming it exists and treating it as root
