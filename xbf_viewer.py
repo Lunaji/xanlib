@@ -3,7 +3,7 @@ import numpy as np
 import math
 import pygame
 from pygame.locals import QUIT
-from xanlib.scene import load_xbf
+from xanlib import load_xbf
 
 def recursive_display(node, frame, transform=None):
     
