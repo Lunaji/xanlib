@@ -1,4 +1,6 @@
 import struct
+from dataclasses import dataclass, field
+from typing import Optional, List
 
 def readInt(file):
 	return struct.unpack("<i", file.read(4))[0]
@@ -53,7 +55,7 @@ def read_node(file):
     if vertexCount == -1:
         return None
     node = Node()
-    flags = readInt(file)
+    node.flags = readInt(file)
     faceCount = readInt(file)
     childCount = readInt(file)
     node.transform = readMatrix(file)
@@ -74,10 +76,10 @@ def read_node(file):
         face.readFrom(file)
         node.faces.append(face)
         
-    hasPrelight = bool(flags & 1)
-    hasFaceData = bool(flags & 2)
-    hasVertexAnimation = bool(flags & 4)
-    hasKeyAnimation = bool(flags & 8)
+    hasPrelight = bool(node.flags & 1)
+    hasFaceData = bool(node.flags & 2)
+    hasVertexAnimation = bool(node.flags & 4)
+    hasKeyAnimation = bool(node.flags & 8)
 
     if hasPrelight:
         rgb = [readInt(file) for i in range(vertexCount)]
@@ -115,9 +117,11 @@ def read_node(file):
                 
     return node
 
+@dataclass
 class Scene:
-    def __init__(self):
-        self.nodes = []
+    nodes: List['Node'] = field(default_factory=list)
+    error: Optional[Exception] = None
+    unparsed: Optional[Exception] = None
 
 def load_xbf(filename):
     scene = Scene()
@@ -137,7 +141,5 @@ def load_xbf(filename):
                 scene.nodes.append(node)
             except Exception as e:
                 scene.error = e
-                print('Error while parsing node:')
-                print(e)
                 scene.unparsed = f.read()
                 return scene
