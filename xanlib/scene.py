@@ -27,6 +27,7 @@ def readByte(file):
     return struct.unpack("<c", file.read(1))[0]
 
 Vector3: TypeAlias = Tuple[float, float, float]
+UV: TypeAlias = Tuple[float, float]
 
 @dataclass
 class Vertex:
@@ -37,17 +38,25 @@ def read_vertex(buffer):
     return Vertex(
         struct.unpack("<3f", buffer.read(4 * 3)),
         struct.unpack("<3f", buffer.read(4 * 3))
-    )       
-        
+    )        
 
+@dataclass
 class Face:
-    def __init__(self):
-        self.longs = []
-        self.floats = []
+    vertex_indices: Tuple[int, int, int]
+    texture_index: int
+    flags: int
+    uv_coords: Tuple[UV, UV, UV]
 
-    def readFrom(self, file):
-        self.longs = struct.unpack("<5i", file.read(4 * 5))
-        self.floats = struct.unpack("<6f", file.read(4 * 6))
+def read_face(buffer):
+    return Face(
+        struct.unpack("<3i", buffer.read(4 * 3)),
+        struct.unpack("<1i", buffer.read(4 * 1)),
+        struct.unpack("<1i", buffer.read(4 * 1)),
+        tuple(
+            struct.unpack("<2f", buffer.read(4 * 2))
+            for i in range(3)
+        )
+    )
 
 class Node:
     def __init__(self):
@@ -78,8 +87,7 @@ def read_node(file):
         node.vertices.append(vertex)
 
     for i in range(faceCount):
-        face = Face()
-        face.readFrom(file)
+        face = read_face(file)
         node.faces.append(face)
         
     hasPrelight = bool(node.flags & 1)
