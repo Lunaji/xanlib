@@ -1,6 +1,6 @@
 import struct
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import Optional, Tuple, List, TypeAlias
 
 def readInt(file):
 	return struct.unpack("<i", file.read(4))[0]
@@ -26,12 +26,19 @@ def readMatrix(file):
 def readByte(file):
     return struct.unpack("<c", file.read(1))[0]
 
-class Vertex:
-    def __init__(self):
-        self.vertices = None
+Vector3: TypeAlias = Tuple[float, float, float]
 
-    def readFrom(self, file):
-        self.vertices = struct.unpack("<6f", file.read(4 * 6))
+@dataclass
+class Vertex:
+    position: Vector3
+    normal: Vector3
+
+def read_vertex(buffer):
+    return Vertex(
+        struct.unpack("<3f", buffer.read(4 * 3)),
+        struct.unpack("<3f", buffer.read(4 * 3))
+    )       
+        
 
 class Face:
     def __init__(self):
@@ -67,8 +74,7 @@ def read_node(file):
         node.children.append(child)
 
     for i in range(vertexCount):
-        vertex = Vertex()
-        vertex.readFrom(file)
+        vertex = read_vertex(file)
         node.vertices.append(vertex)
 
     for i in range(faceCount):
