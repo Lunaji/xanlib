@@ -22,10 +22,10 @@ class VertexAnimation:
     count: int
     actual: int
     keys: List[int]
-    scale: int
-    base_count: int
-    real_count: int
-    body: list
+    scale: Optional[int]
+    base_count: Optional[int]
+    real_count: Optional[int]
+    body: Optional[list]
     interpolation_data: Optional[List[int]]
     
 @dataclass

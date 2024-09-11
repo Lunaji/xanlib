@@ -61,11 +61,11 @@ def read_vertex_animation(buffer):
         count,
         actual,
         keyList,
-        scale,
-        base_count,
-        real_count,
-        body,
-        interpolationData if (scale & 0x80000000) else None
+        scale if count<0 else None,
+        base_count if count<0 else None,
+        real_count if count<0 else None,
+        body if count<0 else None,
+        interpolationData if ((count<0) and (scale & 0x80000000)) else None
     )
 
 def read_key_animation(buffer):
