@@ -16,13 +16,24 @@ class Face:
     flags: int
     uv_coords: Tuple[UV, UV, UV]
 
+@dataclass    
+class VertexAnimation:
+    frame_count: int
+    count: int
+    actual: int
+    keys: List[int]
+    scale: int
+    base_count: int
+    real_count: int
+    body: list
+    interpolation_data: Optional[List[int]]
+
 class Node:
     def __init__(self):
         self.children = []
         self.vertices = []
         self.faces = []
-        self.vertexAnimation=None
-        self.vertexAnimationCount=None
+        self.vertex_animation=None
 
 @dataclass
 class Scene:

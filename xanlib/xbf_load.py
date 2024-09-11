@@ -1,5 +1,5 @@
 import struct
-from .scene import Scene, Node, Face, Vertex
+from .scene import Scene, Node, VertexAnimation, Face, Vertex
 from .xbf_base import NodeFlags
 
 def readInt(file):
@@ -43,6 +43,32 @@ def read_face(buffer):
         )
     )
         
+def read_vertex_animation(buffer):
+    frameCount = readInt(buffer)
+    count = readInt(buffer)
+    actual = readInt(buffer)
+    keyList = [readUInt(buffer) for i in range(actual)]
+    if count < 0: #compressed
+        scale = readUInt(buffer)
+        base_count = readUInt(buffer)
+        real_count = base_count//actual
+        body = [[[readInt16(buffer), readInt16(buffer), readInt16(buffer), readUInt8(buffer), readUInt8(buffer)] for i in range(real_count)] for i in range(actual)]
+        if (scale & 0x80000000): #interpolated
+            interpolationData = [readUInt(buffer) for i in range(frameCount)]
+            
+    return VertexAnimation(
+        frameCount,
+        count,
+        actual,
+        keyList,
+        scale,
+        base_count,
+        real_count,
+        body,
+        interpolationData if (scale & 0x80000000) else None
+    )
+        
+        
 def read_node(file):
     vertexCount = readInt(file)
     if vertexCount == -1:
@@ -60,22 +86,14 @@ def read_node(file):
     node.faces    = [read_face(file)   for i in range(faceCount)]
 
     if NodeFlags.PRELIGHT in node.flags:
-        rgb = [(readByte(file) for i in range(3)) for j in range(vertexCount)]
+        node.rgb = [(readByte(file) for i in range(3)) for j in range(vertexCount)]
 
     if NodeFlags.FACE_DATA in node.flags:
-        faceData = [readInt(file) for i in range(faceCount)]
+        node.faceData = [readInt(file) for i in range(faceCount)]
 
     if NodeFlags.VERTEX_ANIMATION in node.flags:
-        frameCount = readInt(file)
-        count = readInt(file)
-        actual = readInt(file)
-        keyList = [readUInt(file) for i in range(actual)]
-        if count < 0: #compressed
-            scale = readUInt(file)
-            node.vertexAnimationCount = int(readUInt(file)/actual)
-            node.vertexAnimation = [[[readInt16(file), readInt16(file), readInt16(file), readUInt8(file), readUInt8(file)] for i in range(node.vertexAnimationCount)] for i in range(actual)]
-            if (scale & 0x80000000): #interpolated
-                interpolationData = [readUInt(file) for i in range(frameCount)]
+        node.vertex_animation = read_vertex_animation(file)
+
 
     if NodeFlags.KEY_ANIMATION in node.flags:
         frameCount = readInt(file)

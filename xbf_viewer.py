@@ -31,29 +31,29 @@ def transform_vertex(p):
     return (rotp * scale + offsetx, -p[1] * scale + offsety)
 
 def get_vertex_pos(node, frame, ver, transform):    
-    posx = node.vertexAnimation[frame][ver][0]
-    posy = node.vertexAnimation[frame][ver][1]
-    posz = node.vertexAnimation[frame][ver][2]
+    posx = node.vertex_animation.body[frame][ver][0]
+    posy = node.vertex_animation.body[frame][ver][1]
+    posz = node.vertex_animation.body[frame][ver][2]
     np_point = np.array([posx, posy, posz, 1])
     np_result = np_point.dot(transform)
-    #testnorm = node.vertexAnimation[frame][ver][3]
+    #testnorm = node.vertex_animation.body[frame][ver][3]
     return np_result
 
 def display_frame(node, frame, transform):
     
-    if node.vertexAnimation is None:
+    if node.vertex_animation is None:
         return
-    frames = len(node.vertexAnimation)
+    frames = len(node.vertex_animation.body)
     frame = frame%frames
-    vertcount = node.vertexAnimationCount
-
+    vertcount = node.vertex_animation.real_count
+    
     #time = math.pi * 0.5
     for ver in range(vertcount):
 
         worldpos = get_vertex_pos(node, frame, ver, transform)
         curpos = transform_vertex(worldpos)
-        normx = node.vertexAnimation[frame][ver][3]
-        normy = node.vertexAnimation[frame][ver][4]
+        normx = node.vertex_animation.body[frame][ver][3]
+        normy = node.vertex_animation.body[frame][ver][4]
 
         #curpos=(nor1 * 2 + 1280/2.0, nor2 * 2 + 720/10.0)
         #curpos=(ver*10 + 1280/2.0, testnorm * 2 + 720/10.0)
