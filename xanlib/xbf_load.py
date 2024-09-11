@@ -34,8 +34,8 @@ def read_vertex(buffer):
 def read_face(buffer):
     return Face(
         struct.unpack("<3i", buffer.read(4 * 3)),
-        struct.unpack("<1i", buffer.read(4 * 1)),
-        struct.unpack("<1i", buffer.read(4 * 1)),
+        struct.unpack("<1i", buffer.read(4 * 1))[0],
+        struct.unpack("<1i", buffer.read(4 * 1))[0],
         tuple(
             struct.unpack("<2f", buffer.read(4 * 2))
             for i in range(3)
