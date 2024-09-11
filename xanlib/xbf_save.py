@@ -1,4 +1,5 @@
 from struct import pack
+from .xbf_base import NodeFlags
 
 def write_Int32sl(buffer, v):
 	buffer.write(pack('<i', v))
@@ -47,8 +48,23 @@ def write_vertex_animation(buffer, va):
                     write_Int8ul(buffer, va.body[i][j][k])
         if (va.scale & 0x80000000):
             for v in va.interpolation_data:
-                write_Int32ul(buffer, v)                
-    
+                write_Int32ul(buffer, v)
+                
+def write_key_animation(buffer, ka):
+    write_Int32sl(buffer, ka.frame_count)
+    write_Int32sl(buffer, ka.flags)
+    if ka.flags==-1:
+        for matrix in ka.matrices:
+            buffer.write(pack('<16f', *matrix))
+    elif ka.flags==-1:
+        for matrix in ka.matrices:
+            buffer.write(pack('<12f', *matrix))
+    else:
+        write_Int32sl(buffer, ka.actual)
+        for extra_datum in ka.extra_data:
+            write_Int16sl(buffer, extra_datum)
+        for matrix in ka.matrices:
+            buffer.write(pack('<12f', *matrix))   
 	
 def write_node(buffer, node):
     write_Int32sl(buffer, len(node.vertices))
@@ -71,14 +87,17 @@ def write_node(buffer, node):
     if NodeFlags.PRELIGHT in node.flags:
         for j, vertex in enumerate(node.vertices):
             for i in range(3):
-                write_Int8ul(buffer, node.rgb[j][i]
+                write_Int8ul(buffer, node.rgb[j][i])
 
     if NodeFlags.FACE_DATA in node.flags:
         for faceDatum in node.faceData:
             write_Int32sl(buffer, faceDatum)
 
     if NodeFlags.VERTEX_ANIMATION in node.flags:
-        write_vertex_animation(buffer, va.vertex_animation)
+        write_vertex_animation(buffer, node.vertex_animation)
+        
+    if NodeFlags.KEY_ANIMATION in node.flags:
+        write_key_animation(buffer, node.key_animation)
         
 
 def save_xbf(scene, filename):

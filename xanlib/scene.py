@@ -34,7 +34,7 @@ class KeyAnimation:
     flags: int
     matrices: list
     actual: Optional[int]
-    minus3_extra_data: Optional[List[int]]    
+    extra_data: Optional[List[int]]    
 
 class Node:
     def __init__(self):
