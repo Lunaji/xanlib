@@ -1,5 +1,6 @@
 import struct
 from .scene import Scene, Node, Face, Vertex
+from .xbf_base import NodeFlags
 
 def readInt(file):
 	return struct.unpack("<i", file.read(4))[0]
@@ -47,7 +48,7 @@ def read_node(file):
     if vertexCount == -1:
         return None
     node = Node()
-    node.flags = readInt(file)
+    node.flags = NodeFlags(readInt(file))
     faceCount = readInt(file)
     childCount = readInt(file)
     node.transform = readMatrix(file)
@@ -57,19 +58,14 @@ def read_node(file):
     node.children = [read_node(file)   for i in range(childCount)]
     node.vertices = [read_vertex(file) for i in range(vertexCount)]
     node.faces    = [read_face(file)   for i in range(faceCount)]
-        
-    hasPrelight = bool(node.flags & 1)
-    hasFaceData = bool(node.flags & 2)
-    hasVertexAnimation = bool(node.flags & 4)
-    hasKeyAnimation = bool(node.flags & 8)
 
-    if hasPrelight:
-        rgb = [readInt(file) for i in range(vertexCount)]
+    if NodeFlags.PRELIGHT in node.flags:
+        rgb = [(readByte(file) for i in range(3)) for j in range(vertexCount)]
 
-    if hasFaceData:
+    if NodeFlags.FACE_DATA in node.flags:
         faceData = [readInt(file) for i in range(faceCount)]
 
-    if hasVertexAnimation:
+    if NodeFlags.VERTEX_ANIMATION in node.flags:
         frameCount = readInt(file)
         count = readInt(file)
         actual = readInt(file)
@@ -81,7 +77,7 @@ def read_node(file):
             if (scale & 0x80000000): #interpolated
                 interpolationData = [readUInt(file) for i in range(frameCount)]
 
-    if hasKeyAnimation:
+    if NodeFlags.KEY_ANIMATION in node.flags:
         frameCount = readInt(file)
         keynimationflags = readInt(file)
         if keynimationflags==-1:
