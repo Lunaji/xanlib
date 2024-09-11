@@ -27,6 +27,14 @@ class VertexAnimation:
     real_count: int
     body: list
     interpolation_data: Optional[List[int]]
+    
+@dataclass
+class KeyAnimation:
+    frame_count: int
+    flags: int
+    matrices: list
+    actual: Optional[int]
+    minus3_extra_data: Optional[List[int]]    
 
 class Node:
     def __init__(self):
@@ -34,6 +42,7 @@ class Node:
         self.vertices = []
         self.faces = []
         self.vertex_animation=None
+        self.key_animation=None
 
 @dataclass
 class Scene:

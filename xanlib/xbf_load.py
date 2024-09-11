@@ -1,5 +1,5 @@
 import struct
-from .scene import Scene, Node, VertexAnimation, Face, Vertex
+from .scene import Scene, Node, VertexAnimation, KeyAnimation, Face, Vertex
 from .xbf_base import NodeFlags
 
 def readInt(file):
@@ -67,6 +67,36 @@ def read_vertex_animation(buffer):
         body,
         interpolationData if (scale & 0x80000000) else None
     )
+
+def read_key_animation(buffer):
+    frameCount = readInt(buffer)
+    flags = readInt(buffer)
+    if flags==-1:
+        matrices = [
+            struct.unpack('<16f', buffer.read(4*16))
+            for i in range(frameCount+1)
+        ]
+    elif flags==-2:
+        matrices = [
+            struct.unpack('<12f', buffer.read(4*12))
+            for i in range(frameCount+1)
+        ]
+    else: #assuming -3 ?
+        actual = readInt(buffer)
+        extra_data = [readInt16(buffer) for i in range(frameCount+1)]
+        matrices = [
+            struct.unpack('<12f', buffer.read(4 * 12))
+            for i in range(actual)
+        ]
+        
+    return KeyAnimation(
+        frameCount,
+        flags,
+        matrices,
+        actual if flags==-3 else None,
+        extra_data if flags==-3 else None
+    )   
+    
         
         
 def read_node(file):
@@ -94,23 +124,9 @@ def read_node(file):
     if NodeFlags.VERTEX_ANIMATION in node.flags:
         node.vertex_animation = read_vertex_animation(file)
 
-
     if NodeFlags.KEY_ANIMATION in node.flags:
-        frameCount = readInt(file)
-        keynimationflags = readInt(file)
-        if keynimationflags==-1:
-            for i in range(frameCount+1):
-                for j in range(16): readInt(file)
-        elif keynimationflags==-2:
-            for i in range(frameCount+1):
-                for j in range(12): readInt(file)
-        else:
-            actual = readInt(file)
-            for i in range(frameCount+1):
-                readInt16(file)
-            for i in range(actual):
-                struct.unpack("<12f", file.read(4 * 12))
-                
+        node.key_animation = read_key_animation(file)
+        
     return node
 
 def load_xbf(filename):
