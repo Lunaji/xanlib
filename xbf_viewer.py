@@ -70,15 +70,17 @@ def display_frame(node, frame, transform):
         prevpos=curpos
     
     for face in node.faces:
-        v0 = face.longs[0]
-        v1 = face.longs[1]
-        v2 = face.longs[2]
-        v0pos = transform_vertex(get_vertex_pos(node, frame, v0, transform))
-        v1pos = transform_vertex(get_vertex_pos(node, frame, v1, transform))
-        v2pos = transform_vertex(get_vertex_pos(node, frame, v2, transform))
-        pygame.draw.line(WINDOW, (0,0,255), v0pos, v1pos)
-        pygame.draw.line(WINDOW, (0,0,255), v0pos, v2pos)
-        pygame.draw.line(WINDOW, (0,0,255), v2pos, v1pos)
+        vpos = [transform_vertex(get_vertex_pos(
+                                        node,
+                                        frame,
+                                        vi,
+                                        transform
+                                     )
+                                )
+                for vi in face.vertex_indices]
+        
+        for i, j in ((0, 1), (0, 2), (2, 1)):
+             pygame.draw.line(WINDOW, (0, 0, 255), vpos[i], vpos[j])
     
 def viewer(node):
     pygame.init()

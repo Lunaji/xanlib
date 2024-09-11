@@ -1,6 +1,6 @@
 import struct
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import Optional, Tuple, List, TypeAlias
 
 def readInt(file):
 	return struct.unpack("<i", file.read(4))[0]
@@ -26,21 +26,37 @@ def readMatrix(file):
 def readByte(file):
     return struct.unpack("<c", file.read(1))[0]
 
+Vector3: TypeAlias = Tuple[float, float, float]
+UV: TypeAlias = Tuple[float, float]
+
+@dataclass
 class Vertex:
-    def __init__(self):
-        self.vertices = None
+    position: Vector3
+    normal: Vector3
 
-    def readFrom(self, file):
-        self.vertices = struct.unpack("<6f", file.read(4 * 6))
+def read_vertex(buffer):
+    return Vertex(
+        struct.unpack("<3f", buffer.read(4 * 3)),
+        struct.unpack("<3f", buffer.read(4 * 3))
+    )        
 
+@dataclass
 class Face:
-    def __init__(self):
-        self.longs = []
-        self.floats = []
+    vertex_indices: Tuple[int, int, int]
+    texture_index: int
+    flags: int
+    uv_coords: Tuple[UV, UV, UV]
 
-    def readFrom(self, file):
-        self.longs = struct.unpack("<5i", file.read(4 * 5))
-        self.floats = struct.unpack("<6f", file.read(4 * 6))
+def read_face(buffer):
+    return Face(
+        struct.unpack("<3i", buffer.read(4 * 3)),
+        struct.unpack("<1i", buffer.read(4 * 1)),
+        struct.unpack("<1i", buffer.read(4 * 1)),
+        tuple(
+            struct.unpack("<2f", buffer.read(4 * 2))
+            for i in range(3)
+        )
+    )
 
 class Node:
     def __init__(self):
@@ -62,19 +78,9 @@ def read_node(file):
     nameLength = readInt(file)
     node.name = file.read(nameLength).decode()
     
-    for i in range(childCount):
-        child = read_node(file)
-        node.children.append(child)
-
-    for i in range(vertexCount):
-        vertex = Vertex()
-        vertex.readFrom(file)
-        node.vertices.append(vertex)
-
-    for i in range(faceCount):
-        face = Face()
-        face.readFrom(file)
-        node.faces.append(face)
+    node.children = [read_node(file)   for i in range(childCount)]
+    node.vertices = [read_vertex(file) for i in range(vertexCount)]
+    node.faces    = [read_face(file)   for i in range(faceCount)]
         
     hasPrelight = bool(node.flags & 1)
     hasFaceData = bool(node.flags & 2)
