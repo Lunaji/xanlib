@@ -143,3 +143,16 @@ def load_xbf(filename):
                 scene.error = e
                 scene.unparsed = f.read()
                 return scene
+            
+def traverse(node, func, parent=None, depth=0, **kwargs):
+    func(node, parent=parent, depth=depth, **kwargs)
+
+    for child in node.children:
+        traverse(child, func, parent=node, depth=depth+1)
+
+def print_node_names(scene):
+    for node in scene.nodes:
+        traverse(
+            node,
+            lambda n, depth, **kwargs: print(' ' * depth * 2 + n.name)
+        )
