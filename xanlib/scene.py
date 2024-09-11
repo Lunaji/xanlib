@@ -60,7 +60,7 @@ def read_node(file):
     childCount = readInt(file)
     node.transform = readMatrix(file)
     nameLength = readInt(file)
-    node.name = file.read(nameLength)
+    node.name = file.read(nameLength).decode()
     
     for i in range(childCount):
         child = read_node(file)
