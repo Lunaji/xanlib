@@ -12,6 +12,8 @@ def write_node(buffer, node):
     write_Int32sl(buffer, len(node.faces))
     write_Int32sl(buffer, len(node.children))
     write_matrix44dl(buffer, node.transform)
+    write_Int32sl(buffer, len(node.name))
+    buffer.write(node.name.encode())
 
 def save_xbf(scene, filename):
     with open(filename, 'wb') as f:
