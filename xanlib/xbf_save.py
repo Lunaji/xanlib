@@ -68,6 +68,18 @@ def write_node(buffer, node):
     for face in node.faces:
         write_face(buffer, face)
         
+    if NodeFlags.PRELIGHT in node.flags:
+        for j, vertex in enumerate(node.vertices):
+            for i in range(3):
+                write_Int8ul(buffer, node.rgb[j][i]
+
+    if NodeFlags.FACE_DATA in node.flags:
+        for faceDatum in node.faceData:
+            write_Int32sl(buffer, faceDatum)
+
+    if NodeFlags.VERTEX_ANIMATION in node.flags:
+        write_vertex_animation(buffer, va.vertex_animation)
+        
 
 def save_xbf(scene, filename):
     with open(filename, 'wb') as f:
