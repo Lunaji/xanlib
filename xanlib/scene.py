@@ -78,17 +78,9 @@ def read_node(file):
     nameLength = readInt(file)
     node.name = file.read(nameLength).decode()
     
-    for i in range(childCount):
-        child = read_node(file)
-        node.children.append(child)
-
-    for i in range(vertexCount):
-        vertex = read_vertex(file)
-        node.vertices.append(vertex)
-
-    for i in range(faceCount):
-        face = read_face(file)
-        node.faces.append(face)
+    node.children = [read_node(file)   for i in range(childCount)]
+    node.vertices = [read_vertex(file) for i in range(vertexCount)]
+    node.faces    = [read_face(file)   for i in range(faceCount)]
         
     hasPrelight = bool(node.flags & 1)
     hasFaceData = bool(node.flags & 2)
