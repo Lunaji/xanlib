@@ -3,6 +3,18 @@ from struct import pack
 def write_Int32sl(buffer, v):
 	buffer.write(pack('<i', v))
 	
+def write_Int32ul(buffer, v):
+	buffer.write(pack('<I', v))
+	
+def write_Int16sl(buffer, v):
+	buffer.write(pack('<h', v))
+	
+def write_Int16ul(buffer, v):
+	buffer.write(pack('<H', v))
+	
+def write_Int8ul(buffer, v):
+	buffer.write(pack('<B', v))
+	
 def write_matrix44dl(buffer, v):
     buffer.write(pack('<16d', *v))
     
@@ -16,6 +28,27 @@ def write_face(buffer, face):
     buffer.write(pack('<1i', face.flags))
     for uv in face.uv_coords:
         buffer.write(pack('2f', *uv))
+        
+def write_vertex_animation(buffer, va):
+    write_Int32sl(buffer, va.frame_count)
+    write_Int32sl(buffer, va.count)
+    write_Int32sl(buffer, va.actual)
+    for key in va.keys:
+        write_Int32ul(buffer, key)
+    
+    if va.count<0:
+        write_Int32ul(buffer, va.scale)
+        write_Int32ul(buffer, va.base_count)
+        for i in range(va.actual):
+            for j in range(va.real_count):
+                for k in range(3):
+                    write_Int16sl(buffer, va.body[i][j][k])
+                for k in range(3,5):
+                    write_Int8ul(buffer, va.body[i][j][k])
+        if (va.scale & 0x80000000):
+            for v in va.interpolation_data:
+                write_Int32ul(buffer, v)                
+    
 	
 def write_node(buffer, node):
     write_Int32sl(buffer, len(node.vertices))
