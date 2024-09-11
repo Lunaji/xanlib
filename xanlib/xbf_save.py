@@ -1,13 +1,17 @@
 from struct import pack
 
 def write_Int32sl(buffer, v):
-	buffer.write(pack("<i", v))
+	buffer.write(pack('<i', v))
+	
+def write_matrix44dl(buffer, v):
+    buffer.write(pack('<16d', *v))
 	
 def write_node(buffer, node):
     write_Int32sl(buffer, len(node.vertices))
     write_Int32sl(buffer, node.flags)
     write_Int32sl(buffer, len(node.faces))
     write_Int32sl(buffer, len(node.children))
+    write_matrix44dl(buffer, node.transform)
 
 def save_xbf(scene, filename):
     with open(filename, 'wb') as f:
