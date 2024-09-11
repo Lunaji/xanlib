@@ -1,8 +1,12 @@
 from struct import pack
 
+def write_Int32sl(buffer, v):
+	buffer.write(pack("<i", v))
+
 def save_xbf(scene, filename):
     with open(filename, 'wb') as f:
-        f.write(pack('<2i', scene.version, len(scene.FXData)))
+        write_Int32sl(f, scene.version)
+        write_Int32sl(f, len(scene.FXData))
         f.write(scene.FXData)
-        f.write(pack('<i', len(scene.textureNameData)))
+        write_Int32sl(f, len(scene.textureNameData))
         f.write(scene.textureNameData)
