@@ -26,10 +26,8 @@ class Viewer():
         
     def transform_vertex(self, p):
         a = self.time * self.rotspeed
-        ca=np.cos(a)
-        sa=np.sin(a)
-        rotp = ca * p[0] + sa * p[2]
-        return Vector2(rotp, -p[1])*self.scale+self.origin+self.offset
+        rotp = Vector2(np.cos(a), np.sin(a)).dot(Vector2(p.x, p.z))
+        return Vector2(rotp, -p.y)*self.scale+self.origin+self.offset
         
     def display_frame(self, node, frame, transform):
     
