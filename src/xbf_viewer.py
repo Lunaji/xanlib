@@ -22,15 +22,15 @@ class Viewer():
         self.time = 0
         self.scale = 0.02
         self.rotspeed = 0.001
-        marginy = 100
-        self.offset = Vector2(width/2.0, height/2.0+marginy)
+        self.origin = Vector2(width/2.0, height/2.0)
+        self.offset = Vector2(0, 100)        
         
     def transform_vertex(self, p):
         a = self.time * self.rotspeed
         ca=math.cos(a)
         sa=math.sin(a)
         rotp = ca * p[0] + sa * p[2]
-        return Vector2(rotp, -p[1])*self.scale +self.offset
+        return Vector2(rotp, -p[1])*self.scale+self.origin+self.offset
         
     def display_frame(self, node, frame, transform):
     
@@ -45,8 +45,7 @@ class Viewer():
 
             worldpos = get_vertex_pos(vertex, transform)
             curpos = self.transform_vertex(worldpos)
-            normx = vertex[3]
-            normy = vertex[4]
+            norm = Vector2(*vertex[3:5])
 
             #curpos=(nor1 * 2 + 1280/2.0, nor2 * 2 + 720/10.0)
             #curpos=(vi*10 + 1280/2.0, testnorm * 2 + 720/10.0)
@@ -56,7 +55,7 @@ class Viewer():
             pygame.draw.circle(self.WINDOW, (255,(vi*50)%255,(vi*10)%255), curpos, size)
 
             normscale = 30
-            globalnormpos = (worldpos[0], worldpos[1] + normx*normscale, worldpos[2] + (normy-100.0) * normscale)
+            globalnormpos = worldpos+Vector3(0, *(norm-self.offset)*normscale)
             normpos = self.transform_vertex(globalnormpos)
             pygame.draw.line(self.WINDOW, (255,0,0), curpos, normpos)
 
