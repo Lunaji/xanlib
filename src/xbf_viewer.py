@@ -5,13 +5,13 @@ import pygame
 from pygame.locals import QUIT
 from xanlib import load_xbf
 
-def get_vertex_pos(node, frame, ver, transform):    
-    posx = node.vertex_animation.body[frame][ver][0]
-    posy = node.vertex_animation.body[frame][ver][1]
-    posz = node.vertex_animation.body[frame][ver][2]
+def get_vertex_pos(node, frame, vi, transform):    
+    posx = node.vertex_animation.body[frame][vi][0]
+    posy = node.vertex_animation.body[frame][vi][1]
+    posz = node.vertex_animation.body[frame][vi][2]
     np_point = np.array([posx, posy, posz, 1])
     np_result = np_point.dot(transform)
-    #testnorm = node.vertex_animation.body[frame][ver][3]
+    #testnorm = node.vertex_animation.body[frame][vi][3]
     return np_result
     
 class Viewer():   
@@ -48,19 +48,19 @@ class Viewer():
         vertcount = node.vertex_animation.real_count
         
         #time = math.pi * 0.5
-        for ver in range(vertcount):
+        for vi in range(vertcount):
 
-            worldpos = get_vertex_pos(node, frame, ver, transform)
+            worldpos = get_vertex_pos(node, frame, vi, transform)
             curpos = self.transform_vertex(worldpos)
-            normx = node.vertex_animation.body[frame][ver][3]
-            normy = node.vertex_animation.body[frame][ver][4]
+            normx = node.vertex_animation.body[frame][vi][3]
+            normy = node.vertex_animation.body[frame][vi][4]
 
             #curpos=(nor1 * 2 + 1280/2.0, nor2 * 2 + 720/10.0)
-            #curpos=(ver*10 + 1280/2.0, testnorm * 2 + 720/10.0)
-            #if ver>0:
+            #curpos=(vi*10 + 1280/2.0, testnorm * 2 + 720/10.0)
+            #if vi>0:
             #    pygame.draw.line(WINDOW, (0,0,255), curpos, prevpos, 2)
             size = 5
-            pygame.draw.circle(self.WINDOW, (255,(ver*50)%255,(ver*10)%255), curpos, size)
+            pygame.draw.circle(self.WINDOW, (255,(vi*50)%255,(vi*10)%255), curpos, size)
 
             normscale = 30
             globalnormpos = (worldpos[0], worldpos[1] + normx*normscale, worldpos[2] + (normy-100.0) * normscale)
