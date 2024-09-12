@@ -41,12 +41,12 @@ class Viewer():
         vertcount = node.vertex_animation.real_count
         
         #time = math.pi * 0.5
-        for vi in range(vertcount):
+        for vi, vertex in enumerate(node.vertex_animation.body[frame]):
 
-            worldpos = get_vertex_pos(node.vertex_animation.body[frame][vi], transform)
+            worldpos = get_vertex_pos(vertex, transform)
             curpos = self.transform_vertex(worldpos)
-            normx = node.vertex_animation.body[frame][vi][3]
-            normy = node.vertex_animation.body[frame][vi][4]
+            normx = vertex[3]
+            normy = vertex[4]
 
             #curpos=(nor1 * 2 + 1280/2.0, nor2 * 2 + 720/10.0)
             #curpos=(vi*10 + 1280/2.0, testnorm * 2 + 720/10.0)
