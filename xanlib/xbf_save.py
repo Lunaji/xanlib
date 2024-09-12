@@ -56,7 +56,7 @@ def write_key_animation(buffer, ka):
     if ka.flags==-1:
         for matrix in ka.matrices:
             buffer.write(pack('<16f', *matrix))
-    elif ka.flags==-1:
+    elif ka.flags==-2:
         for matrix in ka.matrices:
             buffer.write(pack('<12f', *matrix))
     else:

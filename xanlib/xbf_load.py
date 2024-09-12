@@ -114,7 +114,7 @@ def read_node(buffer):
     node.faces    = [read_face(buffer)   for i in range(faceCount)]
 
     if NodeFlags.PRELIGHT in node.flags:
-        node.rgb = [(readByte(buffer) for i in range(3)) for j in range(vertexCount)]
+        node.rgb = [tuple(readUInt8(buffer) for i in range(3)) for j in range(vertexCount)]
 
     if NodeFlags.FACE_DATA in node.flags:
         node.faceData = [readInt(buffer) for i in range(faceCount)]
