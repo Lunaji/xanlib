@@ -365,3 +365,70 @@ def test_read_node_basic(vertex_data, face_data):
     assert node.vertices == [expected_vertex]
     assert node.faces == [expected_face]
     assert node.rgb == [(255, 0, 0)]
+    
+def test_read_node_with_children(vertex_data, face_data):
+    
+    vertex_bin, expected_vertex = vertex_data
+    face_bin, expected_face = face_data
+
+    # Binary data for parent node (vertexCount = 1, faceCount = 1, childCount = 1)
+    vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int
+    flags_bin = b'\x01\x00\x00\x00'        # NodeFlags.PRELIGHT (1)
+    faceCount_bin = b'\x01\x00\x00\x00'    # 1 as int
+    childCount_bin = b'\x01\x00\x00\x00'   # 1 as int (1 child)
+
+    # Identity matrix for parent node.transform (mocked 4x4 matrix)
+    matrix_bin = b'\x00' * (8 * 16)  # Simplified for the mock
+
+    # Name: length = 10, "ParentNode"
+    nameLength_bin = b'\x0a\x00\x00\x00'  # 10 as int
+    parent_name_bin = b'ParentNode'
+
+    # RGB color data for parent vertex: (255, 0, 0)
+    rgb_bin = b'\xff\x00\x00'
+
+    # Binary data for child node (vertexCount = 1, faceCount = 1, childCount = 0)
+    child_vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int
+    child_flags_bin = b'\x01\x00\x00\x00'        # NodeFlags.PRELIGHT (1)
+    child_faceCount_bin = b'\x01\x00\x00\x00'    # 1 as int
+    child_childCount_bin = b'\x00\x00\x00\x00'   # 0 as int (no children)
+
+    # Name: length = 9, "ChildNode"
+    child_nameLength_bin = b'\x09\x00\x00\x00'  # 9 as int
+    child_name_bin = b'ChildNode'
+
+    # RGB color data for child vertex: (0, 255, 0)
+    child_rgb_bin = b'\x00\xff\x00'
+
+    child_node_bin = (
+        child_vertexCount_bin + child_flags_bin + child_faceCount_bin + child_childCount_bin +
+        matrix_bin + child_nameLength_bin + child_name_bin + vertex_bin + face_bin + child_rgb_bin
+    )
+
+    binary_data = (
+        vertexCount_bin + flags_bin + faceCount_bin + childCount_bin +
+        matrix_bin + nameLength_bin + parent_name_bin + child_node_bin +
+        vertex_bin + face_bin + rgb_bin
+    )
+
+    buffer = io.BytesIO(binary_data)
+
+    node = read_node(buffer)
+
+    # Check parent node attributes
+    assert node is not None
+    assert node.name == "ParentNode"
+    assert node.vertices == [expected_vertex]  # Reusing expected vertex object
+    assert node.faces == [expected_face]       # Reusing expected face object
+    assert node.rgb == [(255, 0, 0)]           # RGB for parent
+
+    # Check that the parent node has one child
+    assert len(node.children) == 1
+
+    # Check child node attributes
+    child_node = node.children[0]
+    assert child_node.name == "ChildNode"
+    assert child_node.vertices == [expected_vertex]  # Reusing expected vertex object
+    assert child_node.faces == [expected_face]       # Reusing expected face object
+    assert child_node.rgb == [(0, 255, 0)]           # RGB for child
+
