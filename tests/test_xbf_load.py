@@ -36,7 +36,37 @@ def vertex_bin():
     )
     
     return binary_position + binary_normal
+
+@pytest.fixture
+def face_bin():
+    # Pre-prepared binary data for vertex_indices (1, 2, 3), texture_index (4), flags (8),
+    # and UV coordinates [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
+
+    # Binary data for vertex_indices: (1, 2, 3)
+    vertex_indices_bin = (
+        b'\x01\x00\x00\x00'  # 1 as a 32-bit little-endian int
+        b'\x02\x00\x00\x00'  # 2 as a 32-bit little-endian int
+        b'\x03\x00\x00\x00'  # 3 as a 32-bit little-endian int
+    )
     
+    # Binary data for texture_index: 4
+    texture_index_bin = b'\x04\x00\x00\x00'  # 4 as a 32-bit little-endian int
+    
+    # Binary data for flags: 8
+    flags_bin = b'\x08\x00\x00\x00'  # 8 as a 32-bit little-endian int
+    
+    # Binary data for UV coordinates: [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
+    uv_coords_bin = (
+        b'\x00\x00\x80\x3f'  # 1.0 as a 32-bit little-endian float
+        b'\x00\x00\x00\x40'  # 2.0 as a 32-bit little-endian float
+        b'\x00\x00\x40\x40'  # 3.0 as a 32-bit little-endian float
+        b'\x00\x00\x80\x40'  # 4.0 as a 32-bit little-endian float
+        b'\x00\x00\xa0\x40'  # 5.0 as a 32-bit little-endian float
+        b'\x00\x00\xc0\x40'  # 6.0 as a 32-bit little-endian float
+    )
+
+    return vertex_indices_bin + texture_index_bin + flags_bin + uv_coords_bin
+
 
 #readInt()
 
@@ -159,36 +189,9 @@ def test_read_vertex(vertex_bin):
     
     assert vertex == expected_vertex
     
-def test_read_face():
-    # Pre-prepared binary data for vertex_indices (1, 2, 3), texture_index (4), flags (8),
-    # and UV coordinates [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
-
-    # Binary data for vertex_indices: (1, 2, 3)
-    vertex_indices_bin = (
-        b'\x01\x00\x00\x00'  # 1 as a 32-bit little-endian int
-        b'\x02\x00\x00\x00'  # 2 as a 32-bit little-endian int
-        b'\x03\x00\x00\x00'  # 3 as a 32-bit little-endian int
-    )
+def test_read_face(face_bin):
     
-    # Binary data for texture_index: 4
-    texture_index_bin = b'\x04\x00\x00\x00'  # 4 as a 32-bit little-endian int
-    
-    # Binary data for flags: 8
-    flags_bin = b'\x08\x00\x00\x00'  # 8 as a 32-bit little-endian int
-    
-    # Binary data for UV coordinates: [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
-    uv_coords_bin = (
-        b'\x00\x00\x80\x3f'  # 1.0 as a 32-bit little-endian float
-        b'\x00\x00\x00\x40'  # 2.0 as a 32-bit little-endian float
-        b'\x00\x00\x40\x40'  # 3.0 as a 32-bit little-endian float
-        b'\x00\x00\x80\x40'  # 4.0 as a 32-bit little-endian float
-        b'\x00\x00\xa0\x40'  # 5.0 as a 32-bit little-endian float
-        b'\x00\x00\xc0\x40'  # 6.0 as a 32-bit little-endian float
-    )
-
-    binary_data = vertex_indices_bin + texture_index_bin + flags_bin + uv_coords_bin
-    
-    buffer = io.BytesIO(binary_data)
+    buffer = io.BytesIO(face_bin)
     
     face = read_face(buffer)
     
