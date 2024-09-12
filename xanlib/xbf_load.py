@@ -98,34 +98,39 @@ def read_key_animation(buffer):
     )        
         
 def read_node(buffer):
-    vertexCount = readInt(buffer)
-    if vertexCount == -1:
-        return None
-    node = Node()
-    node.flags = NodeFlags(readInt(buffer))
-    faceCount = readInt(buffer)
-    childCount = readInt(buffer)
-    node.transform = readMatrix(buffer)
-    nameLength = readInt(buffer)
-    node.name = buffer.read(nameLength).decode()
-    
-    node.children = [read_node(buffer)   for i in range(childCount)]
-    node.vertices = [read_vertex(buffer) for i in range(vertexCount)]
-    node.faces    = [read_face(buffer)   for i in range(faceCount)]
-
-    if NodeFlags.PRELIGHT in node.flags:
-        node.rgb = [tuple(readUInt8(buffer) for i in range(3)) for j in range(vertexCount)]
-
-    if NodeFlags.FACE_DATA in node.flags:
-        node.faceData = [readInt(buffer) for i in range(faceCount)]
-
-    if NodeFlags.VERTEX_ANIMATION in node.flags:
-        node.vertex_animation = read_vertex_animation(buffer)
-
-    if NodeFlags.KEY_ANIMATION in node.flags:
-        node.key_animation = read_key_animation(buffer)
+    buffer_position = buffer.tell()
+    try:
+        vertexCount = readInt(buffer)
+        if vertexCount == -1:
+            return None
+        node = Node()
+        node.flags = NodeFlags(readInt(buffer))
+        faceCount = readInt(buffer)
+        childCount = readInt(buffer)
+        node.transform = readMatrix(buffer)
+        nameLength = readInt(buffer)
+        node.name = buffer.read(nameLength).decode()
         
-    return node
+        node.children = [read_node(buffer)   for i in range(childCount)]
+        node.vertices = [read_vertex(buffer) for i in range(vertexCount)]
+        node.faces    = [read_face(buffer)   for i in range(faceCount)]
+
+        if NodeFlags.PRELIGHT in node.flags:
+            node.rgb = [tuple(readUInt8(buffer) for i in range(3)) for j in range(vertexCount)]
+
+        if NodeFlags.FACE_DATA in node.flags:
+            node.faceData = [readInt(buffer) for i in range(faceCount)]
+
+        if NodeFlags.VERTEX_ANIMATION in node.flags:
+            node.vertex_animation = read_vertex_animation(buffer)
+
+        if NodeFlags.KEY_ANIMATION in node.flags:
+            node.key_animation = read_key_animation(buffer)
+            
+        return node
+    except Exception as e:
+        buffer.seek(buffer_position)
+        raise
 
 def load_xbf(filename):
     scene = Scene()

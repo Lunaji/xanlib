@@ -109,4 +109,7 @@ def save_xbf(scene, filename):
         f.write(scene.textureNameData)
         for node in scene.nodes:
             write_node(f, node)
-        write_Int32sl(f, -1)
+        if scene.unparsed is not None:
+            f.write(scene.unparsed)
+        else:
+            write_Int32sl(f, -1)
