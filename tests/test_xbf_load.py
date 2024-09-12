@@ -8,7 +8,11 @@ from xanlib.xbf_load import (
     readUInt8, 
     readUInt16, 
     readMatrix, 
-    readByte
+    readByte,
+    read_vertex
+)
+from xanlib.scene import (
+    Vertex
 )
 
 #readInt()
@@ -121,3 +125,32 @@ def test_readByte():
     # Test reading another byte ('z')
     buffer = io.BytesIO(b'z')
     assert readByte(buffer) == b'z'
+    
+def test_read_vertex():
+    # Raw binary data for position (1.0, 2.0, 3.0) and normal (4.0, 5.0, 6.0)
+    binary_position = (
+        b'\x00\x00\x80\x3f'  # 1.0 in little-endian (32-bit float)
+        b'\x00\x00\x00\x40'  # 2.0 in little-endian (32-bit float)
+        b'\x00\x00\x40\x40'  # 3.0 in little-endian (32-bit float)
+    )
+    binary_normal = (
+        b'\x00\x00\x80\x40'  # 4.0 in little-endian (32-bit float)
+        b'\x00\x00\xa0\x40'  # 5.0 in little-endian (32-bit float)
+        b'\x00\x00\xc0\x40'  # 6.0 in little-endian (32-bit float)
+    )
+    
+    # Combine binary data for position and normal
+    binary_data = binary_position + binary_normal
+    
+    # Simulate a buffer using io.BytesIO
+    buffer = io.BytesIO(binary_data)
+    
+    # Call the function to read the vertex from the buffer
+    vertex = read_vertex(buffer)
+    
+    # Create the expected Vertex object
+    expected_vertex = Vertex(position=(1.0, 2.0, 3.0), normal=(4.0, 5.0, 6.0))
+    
+    # Check if the returned Vertex matches the expected one
+    assert vertex == expected_vertex
+
