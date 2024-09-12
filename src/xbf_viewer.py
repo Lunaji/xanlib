@@ -59,21 +59,20 @@ class Viewer():
                 pygame.draw.line(self.WINDOW, (0, 0, 255), vpos[i], vpos[j])
                 
                 
-    def recursive_display(self, node, frame, transform=None):
+    def recursive_display(self, node, frame, parent_transform=None):
     
-        np_transform = np.array(node.transform)
-        np_transform.shape=(4,4)
+        node_transform = np.array(node.transform).reshape(4,4)
 
-        if transform is not None:
-            np_transform = np_transform.dot(transform)
+        if parent_transform is not None:
+            node_transform = node_transform.dot(parent_transform)
             
         if node.vertex_animation is not None:
             frames = len(node.vertex_animation.body)
             frame = frame%frames
-            self.display_frame(node.faces, node.vertex_animation.body[frame], np_transform)
+            self.display_frame(node.faces, node.vertex_animation.body[frame], node_transform)
             
         for child in node.children:
-            self.recursive_display(child, frame, np_transform)
+            self.recursive_display(child, frame, node_transform)
             
         
     def view(self, scene):
