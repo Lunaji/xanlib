@@ -45,7 +45,7 @@ def vertex_data():
     return vertex_bin, expected_vertex
 
 @pytest.fixture
-def face_bin():
+def face_data():
     # Pre-prepared binary data for vertex_indices (1, 2, 3), texture_index (4), flags (8),
     # and UV coordinates [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
 
@@ -72,7 +72,16 @@ def face_bin():
         b'\x00\x00\xc0\x40'  # 6.0 as a 32-bit little-endian float
     )
 
-    return vertex_indices_bin + texture_index_bin + flags_bin + uv_coords_bin
+    face_bin = vertex_indices_bin + texture_index_bin + flags_bin + uv_coords_bin
+    
+    expected_face = Face(
+        vertex_indices=(1, 2, 3),
+        texture_index=4,
+        flags=8,
+        uv_coords=((1.0, 2.0), (3.0, 4.0), (5.0, 6.0))
+    )
+    
+    return face_bin, expected_face
 
 
 #readInt()
@@ -196,18 +205,13 @@ def test_read_vertex(vertex_data):
     
     assert vertex == expected_vertex
     
-def test_read_face(face_bin):
+def test_read_face(face_data):
+    
+    face_bin, expected_face = face_data
     
     buffer = io.BytesIO(face_bin)
     
     face = read_face(buffer)
-    
-    expected_face = Face(
-        vertex_indices=(1, 2, 3),
-        texture_index=4,
-        flags=8,
-        uv_coords=((1.0, 2.0), (3.0, 4.0), (5.0, 6.0))
-    )
     
     assert face == expected_face
 
