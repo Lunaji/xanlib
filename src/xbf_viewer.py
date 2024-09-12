@@ -6,9 +6,9 @@ from pygame.locals import QUIT
 from pygame.math import Vector2
 from xanlib import load_xbf
 
-def get_vertex_pos(node, frame, vi, transform):
+def get_vertex_pos(vertex, transform):
     
-    pos = np.array((*node.vertex_animation.body[frame][vi][:3],1))    
+    pos = np.array((*vertex[:3], 1))    
     return pos.dot(transform)
     
 class Viewer():   
@@ -43,7 +43,7 @@ class Viewer():
         #time = math.pi * 0.5
         for vi in range(vertcount):
 
-            worldpos = get_vertex_pos(node, frame, vi, transform)
+            worldpos = get_vertex_pos(node.vertex_animation.body[frame][vi], transform)
             curpos = self.transform_vertex(worldpos)
             normx = node.vertex_animation.body[frame][vi][3]
             normy = node.vertex_animation.body[frame][vi][4]
@@ -63,13 +63,11 @@ class Viewer():
             prevpos=curpos
         
         for face in node.faces:
-            vpos = [self.transform_vertex(get_vertex_pos(
-                                            node,
-                                            frame,
-                                            vi,
-                                            transform
-                                        )
-                                    )
+            vpos = [self.transform_vertex(
+                            get_vertex_pos(
+                                    node.vertex_animation.body[frame][vi], transform
+                                )
+                            )
                     for vi in face.vertex_indices]
             
             for i, j in ((0, 1), (0, 2), (2, 1)):
