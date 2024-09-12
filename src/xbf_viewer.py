@@ -32,15 +32,9 @@ class Viewer():
         return Vector2(rotp, -p.y)*self.scale+self.origin+self.offset
     
         
-    def display_frame(self, node, frame, transform):
-    
-        if node.vertex_animation is None:
-            return
-        frames = len(node.vertex_animation.body)
-        frame = frame%frames
-        vertcount = node.vertex_animation.real_count
+    def display_frame(self, faces, va_frame, transform):
         
-        for vi, vertex in enumerate(node.vertex_animation.body[frame]):
+        for vi, vertex in enumerate(va_frame):
 
             worldpos = get_vertex_pos(vertex, transform)
             curpos = self.transform_vertex(worldpos)
@@ -56,12 +50,8 @@ class Viewer():
 
             prevpos=curpos
         
-        for face in node.faces:
-            vpos = [self.transform_vertex(
-                            get_vertex_pos(
-                                    node.vertex_animation.body[frame][vi], transform
-                                )
-                            )
+        for face in faces:
+            vpos = [self.transform_vertex(get_vertex_pos(va_frame[vi], transform))
                     for vi in face.vertex_indices]
             
             for i, j in ((0, 1), (0, 2), (2, 1)):
@@ -75,8 +65,12 @@ class Viewer():
 
         if transform is not None:
             np_transform = np_transform.dot(transform)
-
-        self.display_frame(node, frame, np_transform)
+            
+        if node.vertex_animation is not None:
+            frames = len(node.vertex_animation.body)
+            frame = frame%frames
+            self.display_frame(node.faces, node.vertex_animation.body[frame], np_transform)
+            
         for child in node.children:
             self.recursive_display(child, frame, np_transform)
             
