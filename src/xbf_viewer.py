@@ -55,8 +55,7 @@ class Viewer():
         for face in faces:
             vpos = [transformed_vertices[vi] for vi in face.vertex_indices]
             
-            for i, j in ((0, 1), (0, 2), (2, 1)):
-                pygame.draw.line(self.WINDOW, (0, 0, 255), vpos[i], vpos[j])
+            pygame.draw.lines(self.WINDOW, (0, 0, 255), True, vpos)
                 
                 
     def recursive_display(self, node, frame, parent_transform=None):
