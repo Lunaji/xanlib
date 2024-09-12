@@ -1,6 +1,5 @@
 ﻿#!/usr/bin/env python3
 import numpy as np
-import math
 import pygame
 from pygame.locals import QUIT
 from pygame.math import Vector2, Vector3
@@ -27,8 +26,8 @@ class Viewer():
         
     def transform_vertex(self, p):
         a = self.time * self.rotspeed
-        ca=math.cos(a)
-        sa=math.sin(a)
+        ca=np.cos(a)
+        sa=np.sin(a)
         rotp = ca * p[0] + sa * p[2]
         return Vector2(rotp, -p[1])*self.scale+self.origin+self.offset
         
@@ -94,7 +93,7 @@ class Viewer():
             
             self.time = pygame.time.get_ticks()
             
-            self.curframe = math.floor(self.time*0.01)
+            self.curframe = int(np.floor(self.time*0.01))
             
             for node in scene.nodes:
                 self.recursive_display(node, self.curframe)
