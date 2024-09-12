@@ -22,7 +22,7 @@ from xanlib.scene import (
 )
 
 @pytest.fixture
-def vertex_bin():
+def vertex_data():
     # Raw binary data for position (1.0, 2.0, 3.0) and normal (4.0, 5.0, 6.0)
     binary_position = (
         b'\x00\x00\x80\x3f'  # 1.0 in little-endian (32-bit float)
@@ -35,7 +35,14 @@ def vertex_bin():
         b'\x00\x00\xc0\x40'  # 6.0 in little-endian (32-bit float)
     )
     
-    return binary_position + binary_normal
+    vertex_bin = binary_position + binary_normal
+    
+    expected_vertex = Vertex(
+        position=(1.0, 2.0, 3.0),
+        normal=(4.0, 5.0, 6.0)
+    )
+    
+    return vertex_bin, expected_vertex
 
 @pytest.fixture
 def face_bin():
@@ -179,13 +186,13 @@ def test_readByte():
     buffer = io.BytesIO(b'z')
     assert readByte(buffer) == b'z'
     
-def test_read_vertex(vertex_bin):
+def test_read_vertex(vertex_data):
+    
+    vertex_bin, expected_vertex = vertex_data
     
     buffer = io.BytesIO(vertex_bin)
     
     vertex = read_vertex(buffer)
-    
-    expected_vertex = Vertex(position=(1.0, 2.0, 3.0), normal=(4.0, 5.0, 6.0))
     
     assert vertex == expected_vertex
     
