@@ -3,6 +3,7 @@ import numpy as np
 import math
 import pygame
 from pygame.locals import QUIT
+from pygame.math import Vector2
 from xanlib import load_xbf
 
 def get_vertex_pos(node, frame, vi, transform):
@@ -22,18 +23,14 @@ class Viewer():
         self.scale = 0.02
         self.rotspeed = 0.001
         marginy = 100
-        self.offsetx = width/2.0
-        self.offsety = height/2.0+marginy
+        self.offset = Vector2(width/2.0, height/2.0+marginy)
         
     def transform_vertex(self, p):
         #time = math.pi * 0.5 / rotspeed
         ca=math.cos(self.time * self.rotspeed)
         sa=math.sin(self.time * self.rotspeed)
         rotp = ca * p[0] + sa * p[2]
-        return (
-            rotp * self.scale + self.offsetx,
-            -p[1] * self.scale + self.offsety
-            )
+        return Vector2(rotp, -p[1])*self.scale +self.offset
         
     def display_frame(self, node, frame, transform):
     
