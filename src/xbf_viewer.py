@@ -5,14 +5,10 @@ import pygame
 from pygame.locals import QUIT
 from xanlib import load_xbf
 
-def get_vertex_pos(node, frame, vi, transform):    
-    posx = node.vertex_animation.body[frame][vi][0]
-    posy = node.vertex_animation.body[frame][vi][1]
-    posz = node.vertex_animation.body[frame][vi][2]
-    np_point = np.array([posx, posy, posz, 1])
-    np_result = np_point.dot(transform)
-    #testnorm = node.vertex_animation.body[frame][vi][3]
-    return np_result
+def get_vertex_pos(node, frame, vi, transform):
+    
+    pos = np.array((*node.vertex_animation.body[frame][vi][:3],1))    
+    return pos.dot(transform)
     
 class Viewer():   
     
