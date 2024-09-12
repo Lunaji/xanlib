@@ -95,7 +95,7 @@ class Viewer():
 
 if __name__ == '__main__':
     
-    filename = 'Data/3DData1/Buildings/AT_conyard_H0.XbF'    
+    filename = 'Data/3DData1/Buildings/AT_MGT_H0.xbf'    
     scene = load_xbf(filename)
     viewer = Viewer(1280, 720)    
     viewer.view(scene)
