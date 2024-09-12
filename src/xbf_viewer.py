@@ -34,25 +34,26 @@ class Viewer():
         
     def display_frame(self, faces, va_frame, transform):
         
+        transformed_vertices = []
+        
         for vi, vertex in enumerate(va_frame):
 
             worldpos = get_vertex_pos(vertex, transform)
             curpos = self.transform_vertex(worldpos)
-            norm = Vector2(*vertex[3:5])
+            transformed_vertices.append(curpos)
 
             size = 5
             pygame.draw.circle(self.WINDOW, (255,(vi*50)%255,(vi*10)%255), curpos, size)
 
             normscale = 30
+            norm = Vector2(*vertex[3:5])
             globalnormpos = worldpos+Vector3(0, *(norm-self.offset)*normscale)
             normpos = self.transform_vertex(globalnormpos)
             pygame.draw.line(self.WINDOW, (255,0,0), curpos, normpos)
-
-            prevpos=curpos
+            
         
         for face in faces:
-            vpos = [self.transform_vertex(get_vertex_pos(va_frame[vi], transform))
-                    for vi in face.vertex_indices]
+            vpos = [transformed_vertices[vi] for vi in face.vertex_indices]
             
             for i, j in ((0, 1), (0, 2), (2, 1)):
                 pygame.draw.line(self.WINDOW, (0, 0, 255), vpos[i], vpos[j])
