@@ -143,19 +143,14 @@ def test_read_vertex():
         b'\x00\x00\xc0\x40'  # 6.0 in little-endian (32-bit float)
     )
     
-    # Combine binary data for position and normal
     binary_data = binary_position + binary_normal
     
-    # Simulate a buffer using io.BytesIO
     buffer = io.BytesIO(binary_data)
     
-    # Call the function to read the vertex from the buffer
     vertex = read_vertex(buffer)
     
-    # Create the expected Vertex object
     expected_vertex = Vertex(position=(1.0, 2.0, 3.0), normal=(4.0, 5.0, 6.0))
     
-    # Check if the returned Vertex matches the expected one
     assert vertex == expected_vertex
     
 def test_read_face():
@@ -185,16 +180,12 @@ def test_read_face():
         b'\x00\x00\xc0\x40'  # 6.0 as a 32-bit little-endian float
     )
 
-    # Combine all binary data
     binary_data = vertex_indices_bin + texture_index_bin + flags_bin + uv_coords_bin
     
-    # Simulate a buffer using io.BytesIO
     buffer = io.BytesIO(binary_data)
     
-    # Call the function to read the face from the buffer
     face = read_face(buffer)
     
-    # Create the expected Face object
     expected_face = Face(
         vertex_indices=(1, 2, 3),
         texture_index=4,
@@ -202,7 +193,6 @@ def test_read_face():
         uv_coords=((1.0, 2.0), (3.0, 4.0), (5.0, 6.0))
     )
     
-    # Check if the returned Face matches the expected one
     assert face == expected_face
     
 def test_read_vertex_animation():
