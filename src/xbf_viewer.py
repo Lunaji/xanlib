@@ -5,11 +5,21 @@ from pygame.locals import QUIT
 from pygame.math import Vector2, Vector3
 from xanlib import load_xbf
 
+
+def convert_signed_5bit(v):
+    sign=-1 if (v%32)>15 else 1
+    return sign*(v%16)
+
 def get_vertex_pos(vertex, transform):
     
     transformed = np.array((*vertex[:3], 1)).dot(transform)
     return Vector3(*transformed[:3])/transformed[3]
+
+def get_vertex_norm(vertex, transform):
     
+    transformed = np.array((*vertex[:3], 0)).dot(transform)
+    return Vector3(*transformed[:3])
+
 class Viewer():   
     
     def __init__(self, width, height):
@@ -26,12 +36,11 @@ class Viewer():
         
         
     def transform_vertex(self, p):
-        
+
         a = self.time * self.rotspeed
         rotp = np.dot([np.cos(a), np.sin(a)], [p.x, p.z])
         return Vector2(rotp, -p.y)*self.scale+self.origin+self.offset
     
-        
     def display_frame(self, faces, va_frame, transform):
         
         transformed_vertices = []
@@ -45,9 +54,13 @@ class Viewer():
             size = 5
             pygame.draw.circle(self.WINDOW, (255,(vi*50)%255,(vi*10)%255), curpos, size)
 
-            normscale = 30
-            norm = Vector2(*vertex[3:5])
-            globalnormpos = worldpos+Vector3(0, *(norm-self.offset)*normscale)
+            normscale = 300
+            normint = vertex[3]
+            normx = convert_signed_5bit(normint & 0x1F)
+            normy = convert_signed_5bit((normint>>5) & 0x1F)
+            normz = convert_signed_5bit((normint>>10) & 0x1F)
+            norm = get_vertex_norm((normx, normy, normz), transform)
+            globalnormpos = worldpos+norm*normscale
             normpos = self.transform_vertex(globalnormpos)
             pygame.draw.line(self.WINDOW, (255,0,0), curpos, normpos)
             
