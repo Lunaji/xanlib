@@ -28,7 +28,7 @@ class Viewer():
     def transform_vertex(self, p):
         
         a = self.time * self.rotspeed
-        rotp = Vector2(np.cos(a), np.sin(a)).dot(Vector2(p.x, p.z))
+        rotp = np.dot([np.cos(a), np.sin(a)], [p.x, p.z])
         return Vector2(rotp, -p.y)*self.scale+self.origin+self.offset
     
         
