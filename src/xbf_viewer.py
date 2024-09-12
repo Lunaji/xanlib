@@ -26,9 +26,9 @@ class Viewer():
         self.offset = Vector2(width/2.0, height/2.0+marginy)
         
     def transform_vertex(self, p):
-        #time = math.pi * 0.5 / rotspeed
-        ca=math.cos(self.time * self.rotspeed)
-        sa=math.sin(self.time * self.rotspeed)
+        a = self.time * self.rotspeed
+        ca=math.cos(a)
+        sa=math.sin(a)
         rotp = ca * p[0] + sa * p[2]
         return Vector2(rotp, -p[1])*self.scale +self.offset
         
