@@ -9,10 +9,12 @@ from xanlib.xbf_load import (
     readUInt16, 
     readMatrix, 
     readByte,
-    read_vertex
+    read_vertex,
+    read_face
 )
 from xanlib.scene import (
-    Vertex
+    Vertex,
+    Face
 )
 
 #readInt()
@@ -153,4 +155,51 @@ def test_read_vertex():
     
     # Check if the returned Vertex matches the expected one
     assert vertex == expected_vertex
+    
+def test_read_face():
+    # Pre-prepared binary data for vertex_indices (1, 2, 3), texture_index (4), flags (8),
+    # and UV coordinates [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
+
+    # Binary data for vertex_indices: (1, 2, 3)
+    vertex_indices_bin = (
+        b'\x01\x00\x00\x00'  # 1 as a 32-bit little-endian int
+        b'\x02\x00\x00\x00'  # 2 as a 32-bit little-endian int
+        b'\x03\x00\x00\x00'  # 3 as a 32-bit little-endian int
+    )
+    
+    # Binary data for texture_index: 4
+    texture_index_bin = b'\x04\x00\x00\x00'  # 4 as a 32-bit little-endian int
+    
+    # Binary data for flags: 8
+    flags_bin = b'\x08\x00\x00\x00'  # 8 as a 32-bit little-endian int
+    
+    # Binary data for UV coordinates: [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
+    uv_coords_bin = (
+        b'\x00\x00\x80\x3f'  # 1.0 as a 32-bit little-endian float
+        b'\x00\x00\x00\x40'  # 2.0 as a 32-bit little-endian float
+        b'\x00\x00\x40\x40'  # 3.0 as a 32-bit little-endian float
+        b'\x00\x00\x80\x40'  # 4.0 as a 32-bit little-endian float
+        b'\x00\x00\xa0\x40'  # 5.0 as a 32-bit little-endian float
+        b'\x00\x00\xc0\x40'  # 6.0 as a 32-bit little-endian float
+    )
+
+    # Combine all binary data
+    binary_data = vertex_indices_bin + texture_index_bin + flags_bin + uv_coords_bin
+    
+    # Simulate a buffer using io.BytesIO
+    buffer = io.BytesIO(binary_data)
+    
+    # Call the function to read the face from the buffer
+    face = read_face(buffer)
+    
+    # Create the expected Face object
+    expected_face = Face(
+        vertex_indices=(1, 2, 3),
+        texture_index=4,
+        flags=8,
+        uv_coords=((1.0, 2.0), (3.0, 4.0), (5.0, 6.0))
+    )
+    
+    # Check if the returned Face matches the expected one
+    assert face == expected_face
 
