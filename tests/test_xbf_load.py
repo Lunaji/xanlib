@@ -10,11 +10,13 @@ from xanlib.xbf_load import (
     readMatrix, 
     readByte,
     read_vertex,
-    read_face
+    read_face,
+    read_vertex_animation,
 )
 from xanlib.scene import (
     Vertex,
-    Face
+    Face,
+    VertexAnimation,
 )
 
 #readInt()
@@ -202,4 +204,37 @@ def test_read_face():
     
     # Check if the returned Face matches the expected one
     assert face == expected_face
+    
+def test_read_vertex_animation():
+    # Binary data for frame_count (2), count (1), actual (3)
+    frame_count_bin = b'\x02\x00\x00\x00'  # 2 as int
+    count_bin = b'\x01\x00\x00\x00'        # 1 as int
+    actual_bin = b'\x03\x00\x00\x00'       # 3 as int
+    
+    # Binary data for key_list: 3 unsigned integers (1, 2, 3)
+    key_list_bin = (
+        b'\x01\x00\x00\x00'  # 1
+        b'\x02\x00\x00\x00'  # 2
+        b'\x03\x00\x00\x00'  # 3
+    )
+    
+    binary_data = frame_count_bin + count_bin + actual_bin + key_list_bin
+    
+    buffer = io.BytesIO(binary_data)
+    
+    vertex_animation = read_vertex_animation(buffer)
+    
+    expected_vertex_animation = VertexAnimation(
+        frame_count=2,
+        count=1,
+        actual=3,
+        keys=[1, 2, 3],
+        scale=None,
+        base_count=None,
+        real_count=None,
+        body=None,
+        interpolation_data=None
+    )
+    
+    assert vertex_animation == expected_vertex_animation
 
