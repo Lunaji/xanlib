@@ -21,6 +21,23 @@ from xanlib.scene import (
     KeyAnimation,
 )
 
+@pytest.fixture
+def vertex_bin():
+    # Raw binary data for position (1.0, 2.0, 3.0) and normal (4.0, 5.0, 6.0)
+    binary_position = (
+        b'\x00\x00\x80\x3f'  # 1.0 in little-endian (32-bit float)
+        b'\x00\x00\x00\x40'  # 2.0 in little-endian (32-bit float)
+        b'\x00\x00\x40\x40'  # 3.0 in little-endian (32-bit float)
+    )
+    binary_normal = (
+        b'\x00\x00\x80\x40'  # 4.0 in little-endian (32-bit float)
+        b'\x00\x00\xa0\x40'  # 5.0 in little-endian (32-bit float)
+        b'\x00\x00\xc0\x40'  # 6.0 in little-endian (32-bit float)
+    )
+    
+    return binary_position + binary_normal
+    
+
 #readInt()
 
 def test_read_positive_integer():
@@ -132,22 +149,9 @@ def test_readByte():
     buffer = io.BytesIO(b'z')
     assert readByte(buffer) == b'z'
     
-def test_read_vertex():
-    # Raw binary data for position (1.0, 2.0, 3.0) and normal (4.0, 5.0, 6.0)
-    binary_position = (
-        b'\x00\x00\x80\x3f'  # 1.0 in little-endian (32-bit float)
-        b'\x00\x00\x00\x40'  # 2.0 in little-endian (32-bit float)
-        b'\x00\x00\x40\x40'  # 3.0 in little-endian (32-bit float)
-    )
-    binary_normal = (
-        b'\x00\x00\x80\x40'  # 4.0 in little-endian (32-bit float)
-        b'\x00\x00\xa0\x40'  # 5.0 in little-endian (32-bit float)
-        b'\x00\x00\xc0\x40'  # 6.0 in little-endian (32-bit float)
-    )
+def test_read_vertex(vertex_bin):
     
-    binary_data = binary_position + binary_normal
-    
-    buffer = io.BytesIO(binary_data)
+    buffer = io.BytesIO(vertex_bin)
     
     vertex = read_vertex(buffer)
     
