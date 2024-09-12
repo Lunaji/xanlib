@@ -3,13 +3,13 @@ import numpy as np
 import math
 import pygame
 from pygame.locals import QUIT
-from pygame.math import Vector2
+from pygame.math import Vector2, Vector3
 from xanlib import load_xbf
 
 def get_vertex_pos(vertex, transform):
     
-    pos = np.array((*vertex[:3], 1))    
-    return pos.dot(transform)
+    transformed = np.array((*vertex[:3], 1)).dot(transform)    
+    return Vector3(*transformed[:3])/transformed[3]
     
 class Viewer():   
     
