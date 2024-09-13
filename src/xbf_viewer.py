@@ -29,32 +29,52 @@ class Viewer():
         self.WINDOW = pygame.display.set_mode((width, height))
         self.curframe=0
         self.time = 0
+        self.bounds_min = None
+        self.bounds_max = None
         self.scale = 0.02
         self.rotspeed = 0.001
-        self.origin = Vector2(width/2.0, height/2.0)
-        self.offset = Vector2(0, 100)
+        self.screen_half = Vector2(width/2.0, height/2.0)
+        self.offset = Vector3(0, 0, 0)
         
         
     def transform_vertex(self, p):
-
         a = self.time * self.rotspeed
-        rotp = np.dot([np.cos(a), np.sin(a)], [p.x, p.z])
-        return Vector2(rotp, -p.y)*self.scale+self.origin+self.offset
+        rotp = np.dot([np.cos(a), np.sin(a)], [p.x - self.offset.x, p.z - self.offset.z])
+        return Vector2(rotp, -p.y + self.offset.y)*self.scale+self.screen_half
     
     def display_frame(self, faces, va_frame, transform):
         
         transformed_vertices = []
+
+        if self.bounds_min is not None and self.bounds_max is not None:
+            self.offset = (self.bounds_max + self.bounds_min) * 0.5
+            bound_size = self.bounds_max - self.bounds_min
+            self.scale = self.screen_half.y * 1.75 / max(max(0.0001,abs(bound_size.x)), max(abs(bound_size.y), abs(bound_size.z)))
         
+        origin = self.transform_vertex(Vector3(0,0,0))
+        pygame.draw.circle(self.WINDOW, (0,255,0), origin, 5)
+
         for vi, vertex in enumerate(va_frame):
 
             worldpos = get_vertex_pos(vertex, transform)
+            if self.bounds_min is None:
+                self.bounds_min = Vector3(worldpos)
+            if self.bounds_max is None:
+                self.bounds_max = Vector3(worldpos)
+            self.bounds_min.x = min(self.bounds_min.x, worldpos.x)
+            self.bounds_min.y = min(self.bounds_min.y, worldpos.y)
+            self.bounds_min.z = min(self.bounds_min.z, worldpos.z)
+            self.bounds_max.x = max(self.bounds_max.x, worldpos.x)
+            self.bounds_max.y = max(self.bounds_max.y, worldpos.y)
+            self.bounds_max.z = max(self.bounds_max.z, worldpos.z)
+
             curpos = self.transform_vertex(worldpos)
             transformed_vertices.append(curpos)
 
             size = 5
             pygame.draw.circle(self.WINDOW, (255,(vi*50)%255,(vi*10)%255), curpos, size)
 
-            normscale = 300
+            normscale = 100
             normint = vertex[3]
             normx = convert_signed_5bit(normint & 0x1F)
             normy = convert_signed_5bit((normint>>5) & 0x1F)
@@ -68,7 +88,7 @@ class Viewer():
         for face in faces:
             vpos = [transformed_vertices[vi] for vi in face.vertex_indices]
             
-            pygame.draw.lines(self.WINDOW, (0, 0, 255), True, vpos)
+            pygame.draw.lines(self.WINDOW, (255, 255, 255), True, vpos)
                 
                 
     def recursive_display(self, node, frame, parent_transform=None):
