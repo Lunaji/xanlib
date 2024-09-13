@@ -79,9 +79,11 @@ class Viewer():
             node_transform = node_transform.dot(parent_transform)
             
         if node.vertex_animation is not None:
-            frames = len(node.vertex_animation.body)
+            frames = len(node.vertex_animation.keys)
             frame = frame%frames
-            self.display_frame(node.faces, node.vertex_animation.body[frame], node_transform)
+            key_frame = node.vertex_animation.keys[frame]
+            if key_frame < len(node.vertex_animation.body):
+                self.display_frame(node.faces, node.vertex_animation.body[key_frame], node_transform)
             
         for child in node.children:
             self.recursive_display(child, frame, node_transform)
