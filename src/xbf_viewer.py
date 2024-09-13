@@ -20,6 +20,8 @@ def get_vertex_norm(vertex, transform):
     transformed = np.array((*vertex[:3], 0)).dot(transform)
     return Vector3(*transformed[:3])
 
+draw_index = 0
+
 class Viewer():   
     
     def __init__(self, width, height):
@@ -84,11 +86,13 @@ class Viewer():
             normpos = self.transform_vertex(globalnormpos)
             pygame.draw.line(self.WINDOW, (255,0,0), curpos, normpos)
             
-        
+        global draw_index
         for face in faces:
-            vpos = [transformed_vertices[vi] for vi in face.vertex_indices]
             
-            pygame.draw.lines(self.WINDOW, (255, 255, 255), True, vpos)
+            vpos = [transformed_vertices[vi] for vi in face.vertex_indices]
+            random_color = ((draw_index*50+200)%255, (draw_index*137+200)%255, (draw_index*77+200)%255)
+            pygame.draw.lines(self.WINDOW, random_color, True, vpos)
+        draw_index += 1
                 
                 
     def recursive_display(self, node, frame, parent_transform=None):
@@ -121,7 +125,8 @@ class Viewer():
             self.time = pygame.time.get_ticks()
             
             self.curframe = int(np.floor(self.time*0.01))
-            
+            global draw_index
+            draw_index = 0
             for node in scene.nodes:
                 self.recursive_display(node, self.curframe)
 
