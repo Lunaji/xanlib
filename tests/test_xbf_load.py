@@ -87,11 +87,11 @@ def face_data():
     return face_bin, expected_face
 
 
-#readInt()
 
-def test_read_positive_integer():
-    buffer = io.BytesIO(b'\x40\xe2\x01\x00')  # Represents 123456 in little-endian
-    assert readInt(buffer) == 123456
+#TODO: parametrize
+def test_read_positive_integer(pos_int):
+    buffer = io.BytesIO(pos_int['binary'])
+    assert readInt(buffer) == pos_int['decoded']
 
 def test_read_negative_integer():
     buffer = io.BytesIO(b'\xc0\x1d\xfe\xff')  # Represents -123456 in little-endian
@@ -111,10 +111,9 @@ def test_read_maximum_value():
     
 #rest
 
-def test_readUInt():
-    # Test with a positive number (123456)
-    buffer = io.BytesIO(b'\x40\xe2\x01\x00')  # 123456 in little-endian
-    assert readUInt(buffer) == 123456
+def test_readUInt(pos_int):
+    buffer = io.BytesIO(pos_int['binary'])
+    assert readUInt(buffer) == pos_int['decoded']
 
     # Test the maximum value for unsigned 32-bit integer (4294967295)
     buffer = io.BytesIO(b'\xff\xff\xff\xff')  # 4294967295 in little-endian

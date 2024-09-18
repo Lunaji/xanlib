@@ -18,3 +18,12 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_slow)
+
+
+@pytest.fixture
+def pos_int():
+    yield {
+            'binary': b'\x40\xe2\x01\x00',
+            'decoded': 123456
+          }
+
