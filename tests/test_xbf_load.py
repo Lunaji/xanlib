@@ -218,38 +218,11 @@ def test_read_face(face_data):
     assert face == expected_face
 
 #TODO: cases of count<0 and interpolation    
-def test_read_vertex_animation():
-    # Binary data for frame_count (2), count (1), actual (3)
-    frame_count_bin = b'\x02\x00\x00\x00'  # 2 as int
-    count_bin = b'\x01\x00\x00\x00'        # 1 as int
-    actual_bin = b'\x03\x00\x00\x00'       # 3 as int
+def test_read_vertex_animation(vertex_animation):
+    buffer = io.BytesIO(vertex_animation['binary'])
+    va = read_vertex_animation(buffer)
     
-    # Binary data for key_list: 3 unsigned integers (1, 2, 3)
-    key_list_bin = (
-        b'\x01\x00\x00\x00'  # 1
-        b'\x02\x00\x00\x00'  # 2
-        b'\x03\x00\x00\x00'  # 3
-    )
-    
-    binary_data = frame_count_bin + count_bin + actual_bin + key_list_bin
-    
-    buffer = io.BytesIO(binary_data)
-    
-    vertex_animation = read_vertex_animation(buffer)
-    
-    expected_vertex_animation = VertexAnimation(
-        frame_count=2,
-        count=1,
-        actual=3,
-        keys=[1, 2, 3],
-        scale=None,
-        base_count=None,
-        real_count=None,
-        body=None,
-        interpolation_data=None
-    )
-    
-    assert vertex_animation == expected_vertex_animation
+    assert va == vertex_animation['decoded']
 
 # Key animation tests for different cases of `flags`
 def test_read_key_animation_flags_minus1():
