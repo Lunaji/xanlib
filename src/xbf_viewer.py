@@ -4,11 +4,8 @@ import pygame
 from pygame.locals import QUIT
 from pygame.math import Vector2, Vector3
 from xanlib import load_xbf
+from xanlib.xbf_load import convert_signed_5bit
 
-
-def convert_signed_5bit(v):
-    sign=-1 if (v%32)>15 else 1
-    return sign*(v%16)
 
 def get_vertex_pos(vertex, transform):
     
