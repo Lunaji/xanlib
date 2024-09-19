@@ -14,6 +14,7 @@ from xanlib.xbf_load import (
     read_vertex_animation,
     read_key_animation,
     read_node,
+    convert_signed_5bit,
 )
 from xanlib.scene import (
     Vertex,
@@ -23,6 +24,7 @@ from xanlib.scene import (
     Node,
 )
 from xanlib.xbf_base import NodeFlags
+
 
 @pytest.fixture
 def vertex_data():
@@ -46,6 +48,7 @@ def vertex_data():
     )
     
     return vertex_bin, expected_vertex
+
 
 @pytest.fixture
 def face_data():
@@ -86,6 +89,9 @@ def face_data():
     
     return face_bin, expected_face
 
+def test_convert_signed_5bit(signed_5bit):
+    v, expected = signed_5bit
+    assert convert_signed_5bit(v) == expected
 
 
 #TODO: parametrize

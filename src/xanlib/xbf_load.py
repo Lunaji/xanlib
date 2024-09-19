@@ -2,6 +2,11 @@ import struct
 from .scene import Scene, Node, VertexAnimation, KeyAnimation, Face, Vertex
 from .xbf_base import NodeFlags
 
+
+def convert_signed_5bit(v):
+    sign=-1 if (v%32)>15 else 1
+    return sign*(v%16)
+
 def readInt(file):
 	return struct.unpack("<i", file.read(4))[0]
 

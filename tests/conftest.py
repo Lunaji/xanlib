@@ -21,6 +21,21 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_slow)
 
 
+@pytest.fixture(params=[
+    (0, 0),    # 0 should stay 0
+    (15, 15),  # Maximum positive value
+    (16, 0),   # 16 should map to -0 (considered 0)
+    (31, -15), # 31 should be -15 (max negative)
+    (32, 0),   # Wrapped around, should behave like 0
+    (47, 15),  # Wrapped, behaves like 15
+    (1, 1),    # Simple positive test
+    (17, -1),  # Corresponding negative test
+    (5, 5),    # Another positive test
+    (21, -5),  # Corresponding negative test
+])
+def signed_5bit(request):
+    yield request.param
+
 @pytest.fixture
 def pos_int():
     yield {
