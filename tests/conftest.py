@@ -3,6 +3,7 @@ import json
 import binascii
 from xanlib.scene import (
     Vertex,
+    Face,
     VertexAnimation
 )
 
@@ -65,6 +66,25 @@ def vertex_data(request):
     )
 
     return encoded, decoded
+
+@pytest.fixture(params=load_test_data('tests/test_data/faces.json'))
+def face_data(request):
+    data = request.param
+    encoded_vi = binascii.unhexlify(data['encoded']['vertex_indices'])
+    encoded_texture_index = binascii.unhexlify(data['encoded']['texture_index'])
+    encoded_flags = binascii.unhexlify(data['encoded']['flags'])
+    encoded_uv_coords = binascii.unhexlify(data['encoded']['uv_coords'])
+    encoded = encoded_vi+encoded_texture_index+encoded_flags+encoded_uv_coords
+
+    decoded = Face(
+        tuple(data['decoded']['vertex_indices']),
+        data['decoded']['texture_index'],
+        data['decoded']['flags'],
+        tuple(tuple(uv) for uv in data['decoded']['uv_coords'])
+    )
+
+    return encoded, decoded
+
 
 @pytest.fixture
 def vertex_animation():
