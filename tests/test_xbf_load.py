@@ -146,15 +146,11 @@ def test_read_vertex(vertex_data):
     vertex = read_vertex(buffer)    
     assert vertex == expected
     
-def test_read_face(face_data):
-    
-    face_bin, expected_face = face_data
-    
-    buffer = io.BytesIO(face_bin)
-    
-    face = read_face(buffer)
-    
-    assert face == expected_face
+def test_read_face(face_data):    
+    given, expected = face_data
+    buffer = io.BytesIO(given)
+    face = read_face(buffer)    
+    assert face == expected
 
 #TODO: cases of count<0 and interpolation    
 def test_read_vertex_animation(vertex_animation):
