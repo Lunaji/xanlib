@@ -1,7 +1,5 @@
 import io
 import pytest
-import json
-import binascii
 from xanlib.xbf_load import (
     readInt,
     readUInt, 
@@ -26,24 +24,6 @@ from xanlib.scene import (
     Node,
 )
 from xanlib.xbf_base import NodeFlags
-
-def load_test_data(json_file):
-    with open(json_file, 'r') as file:
-        return json.load(file)
-
-@pytest.fixture(params=load_test_data('tests/test_data/vertices.json'))
-def vertex_data(request):
-    data = request.param
-    encoded_position = binascii.unhexlify(data['encoded']['position'])
-    encoded_normal = binascii.unhexlify(data['encoded']['normal'])
-    encoded = encoded_position + encoded_normal
-
-    decoded = Vertex(
-        position=tuple(data['decoded']['position']),
-        normal=tuple(data['decoded']['normal'])
-    )
-
-    return encoded, decoded
 
 
 @pytest.fixture

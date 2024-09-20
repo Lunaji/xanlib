@@ -1,5 +1,10 @@
 import pytest
-from xanlib.scene import VertexAnimation
+import json
+import binascii
+from xanlib.scene import (
+    Vertex,
+    VertexAnimation
+)
 
 
 def pytest_addoption(parser):
@@ -42,6 +47,24 @@ def pos_int():
             'binary': b'\x40\xe2\x01\x00',
             'decoded': 123456
         }
+
+def load_test_data(json_file):
+    with open(json_file, 'r') as file:
+        return json.load(file)
+
+@pytest.fixture(params=load_test_data('tests/test_data/vertices.json'))
+def vertex_data(request):
+    data = request.param
+    encoded_position = binascii.unhexlify(data['encoded']['position'])
+    encoded_normal = binascii.unhexlify(data['encoded']['normal'])
+    encoded = encoded_position + encoded_normal
+
+    decoded = Vertex(
+        position=tuple(data['decoded']['position']),
+        normal=tuple(data['decoded']['normal'])
+    )
+
+    return encoded, decoded
 
 @pytest.fixture
 def vertex_animation():
