@@ -1,5 +1,7 @@
 import io
 import pytest
+import json
+import binascii
 from xanlib.xbf_load import (
     readInt,
     readUInt, 
@@ -25,29 +27,23 @@ from xanlib.scene import (
 )
 from xanlib.xbf_base import NodeFlags
 
+def load_test_data(json_file):
+    with open(json_file, 'r') as file:
+        return json.load(file)
 
-@pytest.fixture
-def vertex_data():
-    # Raw binary data for position (1.0, 2.0, 3.0) and normal (4.0, 5.0, 6.0)
-    binary_position = (
-        b'\x00\x00\x80\x3f'  # 1.0 in little-endian (32-bit float)
-        b'\x00\x00\x00\x40'  # 2.0 in little-endian (32-bit float)
-        b'\x00\x00\x40\x40'  # 3.0 in little-endian (32-bit float)
+@pytest.fixture(params=load_test_data('tests/test_data/vertices.json'))
+def vertex_data(request):
+    data = request.param
+    encoded_position = binascii.unhexlify(data['encoded']['position'])
+    encoded_normal = binascii.unhexlify(data['encoded']['normal'])
+    encoded = encoded_position + encoded_normal
+
+    decoded = Vertex(
+        position=tuple(data['decoded']['position']),
+        normal=tuple(data['decoded']['normal'])
     )
-    binary_normal = (
-        b'\x00\x00\x80\x40'  # 4.0 in little-endian (32-bit float)
-        b'\x00\x00\xa0\x40'  # 5.0 in little-endian (32-bit float)
-        b'\x00\x00\xc0\x40'  # 6.0 in little-endian (32-bit float)
-    )
-    
-    vertex_bin = binary_position + binary_normal
-    
-    expected_vertex = Vertex(
-        position=(1.0, 2.0, 3.0),
-        normal=(4.0, 5.0, 6.0)
-    )
-    
-    return vertex_bin, expected_vertex
+
+    return encoded, decoded
 
 
 @pytest.fixture
@@ -203,15 +199,11 @@ def test_readByte():
     buffer = io.BytesIO(b'z')
     assert readByte(buffer) == b'z'
     
-def test_read_vertex(vertex_data):
-    
-    vertex_bin, expected_vertex = vertex_data
-    
-    buffer = io.BytesIO(vertex_bin)
-    
-    vertex = read_vertex(buffer)
-    
-    assert vertex == expected_vertex
+def test_read_vertex(vertex_data):    
+    given, expected = vertex_data
+    buffer = io.BytesIO(given)
+    vertex = read_vertex(buffer)    
+    assert vertex == expected
     
 def test_read_face(face_data):
     
