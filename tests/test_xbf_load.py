@@ -140,24 +140,21 @@ def test_readByte():
     buffer = io.BytesIO(b'z')
     assert readByte(buffer) == b'z'
     
-def test_read_vertex(vertex_data):    
-    given, expected = vertex_data
-    buffer = io.BytesIO(given)
-    vertex = read_vertex(buffer)    
-    assert vertex == expected
+def test_read_vertex(vertex):
+    buffer = io.BytesIO(vertex.encoded)
+    result = read_vertex(buffer)
+    assert result == vertex.decoded
     
-def test_read_face(face_data):    
-    given, expected = face_data
-    buffer = io.BytesIO(given)
-    face = read_face(buffer)    
-    assert face == expected
+def test_read_face(face):
+    buffer = io.BytesIO(face.encoded)
+    result = read_face(buffer)
+    assert result == face.decoded
 
 #TODO: cases of count<0 and interpolation    
 def test_read_vertex_animation(vertex_animation):
-    buffer = io.BytesIO(vertex_animation['binary'])
-    va = read_vertex_animation(buffer)
-    
-    assert va == vertex_animation['decoded']
+    buffer = io.BytesIO(vertex_animation.encoded)
+    result = read_vertex_animation(buffer)
+    assert result == vertex_animation.decoded
 
 # Key animation tests for different cases of `flags`
 def test_read_key_animation_flags_minus1():
@@ -236,10 +233,10 @@ def test_read_key_animation_flags_minus3():
     
     assert key_animation == expected_key_animation
 
-def test_read_node_basic(vertex_data, face_data):
+def test_read_node_basic(vertex, face):
     
-    vertex_bin, expected_vertex = vertex_data
-    face_bin, expected_face = face_data
+    vertex_bin, expected_vertex = vertex
+    face_bin, expected_face = face
     
     # Binary data for vertexCount = 1, flags = NodeFlags.PRELIGHT, faceCount = 1, childCount = 0, name = "TestNode"
     vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int
@@ -273,10 +270,10 @@ def test_read_node_basic(vertex_data, face_data):
     assert node.faces == [expected_face]
     assert node.rgb == [(255, 0, 0)]
     
-def test_read_node_with_children(vertex_data, face_data):
+def test_read_node_with_children(vertex, face):
     
-    vertex_bin, expected_vertex = vertex_data
-    face_bin, expected_face = face_data
+    vertex_bin, expected_vertex = vertex
+    face_bin, expected_face = face
 
     # Binary data for parent node (vertexCount = 1, faceCount = 1, childCount = 1)
     vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int

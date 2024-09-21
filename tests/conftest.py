@@ -1,12 +1,14 @@
 import pytest
 import json
 import binascii
+from collections import namedtuple
 from xanlib.scene import (
     Vertex,
     Face,
     VertexAnimation
 )
 
+EncodedDecoded = namedtuple('EncodedDecoded', ['encoded', 'decoded'])
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -54,7 +56,7 @@ def load_test_data(json_file):
         return json.load(file)
 
 @pytest.fixture(params=load_test_data('tests/test_data/vertices.json'))
-def vertex_data(request):
+def vertex(request):
     data = request.param
     encoded_position = binascii.unhexlify(data['encoded']['position'])
     encoded_normal = binascii.unhexlify(data['encoded']['normal'])
@@ -65,10 +67,10 @@ def vertex_data(request):
         normal=tuple(data['decoded']['normal'])
     )
 
-    return encoded, decoded
+    yield EncodedDecoded(encoded, decoded)
 
 @pytest.fixture(params=load_test_data('tests/test_data/faces.json'))
-def face_data(request):
+def face(request):
     data = request.param
     attrs = ['vertex_indices', 'texture_index', 'flags', 'uv_coords']
     encoded = b''.join([binascii.unhexlify(data['encoded'][attr]) for attr in attrs])
@@ -80,24 +82,24 @@ def face_data(request):
         tuple(tuple(uv) for uv in data['decoded']['uv_coords'])
     )
 
-    return encoded, decoded
+    yield EncodedDecoded(encoded, decoded)
 
 
 @pytest.fixture(params=load_test_data('tests/test_data/vertex_animations.json'))
 def vertex_animation(request):
     data = request.param
 
-    yield {
-        'binary': binascii.unhexlify(data['binary']),
-        'decoded': VertexAnimation(
-                        frame_count=data['decoded']['frame_count'],
-                        count=data['decoded']['count'],
-                        actual=data['decoded']['actual'],
-                        keys=data['decoded']['keys'],
-                        scale=data['decoded']['scale'],
-                        base_count=data['decoded']['base_count'],
-                        real_count=data['decoded']['real_count'],
-                        body=data['decoded']['body'],
-                        interpolation_data=data['decoded']['interpolation_data'],
-                    )
-    }
+    encoded = binascii.unhexlify(data['encoded'])
+    decoded = VertexAnimation(
+                frame_count=data['decoded']['frame_count'],
+                count=data['decoded']['count'],
+                actual=data['decoded']['actual'],
+                keys=data['decoded']['keys'],
+                scale=data['decoded']['scale'],
+                base_count=data['decoded']['base_count'],
+                real_count=data['decoded']['real_count'],
+                body=data['decoded']['body'],
+                interpolation_data=data['decoded']['interpolation_data'],
+              )
+
+    yield EncodedDecoded(encoded, decoded)

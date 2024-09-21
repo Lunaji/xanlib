@@ -15,17 +15,15 @@ def test_write_Int32sl(buffer, pos_int):
     write_Int32sl(buffer, pos_int['decoded'])
     assert buffer.getvalue() == pos_int['binary']
 
-def test_write_vertex(buffer, vertex_data):
-    expected, given = vertex_data
-    write_vertex(buffer, given)
-    assert buffer.getvalue() == expected
+def test_write_vertex(buffer, vertex):
+    write_vertex(buffer, vertex.decoded)
+    assert buffer.getvalue() == vertex.encoded
 
-def test_write_face(buffer, face_data):
-    expected, given = face_data
-    write_face(buffer, given)
-    assert buffer.getvalue() == expected
+def test_write_face(buffer, face):
+    write_face(buffer, face.decoded)
+    assert buffer.getvalue() == face.encoded
 
 def test_write_vertex_animation(buffer, vertex_animation):
-    write_vertex_animation(buffer, vertex_animation['decoded'])
-    assert buffer.getvalue() == vertex_animation['binary']
+    write_vertex_animation(buffer, vertex_animation.decoded)
+    assert buffer.getvalue() == vertex_animation.encoded
 
