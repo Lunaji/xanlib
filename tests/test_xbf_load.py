@@ -150,7 +150,6 @@ def test_read_face(face):
     result = read_face(buffer)
     assert result == face.decoded
 
-#TODO: cases of count<0 and interpolation    
 def test_read_vertex_animation(vertex_animation):
     buffer = io.BytesIO(vertex_animation.encoded)
     result = read_vertex_animation(buffer)
