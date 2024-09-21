@@ -86,8 +86,6 @@ def face_data(request):
 @pytest.fixture
 def vertex_animation():
 
-    vertex_animations = []
-
     # Binary data for frame_count (2), count (1), actual (3)
     frame_count_bin = b'\x02\x00\x00\x00'  # 2 as int
     count_bin = b'\x01\x00\x00\x00'        # 1 as int
@@ -114,10 +112,7 @@ def vertex_animation():
         interpolation_data=None
     )
 
-    vertex_animations.append({
-            'binary': binary_data,
-            'decoded': decoded
-        })
-
-    for va in vertex_animations:
-        yield va
+    yield {
+        'binary': binary_data,
+        'decoded': decoded
+    }
