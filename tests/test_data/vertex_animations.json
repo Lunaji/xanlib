@@ -12,5 +12,30 @@
             "body": null,
             "interpolation_data": null
         }
+    },
+    {
+        "binary": "03000000ffffffff010000000000000000000000010000000100020003000400",
+        "decoded": {
+            "frame_count": 3,
+            "count": -1,
+            "actual": 1,
+            "keys": [
+                0
+            ],
+            "scale": 0,
+            "base_count": 1,
+            "real_count": 1,
+            "body": [
+                [
+                    [
+                        1,
+                        2,
+                        3,
+                        4
+                    ]
+                ]
+            ],
+            "interpolation_data": null
+        }
     }
 ]
