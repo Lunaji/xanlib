@@ -1,0 +1,16 @@
+[
+    {
+        "binary": "020000000100000003000000010000000200000003000000",
+        "decoded": {
+            "frame_count": 2,
+            "count": 1,
+            "actual": 3,
+            "keys": [1, 2, 3],
+            "scale": null,
+            "base_count": null,
+            "real_count": null,
+            "body": null,
+            "interpolation_data": null
+        }
+    }
+]

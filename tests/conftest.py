@@ -83,36 +83,21 @@ def face_data(request):
     return encoded, decoded
 
 
-@pytest.fixture
-def vertex_animation():
-
-    # Binary data for frame_count (2), count (1), actual (3)
-    frame_count_bin = b'\x02\x00\x00\x00'  # 2 as int
-    count_bin = b'\x01\x00\x00\x00'        # 1 as int
-    actual_bin = b'\x03\x00\x00\x00'       # 3 as int
-
-    # Binary data for key_list: 3 unsigned integers (1, 2, 3)
-    key_list_bin = (
-        b'\x01\x00\x00\x00'  # 1
-        b'\x02\x00\x00\x00'  # 2
-        b'\x03\x00\x00\x00'  # 3
-    )
-
-    binary_data = frame_count_bin + count_bin + actual_bin + key_list_bin
-
-    decoded = VertexAnimation(
-        frame_count=2,
-        count=1,
-        actual=3,
-        keys=[1, 2, 3],
-        scale=None,
-        base_count=None,
-        real_count=None,
-        body=None,
-        interpolation_data=None
-    )
+@pytest.fixture(params=load_test_data('tests/test_data/vertex_animations.json'))
+def vertex_animation(request):
+    data = request.param
 
     yield {
-        'binary': binary_data,
-        'decoded': decoded
+        'binary': binascii.unhexlify(data['binary']),
+        'decoded': VertexAnimation(
+                        frame_count=data['decoded']['frame_count'],
+                        count=data['decoded']['count'],
+                        actual=data['decoded']['actual'],
+                        keys=data['decoded']['keys'],
+                        scale=data['decoded']['scale'],
+                        base_count=data['decoded']['base_count'],
+                        real_count=data['decoded']['real_count'],
+                        body=data['decoded']['body'],
+                        interpolation_data=data['decoded']['interpolation_data'],
+                    )
     }
