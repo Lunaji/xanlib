@@ -89,21 +89,10 @@ def face(request):
 @pytest.fixture(params=load_test_data('tests/test_data/vertex_animations.json'))
 def vertex_animation(request):
     data = request.param
-
-    encoded = binascii.unhexlify(data['encoded'])
-    decoded = VertexAnimation(
-                frame_count=data['decoded']['frame_count'],
-                count=data['decoded']['count'],
-                actual=data['decoded']['actual'],
-                keys=data['decoded']['keys'],
-                scale=data['decoded']['scale'],
-                base_count=data['decoded']['base_count'],
-                real_count=data['decoded']['real_count'],
-                body=data['decoded']['body'],
-                interpolation_data=data['decoded']['interpolation_data'],
-              )
-
-    yield EncodedDecoded(encoded, decoded)
+    yield EncodedDecoded(
+                            binascii.unhexlify(data['encoded']),
+                            VertexAnimation(**data['decoded'])
+                        )
 
 @pytest.fixture(params=load_test_data('tests/test_data/key_animations.json'))
 def key_animation(request):
