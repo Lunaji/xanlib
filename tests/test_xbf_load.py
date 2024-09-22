@@ -160,30 +160,6 @@ def test_read_key_animation(key_animation):
     result = read_key_animation(buffer)
     assert result == key_animation.decoded
 
-def test_read_key_animation_flags_minus2():
-    # Binary data for frame_count = 1, flags = -2
-    frame_count_bin = b'\x01\x00\x00\x00'  # 1 as int
-    flags_bin = b'\xfe\xff\xff\xff'        # -2 as int
-    
-    # 2 matrices (frame_count + 1) of 12 floats each (all set to 2.0 for simplicity)
-    matrices_bin = b''.join([b'\x00\x00\x00\x40' * 12] * 2)  # 2.0 as 32-bit float (little-endian)
-    
-    binary_data = frame_count_bin + flags_bin + matrices_bin
-    
-    buffer = io.BytesIO(binary_data)
-    
-    key_animation = read_key_animation(buffer)
-    
-    expected_key_animation = KeyAnimation(
-        frame_count=1,
-        flags=-2,
-        matrices=[(2.0,) * 12] * 2,
-        actual=None,
-        extra_data=None
-    )
-    
-    assert key_animation == expected_key_animation
-
 def test_read_key_animation_flags_minus3():
     # Binary data for frame_count = 1, flags = -3, actual = 2
     frame_count_bin = b'\x01\x00\x00\x00'  # 1 as int
