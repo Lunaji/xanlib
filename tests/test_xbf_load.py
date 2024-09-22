@@ -155,30 +155,10 @@ def test_read_vertex_animation(vertex_animation):
     result = read_vertex_animation(buffer)
     assert result == vertex_animation.decoded
 
-# Key animation tests for different cases of `flags`
-def test_read_key_animation_flags_minus1():
-    # Binary data for frame_count = 2, flags = -1
-    frame_count_bin = b'\x02\x00\x00\x00'  # 2 as int
-    flags_bin = b'\xff\xff\xff\xff'        # -1 as int
-    
-    # 3 matrices (frame_count + 1) of 16 floats each (all set to 1.0 for simplicity)
-    matrices_bin = b''.join([b'\x00\x00\x80\x3f' * 16] * 3)  # 1.0 as 32-bit float (little-endian)
-    
-    binary_data = frame_count_bin + flags_bin + matrices_bin
-    
-    buffer = io.BytesIO(binary_data)
-    
-    key_animation = read_key_animation(buffer)
-    
-    expected_key_animation = KeyAnimation(
-        frame_count=2,
-        flags=-1,
-        matrices=[(1.0,) * 16] * 3,
-        actual=None,
-        extra_data=None
-    )
-    
-    assert key_animation == expected_key_animation
+def test_read_key_animation(key_animation):
+    buffer = io.BytesIO(key_animation.encoded)
+    result = read_key_animation(buffer)
+    assert result == key_animation.decoded
 
 def test_read_key_animation_flags_minus2():
     # Binary data for frame_count = 1, flags = -2
