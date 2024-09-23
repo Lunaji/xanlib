@@ -1,8 +1,11 @@
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, List, TypeAlias
 
+
 Vector3: TypeAlias = Tuple[float, float, float]
+Quaternion: TypeAlias = Tuple[float, Vector3]
 UV: TypeAlias = Tuple[float, float]
+
 
 @dataclass
 class Vertex:
@@ -27,6 +30,14 @@ class VertexAnimation:
     real_count: Optional[int]
     body: Optional[list]
     interpolation_data: Optional[List[int]]
+
+@dataclass
+class KeyAnimationFrame:
+    frame_id: int
+    flag: int
+    rotation: Optional[Quaternion]
+    scale: Optional[Vector3]
+    translation: Optional[Vector3]
     
 @dataclass
 class KeyAnimation:
@@ -34,7 +45,8 @@ class KeyAnimation:
     flags: int
     matrices: list
     actual: Optional[int]
-    extra_data: Optional[List[int]]    
+    extra_data: Optional[List[int]]
+    frames: Optional[List[KeyAnimationFrame]]
 
 class Node:
     def __init__(self):
