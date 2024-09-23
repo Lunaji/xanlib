@@ -1,5 +1,5 @@
 import struct
-from .scene import Scene, Node, VertexAnimation, KeyAnimation, Face, Vertex
+from .scene import Scene, Node, VertexAnimation, KeyAnimation, Face, Vertex, Quaternion, Vector3
 from .xbf_base import NodeFlags
 
 
@@ -86,20 +86,48 @@ def read_key_animation(buffer):
             struct.unpack('<12f', buffer.read(4*12))
             for i in range(frameCount+1)
         ]
-    else: #assuming -3 ?
+    elif flags==-3:
         actual = readInt(buffer)
         extra_data = [readInt16(buffer) for i in range(frameCount+1)]
         matrices = [
             struct.unpack('<12f', buffer.read(4 * 12))
             for i in range(actual)
         ]
+    else:
+        frames = []
+        for i in range(flags):
+            frame_id = readInt16(buffer)
+            flag = readInt16(buffer)
+            assert not (flag & 0b1000111111111111)
+
+            if ((flag >> 12) & 0b001):
+                rotation = Quaternion(struct.pack('<4f', buffer.read(4*4)))
+            else:
+                rotation = None
+            if ((flags >> 12) & 0b010):
+                scale: Vector3(struct.pack('<3f', buffer.read(4*3)))
+            else:
+                scale = None
+            if ((flags >> 12) & 0b100):
+                translation: Vector3(struct.pack('<3f', buffer.read(4*3)))
+            else:
+                translation = None
+
+            frames.append(KeyAnimationFrame(
+                            frame_id,
+                            flag,
+                            rotation,
+                            scale,
+                            translation
+                        ))
         
     return KeyAnimation(
         frameCount,
         flags,
         matrices,
         actual if flags==-3 else None,
-        extra_data if flags==-3 else None
+        extra_data if flags==-3 else None,
+        frames if flags not in (-1,-2,-3) else None
     )        
         
 def read_node(buffer):
