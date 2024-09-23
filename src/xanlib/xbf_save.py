@@ -58,12 +58,22 @@ def write_key_animation(buffer, ka):
     elif ka.flags==-2:
         for matrix in ka.matrices:
             buffer.write(pack('<12f', *matrix))
-    else:
+    elif ka.flags==-3:
         write_Int32sl(buffer, ka.actual)
         for extra_datum in ka.extra_data:
             write_Int16sl(buffer, extra_datum)
         for matrix in ka.matrices:
-            buffer.write(pack('<12f', *matrix))   
+            buffer.write(pack('<12f', *matrix))
+    else:
+        for frame in ka.frames:
+            write_Int16sl(buffer, frame.frame_id)
+            write_Int16sl(buffer, frame.flag)
+            if frame.rotation is not None:
+                buffer.write(pack('<4f', *frame.rotation))
+            if frame.scale is not None:
+                buffer.write(pack('<3f', *frame.scale))
+            if frame.translation is not None:
+                buffer.write(pack('<3f', *frame.translation))
 	
 def write_node(buffer, node):
     write_Int32sl(buffer, len(node.vertices))
