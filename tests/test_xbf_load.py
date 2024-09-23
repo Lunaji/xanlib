@@ -14,6 +14,7 @@ from xanlib.xbf_load import (
     read_vertex_animation,
     read_key_animation,
     read_node,
+    convert_signed_5bit,
 )
 from xanlib.scene import (
     Vertex,
@@ -24,74 +25,16 @@ from xanlib.scene import (
 )
 from xanlib.xbf_base import NodeFlags
 
-@pytest.fixture
-def vertex_data():
-    # Raw binary data for position (1.0, 2.0, 3.0) and normal (4.0, 5.0, 6.0)
-    binary_position = (
-        b'\x00\x00\x80\x3f'  # 1.0 in little-endian (32-bit float)
-        b'\x00\x00\x00\x40'  # 2.0 in little-endian (32-bit float)
-        b'\x00\x00\x40\x40'  # 3.0 in little-endian (32-bit float)
-    )
-    binary_normal = (
-        b'\x00\x00\x80\x40'  # 4.0 in little-endian (32-bit float)
-        b'\x00\x00\xa0\x40'  # 5.0 in little-endian (32-bit float)
-        b'\x00\x00\xc0\x40'  # 6.0 in little-endian (32-bit float)
-    )
-    
-    vertex_bin = binary_position + binary_normal
-    
-    expected_vertex = Vertex(
-        position=(1.0, 2.0, 3.0),
-        normal=(4.0, 5.0, 6.0)
-    )
-    
-    return vertex_bin, expected_vertex
 
-@pytest.fixture
-def face_data():
-    # Pre-prepared binary data for vertex_indices (1, 2, 3), texture_index (4), flags (8),
-    # and UV coordinates [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
-
-    # Binary data for vertex_indices: (1, 2, 3)
-    vertex_indices_bin = (
-        b'\x01\x00\x00\x00'  # 1 as a 32-bit little-endian int
-        b'\x02\x00\x00\x00'  # 2 as a 32-bit little-endian int
-        b'\x03\x00\x00\x00'  # 3 as a 32-bit little-endian int
-    )
-    
-    # Binary data for texture_index: 4
-    texture_index_bin = b'\x04\x00\x00\x00'  # 4 as a 32-bit little-endian int
-    
-    # Binary data for flags: 8
-    flags_bin = b'\x08\x00\x00\x00'  # 8 as a 32-bit little-endian int
-    
-    # Binary data for UV coordinates: [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
-    uv_coords_bin = (
-        b'\x00\x00\x80\x3f'  # 1.0 as a 32-bit little-endian float
-        b'\x00\x00\x00\x40'  # 2.0 as a 32-bit little-endian float
-        b'\x00\x00\x40\x40'  # 3.0 as a 32-bit little-endian float
-        b'\x00\x00\x80\x40'  # 4.0 as a 32-bit little-endian float
-        b'\x00\x00\xa0\x40'  # 5.0 as a 32-bit little-endian float
-        b'\x00\x00\xc0\x40'  # 6.0 as a 32-bit little-endian float
-    )
-
-    face_bin = vertex_indices_bin + texture_index_bin + flags_bin + uv_coords_bin
-    
-    expected_face = Face(
-        vertex_indices=(1, 2, 3),
-        texture_index=4,
-        flags=8,
-        uv_coords=((1.0, 2.0), (3.0, 4.0), (5.0, 6.0))
-    )
-    
-    return face_bin, expected_face
+def test_convert_signed_5bit(signed_5bit):
+    v, expected = signed_5bit
+    assert convert_signed_5bit(v) == expected
 
 
-#readInt()
-
-def test_read_positive_integer():
-    buffer = io.BytesIO(b'\x40\xe2\x01\x00')  # Represents 123456 in little-endian
-    assert readInt(buffer) == 123456
+#TODO: parametrize
+def test_read_positive_integer(pos_int):
+    buffer = io.BytesIO(pos_int['binary'])
+    assert readInt(buffer) == pos_int['decoded']
 
 def test_read_negative_integer():
     buffer = io.BytesIO(b'\xc0\x1d\xfe\xff')  # Represents -123456 in little-endian
@@ -111,10 +54,9 @@ def test_read_maximum_value():
     
 #rest
 
-def test_readUInt():
-    # Test with a positive number (123456)
-    buffer = io.BytesIO(b'\x40\xe2\x01\x00')  # 123456 in little-endian
-    assert readUInt(buffer) == 123456
+def test_readUInt(pos_int):
+    buffer = io.BytesIO(pos_int['binary'])
+    assert readUInt(buffer) == pos_int['decoded']
 
     # Test the maximum value for unsigned 32-bit integer (4294967295)
     buffer = io.BytesIO(b'\xff\xff\xff\xff')  # 4294967295 in little-endian
@@ -198,141 +140,30 @@ def test_readByte():
     buffer = io.BytesIO(b'z')
     assert readByte(buffer) == b'z'
     
-def test_read_vertex(vertex_data):
+def test_read_vertex(vertex):
+    buffer = io.BytesIO(vertex.encoded)
+    result = read_vertex(buffer)
+    assert result == vertex.decoded
     
-    vertex_bin, expected_vertex = vertex_data
-    
-    buffer = io.BytesIO(vertex_bin)
-    
-    vertex = read_vertex(buffer)
-    
-    assert vertex == expected_vertex
-    
-def test_read_face(face_data):
-    
-    face_bin, expected_face = face_data
-    
-    buffer = io.BytesIO(face_bin)
-    
-    face = read_face(buffer)
-    
-    assert face == expected_face
+def test_read_face(face):
+    buffer = io.BytesIO(face.encoded)
+    result = read_face(buffer)
+    assert result == face.decoded
 
-#TODO: cases of count<0 and interpolation    
-def test_read_vertex_animation():
-    # Binary data for frame_count (2), count (1), actual (3)
-    frame_count_bin = b'\x02\x00\x00\x00'  # 2 as int
-    count_bin = b'\x01\x00\x00\x00'        # 1 as int
-    actual_bin = b'\x03\x00\x00\x00'       # 3 as int
-    
-    # Binary data for key_list: 3 unsigned integers (1, 2, 3)
-    key_list_bin = (
-        b'\x01\x00\x00\x00'  # 1
-        b'\x02\x00\x00\x00'  # 2
-        b'\x03\x00\x00\x00'  # 3
-    )
-    
-    binary_data = frame_count_bin + count_bin + actual_bin + key_list_bin
-    
-    buffer = io.BytesIO(binary_data)
-    
-    vertex_animation = read_vertex_animation(buffer)
-    
-    expected_vertex_animation = VertexAnimation(
-        frame_count=2,
-        count=1,
-        actual=3,
-        keys=[1, 2, 3],
-        scale=None,
-        base_count=None,
-        real_count=None,
-        body=None,
-        interpolation_data=None
-    )
-    
-    assert vertex_animation == expected_vertex_animation
+def test_read_vertex_animation(vertex_animation):
+    buffer = io.BytesIO(vertex_animation.encoded)
+    result = read_vertex_animation(buffer)
+    assert result == vertex_animation.decoded
 
-# Key animation tests for different cases of `flags`
-def test_read_key_animation_flags_minus1():
-    # Binary data for frame_count = 2, flags = -1
-    frame_count_bin = b'\x02\x00\x00\x00'  # 2 as int
-    flags_bin = b'\xff\xff\xff\xff'        # -1 as int
-    
-    # 3 matrices (frame_count + 1) of 16 floats each (all set to 1.0 for simplicity)
-    matrices_bin = b''.join([b'\x00\x00\x80\x3f' * 16] * 3)  # 1.0 as 32-bit float (little-endian)
-    
-    binary_data = frame_count_bin + flags_bin + matrices_bin
-    
-    buffer = io.BytesIO(binary_data)
-    
-    key_animation = read_key_animation(buffer)
-    
-    expected_key_animation = KeyAnimation(
-        frame_count=2,
-        flags=-1,
-        matrices=[(1.0,) * 16] * 3,
-        actual=None,
-        extra_data=None
-    )
-    
-    assert key_animation == expected_key_animation
+def test_read_key_animation(key_animation):
+    buffer = io.BytesIO(key_animation.encoded)
+    result = read_key_animation(buffer)
+    assert result == key_animation.decoded
 
-def test_read_key_animation_flags_minus2():
-    # Binary data for frame_count = 1, flags = -2
-    frame_count_bin = b'\x01\x00\x00\x00'  # 1 as int
-    flags_bin = b'\xfe\xff\xff\xff'        # -2 as int
+def test_read_node_basic(vertex, face):
     
-    # 2 matrices (frame_count + 1) of 12 floats each (all set to 2.0 for simplicity)
-    matrices_bin = b''.join([b'\x00\x00\x00\x40' * 12] * 2)  # 2.0 as 32-bit float (little-endian)
-    
-    binary_data = frame_count_bin + flags_bin + matrices_bin
-    
-    buffer = io.BytesIO(binary_data)
-    
-    key_animation = read_key_animation(buffer)
-    
-    expected_key_animation = KeyAnimation(
-        frame_count=1,
-        flags=-2,
-        matrices=[(2.0,) * 12] * 2,
-        actual=None,
-        extra_data=None
-    )
-    
-    assert key_animation == expected_key_animation
-
-def test_read_key_animation_flags_minus3():
-    # Binary data for frame_count = 1, flags = -3, actual = 2
-    frame_count_bin = b'\x01\x00\x00\x00'  # 1 as int
-    flags_bin = b'\xfd\xff\xff\xff'        # -3 as int
-    actual_bin = b'\x02\x00\x00\x00'       # 2 as int
-    
-    # 2 extra_data entries (frame_count + 1) as 16-bit integers
-    extra_data_bin = b'\x0a\x00' * 2  # 10 as int16
-    
-    # 2 matrices (actual count) of 12 floats each (all set to 3.0 for simplicity)
-    matrices_bin = b''.join([b'\x00\x00\x40\x40' * 12] * 2)  # 3.0 as 32-bit float (little-endian)
-    
-    binary_data = frame_count_bin + flags_bin + actual_bin + extra_data_bin + matrices_bin
-    
-    buffer = io.BytesIO(binary_data)
-    
-    key_animation = read_key_animation(buffer)
-    
-    expected_key_animation = KeyAnimation(
-        frame_count=1,
-        flags=-3,
-        matrices=[(3.0,) * 12] * 2,
-        actual=2,
-        extra_data=[10, 10]
-    )
-    
-    assert key_animation == expected_key_animation
-
-def test_read_node_basic(vertex_data, face_data):
-    
-    vertex_bin, expected_vertex = vertex_data
-    face_bin, expected_face = face_data
+    vertex_bin, expected_vertex = vertex
+    face_bin, expected_face = face
     
     # Binary data for vertexCount = 1, flags = NodeFlags.PRELIGHT, faceCount = 1, childCount = 0, name = "TestNode"
     vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int
@@ -366,10 +197,10 @@ def test_read_node_basic(vertex_data, face_data):
     assert node.faces == [expected_face]
     assert node.rgb == [(255, 0, 0)]
     
-def test_read_node_with_children(vertex_data, face_data):
+def test_read_node_with_children(vertex, face):
     
-    vertex_bin, expected_vertex = vertex_data
-    face_bin, expected_face = face_data
+    vertex_bin, expected_vertex = vertex
+    face_bin, expected_face = face
 
     # Binary data for parent node (vertexCount = 1, faceCount = 1, childCount = 1)
     vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int
