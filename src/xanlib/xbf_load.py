@@ -1,5 +1,5 @@
 import struct
-from .scene import Scene, Node, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex, Quaternion, Vector3
+from .scene import Scene, Node, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex
 from .xbf_base import NodeFlags
 
 
