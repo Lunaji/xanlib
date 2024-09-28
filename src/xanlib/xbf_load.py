@@ -1,4 +1,4 @@
-import struct
+from struct import unpack
 from .scene import Scene, Node, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex
 from .xbf_base import NodeFlags
 
@@ -8,42 +8,42 @@ def convert_signed_5bit(v):
     return sign*(v%16)
 
 def readInt(file):
-	return struct.unpack("<i", file.read(4))[0]
+        return unpack("<i", file.read(4))[0]
 
 def readUInt(file):
-	return struct.unpack("<I", file.read(4))[0]
+        return unpack("<I", file.read(4))[0]
 
 def readInt16(file):
-    return struct.unpack("<h", file.read(2))[0]
+    return unpack("<h", file.read(2))[0]
 
 def readInt8(file):
-    return struct.unpack("<b", file.read(1))[0]
+    return unpack("<b", file.read(1))[0]
 
 def readUInt8(file):
-    return struct.unpack("<B", file.read(1))[0]
+    return unpack("<B", file.read(1))[0]
 
 def readUInt16(file):
-    return struct.unpack("<H", file.read(2))[0]
+    return unpack("<H", file.read(2))[0]
 
 def readMatrix(file):
-	return struct.unpack("<16d", file.read(8*16))
+        return unpack("<16d", file.read(8*16))
 
 def readByte(file):
-    return struct.unpack("<c", file.read(1))[0]
+    return unpack("<c", file.read(1))[0]
 
 def read_vertex(buffer):
     return Vertex(
-        struct.unpack("<3f", buffer.read(4 * 3)),
-        struct.unpack("<3f", buffer.read(4 * 3))
+        unpack("<3f", buffer.read(4 * 3)),
+        unpack("<3f", buffer.read(4 * 3))
     )
 
 def read_face(buffer):
     return Face(
-        struct.unpack("<3i", buffer.read(4 * 3)),
-        struct.unpack("<1i", buffer.read(4 * 1))[0],
-        struct.unpack("<1i", buffer.read(4 * 1))[0],
+        unpack("<3i", buffer.read(4 * 3)),
+        unpack("<1i", buffer.read(4 * 1))[0],
+        unpack("<1i", buffer.read(4 * 1))[0],
         tuple(
-            struct.unpack("<2f", buffer.read(4 * 2))
+            unpack("<2f", buffer.read(4 * 2))
             for i in range(3)
         )
     )
@@ -78,19 +78,19 @@ def read_key_animation(buffer):
     flags = readInt(buffer)
     if flags==-1:
         matrices = [
-            struct.unpack('<16f', buffer.read(4*16))
+            unpack('<16f', buffer.read(4*16))
             for i in range(frameCount+1)
         ]
     elif flags==-2:
         matrices = [
-            struct.unpack('<12f', buffer.read(4*12))
+            unpack('<12f', buffer.read(4*12))
             for i in range(frameCount+1)
         ]
     elif flags==-3:
         actual = readInt(buffer)
         extra_data = [readInt16(buffer) for i in range(frameCount+1)]
         matrices = [
-            struct.unpack('<12f', buffer.read(4 * 12))
+            unpack('<12f', buffer.read(4 * 12))
             for i in range(actual)
         ]
     else:
@@ -101,15 +101,15 @@ def read_key_animation(buffer):
             #assert not (flag & 0b1000111111111111)
 
             if ((flag >> 12) & 0b001):
-                rotation = struct.unpack('<4f', buffer.read(4*4))
+                rotation = unpack('<4f', buffer.read(4*4))
             else:
                 rotation = None
             if ((flags >> 12) & 0b010):
-                scale: struct.unpack('<3f', buffer.read(4*3))
+                scale: unpack('<3f', buffer.read(4*3))
             else:
                 scale = None
             if ((flags >> 12) & 0b100):
-                translation: struct.unpack('<3f', buffer.read(4*3))
+                translation: unpack('<3f', buffer.read(4*3))
             else:
                 translation = None
 
@@ -161,7 +161,7 @@ def read_node(buffer):
             node.key_animation = read_key_animation(buffer)
             
         return node
-    except Exception as e:
+    except Exception:
         buffer.seek(buffer_position)
         raise
 
