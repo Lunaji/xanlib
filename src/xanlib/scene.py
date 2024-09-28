@@ -28,7 +28,7 @@ class VertexAnimation:
     scale: Optional[int]
     base_count: Optional[int]
     real_count: Optional[int]
-    body: Optional[list]
+    frames: Optional[list]
     interpolation_data: Optional[List[int]]
 
 @dataclass

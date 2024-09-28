@@ -43,8 +43,8 @@ def write_vertex_animation(buffer, va):
         for i in range(va.actual):
             for j in range(va.real_count):
                 for k in range(3):
-                    write_Int16sl(buffer, va.body[i][j][k])
-                write_Int16ul(buffer, va.body[i][j][3])
+                    write_Int16sl(buffer, va.frames[i][j][k])
+                write_Int16ul(buffer, va.frames[i][j][3])
         if (va.scale & 0x80000000):
             for v in va.interpolation_data:
                 write_Int32ul(buffer, v)

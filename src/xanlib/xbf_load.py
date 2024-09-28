@@ -57,7 +57,7 @@ def read_vertex_animation(buffer):
         scale = readUInt(buffer)
         base_count = readUInt(buffer)
         real_count = base_count//actual
-        body = [[[readInt16(buffer), readInt16(buffer), readInt16(buffer), readUInt16(buffer)] for j in range(real_count)] for i in range(actual)]
+        frames = [[[readInt16(buffer), readInt16(buffer), readInt16(buffer), readUInt16(buffer)] for j in range(real_count)] for i in range(actual)]
         if (scale & 0x80000000): #interpolated
             interpolationData = [readUInt(buffer) for i in range(frameCount)]
             
@@ -69,7 +69,7 @@ def read_vertex_animation(buffer):
         scale if count<0 else None,
         base_count if count<0 else None,
         real_count if count<0 else None,
-        body if count<0 else None,
+        frames if count<0 else None,
         interpolationData if ((count<0) and (scale & 0x80000000)) else None
     )
 

@@ -100,8 +100,8 @@ class Viewer():
             frames = len(node.vertex_animation.keys)
             frame = frame%frames
             key_frame = node.vertex_animation.keys[frame]
-            if key_frame < len(node.vertex_animation.body):
-                self.display_frame(node.faces, node.vertex_animation.body[key_frame], node_transform)
+            if key_frame < len(node.vertex_animation.frames):
+                self.display_frame(node.faces, node.vertex_animation.frames[key_frame], node_transform)
             
         for child in node.children:
             self.recursive_display(child, frame, node_transform)
@@ -129,7 +129,7 @@ class Viewer():
 
 if __name__ == '__main__':
     
-    filename = 'Data/3DData1/Buildings/AT_MGT_H0.xbf'    
+    filename = 'Data/3DDATA0001/Buildings/AT_MGT_H0.xbf'
     scene = load_xbf(filename)
     viewer = Viewer(1280, 720)    
     viewer.view(scene)
