@@ -5,6 +5,7 @@ from pygame.locals import QUIT
 from pygame.math import Vector2, Vector3
 from xanlib import load_xbf
 from xanlib.xbf_load import convert_signed_5bit
+import sys
 
 
 def transform_vertex(vertex, transform):
@@ -133,3 +134,5 @@ if __name__ == '__main__':
     scene = load_xbf(filename)
     viewer = Viewer(1280, 720)    
     viewer.view(scene)
+    pygame.quit()
+    sys.exit()
