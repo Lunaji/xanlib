@@ -11,4 +11,6 @@ def test_xbf_full_roundtrip(xbf_file):
     scene = load_xbf(xbf_file.resolve())
     with tempfile.NamedTemporaryFile(delete=True) as saved_file:
         save_xbf(scene, saved_file.name)
+        assert scene.error is None
+        assert scene.unparsed is None
         assert filecmp.cmp(xbf_file, saved_file.name, shallow=False)
