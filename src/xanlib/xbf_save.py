@@ -1,6 +1,14 @@
 from struct import pack
 from .xbf_base import NodeFlags
 
+def convert_to_5bit_signed(v):
+    v_clamped = max(-15, min(15, int(round(v))))
+
+    if v_clamped < 0:
+        return v_clamped + 32
+    else:
+        return v_clamped
+
 def write_Int32sl(buffer, v):
 	buffer.write(pack('<i', v))
 	
@@ -22,6 +30,10 @@ def write_matrix44dl(buffer, v):
 def write_vertex(buffer, vertex):
     buffer.write(pack('<3f', *vertex.position))
     buffer.write(pack('<3f', *vertex.normal))
+
+def write_vertex_for_vertex_animation(buffer, vertex):
+    normal_packed = sum((convert_to_5bit_signed(v) & 0x1F) << shift for v, shift in zip(vertex.normal, [0, 5, 10]))
+    buffer.write(pack('<3hH', *(int(coord) for coord in vertex.position), normal_packed))
     
 def write_face(buffer, face):
     buffer.write(pack('<3i', *face.vertex_indices))
@@ -40,11 +52,9 @@ def write_vertex_animation(buffer, va):
     if va.count<0:
         write_Int32ul(buffer, va.scale)
         write_Int32ul(buffer, va.base_count)
-        for i in range(va.actual):
-            for j in range(va.real_count):
-                for k in range(3):
-                    write_Int16sl(buffer, va.frames[i][j][k])
-                write_Int16ul(buffer, va.frames[i][j][3])
+        for frame in va.frames:
+            for vertex in frame:
+                write_vertex_for_vertex_animation(buffer, vertex)
         if (va.scale & 0x80000000):
             for v in va.interpolation_data:
                 write_Int32ul(buffer, v)

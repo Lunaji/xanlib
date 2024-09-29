@@ -1,4 +1,4 @@
-from struct import unpack
+from struct import unpack, calcsize
 from .scene import Scene, Node, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex
 from .xbf_base import NodeFlags
 
@@ -37,6 +37,15 @@ def read_vertex(buffer):
         unpack("<3f", buffer.read(4 * 3))
     )
 
+def read_vertex_from_vertex_animation(buffer):
+    ps = '<3h'
+    position = unpack(ps, buffer.read(calcsize(ps)))
+    ns = '<H'
+    normal_packed = unpack(ns, buffer.read(calcsize(ns)))[0]
+    normal = tuple(convert_signed_5bit((normal_packed >> x) & 0x1F)
+                for x in (0, 5, 10))
+    return Vertex(position, normal)
+
 def read_face(buffer):
     return Face(
         unpack("<3i", buffer.read(4 * 3)),
@@ -57,7 +66,7 @@ def read_vertex_animation(buffer):
         scale = readUInt(buffer)
         base_count = readUInt(buffer)
         real_count = base_count//actual
-        frames = [[[readInt16(buffer), readInt16(buffer), readInt16(buffer), readUInt16(buffer)] for j in range(real_count)] for i in range(actual)]
+        frames = [[read_vertex_from_vertex_animation(buffer) for j in range(real_count)] for i in range(actual)]
         if (scale & 0x80000000): #interpolated
             interpolationData = [readUInt(buffer) for i in range(frameCount)]
             
