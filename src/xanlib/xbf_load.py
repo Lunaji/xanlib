@@ -1,5 +1,5 @@
 from struct import unpack, calcsize
-from .scene import Scene, Node, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex
+from .scene import Scene, Node, VertexFlagged, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex
 from .xbf_base import NodeFlags
 
 
@@ -44,7 +44,8 @@ def read_vertex_from_vertex_animation(buffer):
     normal_packed = unpack(ns, buffer.read(calcsize(ns)))[0]
     normal = tuple(convert_signed_5bit((normal_packed >> x) & 0x1F)
                 for x in (0, 5, 10))
-    return Vertex(position, normal)
+    flag = bool((normal_packed >> 15) & 1)
+    return VertexFlagged(Vertex(position, normal), flag)
 
 def read_face(buffer):
     return Face(

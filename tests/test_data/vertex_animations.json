@@ -29,7 +29,8 @@
                 [
                     {
                         "position": [1.0, 2.0, 3.0],
-                        "normal": [4.0, 0, 0]
+                        "normal": [4.0, 0, 0],
+                        "flag": false
                     }
                 ]
             ],
@@ -52,11 +53,13 @@
                 [
                     {
                         "position": [0, 0, 0],
-                        "normal": [0, 0, 0]
+                        "normal": [0, 0, 0],
+                        "flag": false
                     },
                     {
                         "position": [3.0, 5.0, 8.0],
-                        "normal": [15.0, 0, 0]
+                        "normal": [15.0, 0, 0],
+                        "flag": false
                     }
                 ]
             ],

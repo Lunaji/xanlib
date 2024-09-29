@@ -5,6 +5,7 @@ from collections import namedtuple
 from xanlib.scene import (
     Vertex,
     Face,
+    VertexFlagged,
     VertexAnimation,
     KeyAnimation
 )
@@ -99,7 +100,7 @@ def vertex_animation(request):
                                             scale=data['decoded']['scale'],
                                             base_count=data['decoded']['base_count'],
                                             real_count=data['decoded']['real_count'],
-                                            frames=[[Vertex(tuple(vertex['position']), tuple(vertex['normal'])) for vertex in frame] for frame in data['decoded']['frames']]if data['decoded']['frames'] is not None else None,
+                                            frames=[[VertexFlagged(Vertex(tuple(vertex['position']), tuple(vertex['normal'])), vertex['flag']) for vertex in frame] for frame in data['decoded']['frames']]if data['decoded']['frames'] is not None else None,
                                             interpolation_data=data['decoded']['interpolation_data'],
                                         )
                         )

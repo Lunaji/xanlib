@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, List, TypeAlias
+from typing import Optional, Tuple, List, TypeAlias, NamedTuple
 
 
 Vector3: TypeAlias = Tuple[float, float, float]
@@ -18,6 +18,10 @@ class Face:
     texture_index: int
     flags: int
     uv_coords: Tuple[UV, UV, UV]
+
+class VertexFlagged(NamedTuple):
+    vertex: Vertex
+    flag: bool
 
 @dataclass    
 class VertexAnimation:
