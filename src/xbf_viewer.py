@@ -87,15 +87,14 @@ class Viewer():
                 
                 
     def display(self, node):
-    
-        node_transform = as_matrix44(node.transform)
-        for ancestor in node.ancestors:
-            node_transform @= as_matrix44(ancestor.transform)
             
         frames = len(node.vertex_animation.keys)
         frame = self.curframe%frames
         key_frame = node.vertex_animation.keys[frame]
         if key_frame < len(node.vertex_animation.frames):
+            node_transform = as_matrix44(node.transform)
+            for ancestor in node.ancestors:
+                node_transform @= as_matrix44(ancestor.transform)
             self.display_frame(node.faces, node.vertex_animation.frames[key_frame], node_transform)
             
         
