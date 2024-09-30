@@ -83,7 +83,7 @@ class Viewer():
         draw_index += 1
                 
                 
-    def recursive_display(self, node, frame, parent_transform=None):
+    def display(self, node, frame, parent_transform=None):
     
         node_transform = np.array(node.transform).reshape(4,4)
 
@@ -96,9 +96,6 @@ class Viewer():
             key_frame = node.vertex_animation.keys[frame]
             if key_frame < len(node.vertex_animation.frames):
                 self.display_frame(node.faces, node.vertex_animation.frames[key_frame], node_transform)
-            
-        for child in node.children:
-            self.recursive_display(child, frame, node_transform)
             
         
     def view(self, scene):
@@ -115,8 +112,9 @@ class Viewer():
             self.curframe = int(np.floor(self.time*0.01))
             global draw_index
             draw_index = 0
-            for node in scene.nodes:
-                self.recursive_display(node, self.curframe)
+            for root in scene.nodes:
+                for node in root:
+                    self.display(node, self.curframe)
 
             pygame.display.update()
             

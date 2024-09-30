@@ -62,6 +62,11 @@ class Node:
         self.vertex_animation=None
         self.key_animation=None
 
+    def __iter__(self):
+        yield self
+        for child in self.children:
+            yield from child
+
 @dataclass
 class Scene:
     nodes: List['Node'] = field(default_factory=list)
