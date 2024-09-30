@@ -19,9 +19,11 @@ class Face:
     flags: int
     uv_coords: Tuple[UV, UV, UV]
 
-class VertexFlagged(NamedTuple):
-    vertex: Vertex
-    flag: bool
+class VertexAnimationFrameDatum(NamedTuple):
+    x: int
+    y: int
+    z: int
+    normal_packed: int
 
 @dataclass    
 class VertexAnimation:

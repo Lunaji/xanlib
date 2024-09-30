@@ -31,10 +31,8 @@ def write_vertex(buffer, vertex):
     buffer.write(pack('<3f', *vertex.position))
     buffer.write(pack('<3f', *vertex.normal))
 
-def write_vertex_for_vertex_animation(buffer, vertex_flagged):
-    normal_packed = sum((convert_to_5bit_signed(v) & 0x1F) << shift for v, shift in zip(vertex_flagged.vertex.normal, [0, 5, 10]))
-    normal_packed |= (1 << 15) if vertex_flagged.flag else 0
-    buffer.write(pack('<3hH', *(int(coord) for coord in vertex_flagged.vertex.position), normal_packed))
+def write_vertex_for_vertex_animation(buffer, vertex_animation_frame_datum):
+    buffer.write(pack('<3hH', *vertex_animation_frame_datum))
     
 def write_face(buffer, face):
     buffer.write(pack('<3i', *face.vertex_indices))
