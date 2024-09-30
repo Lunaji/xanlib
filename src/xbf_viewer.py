@@ -112,9 +112,8 @@ class Viewer():
             self.curframe = int(np.floor(self.time*0.01))
             global draw_index
             draw_index = 0
-            for root in scene.nodes:
-                for node in root:
-                    self.display(node, self.curframe)
+            for node in scene:
+                self.display(node, self.curframe)
 
             pygame.display.update()
             

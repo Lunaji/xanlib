@@ -75,6 +75,10 @@ class Scene:
 
     def get_textures(self):
         return [texture.decode() for texture in self.textureNameData.split(b'\x00\x00') if texture]
+
+    def __iter__(self):
+        for node in self.nodes:
+            yield from node
     
 
 def traverse(node, func, parent=None, depth=0, **kwargs):
