@@ -89,16 +89,14 @@ class Viewer():
     def display(self, node):
     
         node_transform = as_matrix44(node.transform)
-
-        for ancenstor in node.ancestors:
-            node_transform = node_transform.dot(as_matrix44(ancenstor.transform))
+        for ancestor in node.ancestors:
+            node_transform @= as_matrix44(ancestor.transform)
             
-        if node.vertex_animation is not None:
-            frames = len(node.vertex_animation.keys)
-            frame = self.curframe%frames
-            key_frame = node.vertex_animation.keys[frame]
-            if key_frame < len(node.vertex_animation.frames):
-                self.display_frame(node.faces, node.vertex_animation.frames[key_frame], node_transform)
+        frames = len(node.vertex_animation.keys)
+        frame = self.curframe%frames
+        key_frame = node.vertex_animation.keys[frame]
+        if key_frame < len(node.vertex_animation.frames):
+            self.display_frame(node.faces, node.vertex_animation.frames[key_frame], node_transform)
             
         
     def view(self, scene):
@@ -115,7 +113,7 @@ class Viewer():
             self.curframe = int(np.floor(self.time*0.01))
             global draw_index
             draw_index = 0
-            for node in scene:
+            for node in filter(lambda node: node.vertex_animation, scene):
                 self.display(node)
 
             pygame.display.update()
