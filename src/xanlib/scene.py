@@ -61,6 +61,7 @@ class Node:
         self.faces = []
         self.vertex_animation=None
         self.key_animation=None
+        self.parent = None
 
     def __iter__(self):
         yield self

@@ -12,6 +12,9 @@ def transform_vertex(vertex, transform):
     normal = np.array([*vertex.normal,0]).dot(transform)
     return Vector3(*position[:3])/position[3], Vector3(*normal[:3])
 
+def as_matrix44(transform):
+    return np.array(transform).reshape(4,4)
+
 draw_index = 0
 
 class Viewer():   
@@ -83,12 +86,12 @@ class Viewer():
         draw_index += 1
                 
                 
-    def display(self, node, parent_transform=None):
+    def display(self, node):
     
-        node_transform = np.array(node.transform).reshape(4,4)
+        node_transform = as_matrix44(node.transform)
 
-        if parent_transform is not None:
-            node_transform = node_transform.dot(parent_transform)
+        if node.parent is not None:
+            node_transform = node_transform.dot(as_matrix44(node.parent.transform))
             
         if node.vertex_animation is not None:
             frames = len(node.vertex_animation.keys)

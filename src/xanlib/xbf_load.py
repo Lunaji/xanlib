@@ -165,13 +165,14 @@ def read_key_animation(buffer):
         frames if flags not in (-1,-2,-3) else None
     )        
         
-def read_node(buffer):
+def read_node(buffer, parent=None):
     buffer_position = buffer.tell()
     try:
         vertexCount = readInt(buffer)
         if vertexCount == -1:
             return None
         node = Node()
+        node.parent = parent
         node.flags = NodeFlags(readInt(buffer))
         faceCount = readInt(buffer)
         childCount = readInt(buffer)
@@ -179,7 +180,7 @@ def read_node(buffer):
         nameLength = readInt(buffer)
         node.name = buffer.read(nameLength).decode()
         
-        node.children = [read_node(buffer)   for i in range(childCount)]
+        node.children = [read_node(buffer, node)   for i in range(childCount)]
         node.vertices = [read_vertex(buffer) for i in range(vertexCount)]
         node.faces    = [read_face(buffer)   for i in range(faceCount)]
 
