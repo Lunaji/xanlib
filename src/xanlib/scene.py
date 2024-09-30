@@ -85,7 +85,8 @@ class Scene:
     error: Optional[Exception] = None
     unparsed: Optional[Exception] = None
 
-    def get_textures(self):
+    @property
+    def textures(self):
         return [texture.decode() for texture in self.textureNameData.split(b'\x00\x00') if texture]
 
     def __iter__(self):
