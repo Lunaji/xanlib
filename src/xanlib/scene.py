@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, List, NamedTuple
+from typing import Optional, Tuple, List, NamedTuple, Union
+from pathlib import Path
 
 
 class Vector3(NamedTuple):
@@ -81,7 +82,11 @@ class Node:
 
 @dataclass
 class Scene:
-    nodes: List['Node'] = field(default_factory=list)
+    file: Optional[Union[str, Path]] = None
+    version: Optional[int] = None
+    FXData: Optional[bytes] = None
+    textureNameData: Optional[bytes] = None
+    nodes: List[Node] = field(default_factory=list)
     error: Optional[Exception] = None
     unparsed: Optional[Exception] = None
 
