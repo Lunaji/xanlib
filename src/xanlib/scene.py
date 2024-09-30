@@ -67,6 +67,9 @@ class Scene:
     nodes: List['Node'] = field(default_factory=list)
     error: Optional[Exception] = None
     unparsed: Optional[Exception] = None
+
+    def get_textures(self):
+        return [texture.decode() for texture in self.textureNameData.split(b'\x00\x00') if texture]
     
 
 def traverse(node, func, parent=None, depth=0, **kwargs):
