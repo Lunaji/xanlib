@@ -48,9 +48,9 @@ class Viewer():
         origin = self.transform_vertex(Vector3(0,0,0))
         pygame.draw.circle(self.WINDOW, (0,255,0), origin, 5)
 
-        for vi, vertex_flagged in enumerate(va_frame):
+        for vi, vertex_animation_frame_datum in enumerate(va_frame):
 
-            worldpos, norm = transform_vertex(vertex_flagged.vertex, transform)
+            worldpos, norm = transform_vertex(vertex_animation_frame_datum.as_vertex(), transform)
 
             if self.bounds_min is None:
                 self.bounds_min = Vector3(worldpos)

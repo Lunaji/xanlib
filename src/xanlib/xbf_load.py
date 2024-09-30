@@ -38,7 +38,12 @@ def read_vertex(buffer):
     )
 
 class VertexAnimationVertex(VertexAnimationFrameDatum):
-    pass
+
+    def as_vertex(self):
+        normal = tuple(convert_signed_5bit((self.normal_packed >> shift) & 0x1F)
+                        for shift in (0, 5, 10))
+        return Vertex((self.x, self.y, self.z), normal)
+
 
 def read_vertex_from_vertex_animation(buffer):
     format_string = '<3hH'
