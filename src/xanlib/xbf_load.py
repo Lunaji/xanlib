@@ -1,5 +1,5 @@
 from struct import unpack, calcsize
-from .scene import Scene, Node, VertexAnimationFrameDatum, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex
+from .scene import Scene, Node, VertexAnimationFrameDatum, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex, Vector3
 from .xbf_base import NodeFlags
 
 
@@ -47,10 +47,17 @@ def read_vertex(buffer):
 
 class VertexAnimationVertex(VertexAnimationFrameDatum):
 
+    @property
+    def position(self):
+        return Vector3(self.x, self.y, self.z)
+
+    @property
+    def normal(self):
+        return Vector3(*(convert_signed_5bit((self.normal_packed >> shift) & 0x1F)
+                                for shift in (0, 5, 10)))
+
     def as_vertex(self):
-        normal = tuple(convert_signed_5bit((self.normal_packed >> shift) & 0x1F)
-                        for shift in (0, 5, 10))
-        return Vertex((self.x, self.y, self.z), normal)
+        return Vertex(self.position, self.normal)
 
     def from_vertex(self, vertex):
         """Warning: does not roundtrip"""
