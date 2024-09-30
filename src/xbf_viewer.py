@@ -83,7 +83,7 @@ class Viewer():
         draw_index += 1
                 
                 
-    def display(self, node, frame, parent_transform=None):
+    def display(self, node, parent_transform=None):
     
         node_transform = np.array(node.transform).reshape(4,4)
 
@@ -92,7 +92,7 @@ class Viewer():
             
         if node.vertex_animation is not None:
             frames = len(node.vertex_animation.keys)
-            frame = frame%frames
+            frame = self.curframe%frames
             key_frame = node.vertex_animation.keys[frame]
             if key_frame < len(node.vertex_animation.frames):
                 self.display_frame(node.faces, node.vertex_animation.frames[key_frame], node_transform)
@@ -113,7 +113,7 @@ class Viewer():
             global draw_index
             draw_index = 0
             for node in scene:
-                self.display(node, self.curframe)
+                self.display(node)
 
             pygame.display.update()
             
