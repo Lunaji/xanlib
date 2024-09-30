@@ -7,6 +7,14 @@ def convert_signed_5bit(v):
     sign=-1 if (v%32)>15 else 1
     return sign*(v%16)
 
+def convert_to_5bit_signed(v):
+    #TODO: unit test
+    v_clamped = max(-15, min(15, int(round(v))))
+    if v_clamped < 0:
+        return v_clamped + 32
+    else:
+        return v_clamped
+
 def readInt(file):
         return unpack("<i", file.read(4))[0]
 
@@ -43,6 +51,17 @@ class VertexAnimationVertex(VertexAnimationFrameDatum):
         normal = tuple(convert_signed_5bit((self.normal_packed >> shift) & 0x1F)
                         for shift in (0, 5, 10))
         return Vertex((self.x, self.y, self.z), normal)
+
+    def from_vertex(self, vertex):
+        """Warning: does not roundtrip"""
+        #TODO: unit test
+
+        self.x = vertex.position[0]
+        self.y = vertex.position[1]
+        self.z = vertex.position[2]
+        self.normal_packed = sum((convert_to_5bit_signed(v) & 0x1F) << shift for v, shift in zip(vertex.normal, [0, 5, 10]))
+
+
 
 
 def read_vertex_from_vertex_animation(buffer):
