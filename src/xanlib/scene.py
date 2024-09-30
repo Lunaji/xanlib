@@ -40,7 +40,7 @@ class VertexAnimation(NamedTuple):
     scale: Optional[int]
     base_count: Optional[int]
     real_count: Optional[int]
-    frames: Optional[list]
+    frames: Optional[List[VertexAnimationFrameDatum]]
     interpolation_data: Optional[List[int]]
 
 class KeyAnimationFrame(NamedTuple):
