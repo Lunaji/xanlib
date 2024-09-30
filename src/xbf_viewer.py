@@ -90,8 +90,8 @@ class Viewer():
     
         node_transform = as_matrix44(node.transform)
 
-        if node.parent is not None:
-            node_transform = node_transform.dot(as_matrix44(node.parent.transform))
+        for ancenstor in node.ancestors:
+            node_transform = node_transform.dot(as_matrix44(ancenstor.transform))
             
         if node.vertex_animation is not None:
             frames = len(node.vertex_animation.keys)

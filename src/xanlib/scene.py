@@ -71,6 +71,14 @@ class Node:
         for child in self.children:
             yield from child
 
+    @property
+    def ancestors(self):
+        node = self
+        while node.parent is not None:
+            yield node.parent
+            node = node.parent
+
+
 @dataclass
 class Scene:
     nodes: List['Node'] = field(default_factory=list)
@@ -83,7 +91,7 @@ class Scene:
     def __iter__(self):
         for node in self.nodes:
             yield from node
-    
+
 
 def traverse(node, func, parent=None, depth=0, **kwargs):
     func(node, parent=parent, depth=depth, **kwargs)
