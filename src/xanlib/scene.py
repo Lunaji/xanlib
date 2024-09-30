@@ -1,11 +1,19 @@
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, List, TypeAlias, NamedTuple
+from typing import Optional, Tuple, List, NamedTuple
 
 
-Vector3: TypeAlias = Tuple[float, float, float]
-Quaternion: TypeAlias = Tuple[float, Vector3]
-UV: TypeAlias = Tuple[float, float]
+class Vector3(NamedTuple):
+    x: float
+    y: float
+    z: float
 
+class Quaternion(NamedTuple):
+    w: float
+    v: Vector3
+
+class UV(NamedTuple):
+    u: float
+    v: float
 
 @dataclass
 class Vertex:
