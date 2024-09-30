@@ -61,7 +61,8 @@ class VertexAnimationVertex(VertexAnimationFrameDatum):
         self.z = vertex.position[2]
         self.normal_packed = sum((convert_to_5bit_signed(v) & 0x1F) << shift for v, shift in zip(vertex.normal, [0, 5, 10]))
 
-
+    def as_flag(self):
+        return bool((self.normal_packed >> 15) & 1)
 
 
 def read_vertex_from_vertex_animation(buffer):
