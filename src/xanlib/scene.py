@@ -15,13 +15,11 @@ class UV(NamedTuple):
     u: float
     v: float
 
-@dataclass
-class Vertex:
+class Vertex(NamedTuple):
     position: Vector3
     normal: Vector3
 
-@dataclass
-class Face:
+class Face(NamedTuple):
     vertex_indices: Tuple[int, int, int]
     texture_index: int
     flags: int
@@ -33,8 +31,7 @@ class VertexAnimationFrameDatum(NamedTuple):
     z: int
     normal_packed: int
 
-@dataclass    
-class VertexAnimation:
+class VertexAnimation(NamedTuple):
     frame_count: int
     count: int
     actual: int
@@ -45,16 +42,14 @@ class VertexAnimation:
     frames: Optional[list]
     interpolation_data: Optional[List[int]]
 
-@dataclass
-class KeyAnimationFrame:
+class KeyAnimationFrame(NamedTuple):
     frame_id: int
     flag: int
     rotation: Optional[Quaternion]
     scale: Optional[Vector3]
     translation: Optional[Vector3]
     
-@dataclass
-class KeyAnimation:
+class KeyAnimation(NamedTuple):
     frame_count: int
     flags: int
     matrices: list
