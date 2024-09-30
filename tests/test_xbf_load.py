@@ -16,13 +16,6 @@ from xanlib.xbf_load import (
     read_node,
     convert_signed_5bit,
 )
-from xanlib.scene import (
-    Vertex,
-    Face,
-    VertexAnimation,
-    KeyAnimation,
-    Node,
-)
 from xanlib.xbf_base import NodeFlags
 
 
