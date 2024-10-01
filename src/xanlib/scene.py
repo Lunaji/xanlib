@@ -55,7 +55,7 @@ class KeyAnimationFrame(NamedTuple):
 class KeyAnimation(NamedTuple):
     frame_count: int
     flags: int
-    matrices: list
+    matrices: Optional[List[Matrix]]
     actual: Optional[int]
     extra_data: Optional[List[int]]
     frames: Optional[List[KeyAnimationFrame]]
