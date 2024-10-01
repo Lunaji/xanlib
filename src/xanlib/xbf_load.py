@@ -98,6 +98,7 @@ def read_vertex_animation(buffer):
     if count < 0: #compressed
         scale = readUInt(buffer)
         base_count = readUInt(buffer)
+        assert count == -base_count
         real_count = base_count//actual
         frames = [[read_vertex_from_vertex_animation(buffer) for j in range(real_count)] for i in range(actual)]
         if (scale & 0x80000000): #interpolated
@@ -140,7 +141,7 @@ def read_key_animation(buffer):
         for i in range(flags):
             frame_id = readInt16(buffer)
             flag = readInt16(buffer)
-            #assert not (flag & 0b1000111111111111)
+            assert not (flag & 0b1000111111111111)
 
             if ((flag >> 12) & 0b001):
                 rotation = unpack('<4f', buffer.read(4*4))
@@ -221,7 +222,9 @@ def load_xbf(filename):
             try:
                 node = read_node(f)
                 if node is None:
-                    #Verify eof?
+                    current_position = f.tell()
+                    f.seek(0, 2)
+                    assert current_position == f.tell(), 'Not at EOF'
                     return scene
                 scene.nodes.append(node)
             except Exception as e:
