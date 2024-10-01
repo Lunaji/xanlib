@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, List, NamedTuple, Union
+from typing import Optional, Tuple, List, NamedTuple, Union, TypeAlias
 from pathlib import Path
+from .xbf_base import NodeFlags
 
+Matrix: TypeAlias = Tuple[float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float]
 
 class Vector3(NamedTuple):
     x: float
@@ -58,14 +60,19 @@ class KeyAnimation(NamedTuple):
     extra_data: Optional[List[int]]
     frames: Optional[List[KeyAnimationFrame]]
 
+@dataclass
 class Node:
-    def __init__(self):
-        self.children = []
-        self.vertices = []
-        self.faces = []
-        self.vertex_animation=None
-        self.key_animation=None
-        self.parent = None
+    parent: Optional['Node'] = None
+    flags: Optional[NodeFlags] = None
+    transform: Optional[Matrix] = None
+    name: Optional[str] = None
+    children: List['Node'] = field(default_factory=list)
+    vertices: List[Vertex] = field(default_factory=list)
+    faces: List[Face] = field(default_factory=list)
+    rgb: Optional[List[Tuple[int, int, int]]] = None
+    faceData: Optional[List[int]] = None
+    vertex_animation: Optional[VertexAnimation] = None
+    key_animation: Optional[KeyAnimation] = None
 
     def __iter__(self):
         yield self
@@ -78,7 +85,6 @@ class Node:
         while node.parent is not None:
             yield node.parent
             node = node.parent
-
 
 @dataclass
 class Scene:
