@@ -137,7 +137,7 @@ def read_key_animation(buffer):
         ]
     else:
         frames = []
-        for i in range(frameCount+1):
+        for i in range(flags):
             frame_id = readInt16(buffer)
             flag = readInt16(buffer)
             #assert not (flag & 0b1000111111111111)
@@ -146,12 +146,12 @@ def read_key_animation(buffer):
                 rotation = unpack('<4f', buffer.read(4*4))
             else:
                 rotation = None
-            if ((flags >> 12) & 0b010):
-                scale: unpack('<3f', buffer.read(4*3))
+            if ((flag >> 12) & 0b010):
+                scale = unpack('<3f', buffer.read(4*3))
             else:
                 scale = None
-            if ((flags >> 12) & 0b100):
-                translation: unpack('<3f', buffer.read(4*3))
+            if ((flag >> 12) & 0b100):
+                translation = unpack('<3f', buffer.read(4*3))
             else:
                 translation = None
 
