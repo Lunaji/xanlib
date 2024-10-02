@@ -84,7 +84,7 @@ def find_string(t,s):
        if v==ord(s[b]):
             b+=1
             if b>=len(s):
-                 return i-b
+                 return i-b+1
        else:
             b=0
     return -1
@@ -98,7 +98,7 @@ def get_name(s, i):
         i+=1
     return ""
 
-def parse_events(pos, FXData):
+def parse_events(pos, FXData, events):
     print("Effects:")
     found_count=0
     while pos<len(FXData):
@@ -180,9 +180,17 @@ def parse_events(pos, FXData):
                 post_args+=" "+str(FXData[i])
             pos+=post_len
 
-        found_count+=1
-        stringout = " - " + event_name + "\t\t" + target_name + "\t" + second_name + head_args + post_args
+        frame_number = ""
+        if events:
+            if found_count<len(events):
+                frame_number = str(events[found_count]) + "\t"
+            else:
+                frame_number = "Error"
+        
+        #stringout = " - " + frame_number + event_name + "\t\t" + target_name + "\t" + second_name + head_args + post_args
+        stringout = " - " + frame_number + event_name + "\t\t" + target_name + "\t" + second_name
         print(stringout)
+        found_count+=1
     print("found events:",found_count)
     return pos
 
@@ -193,7 +201,7 @@ def parse_anim(pos, FXData):
         anim_name=get_name(FXData, pos)
         args=""
         deuxcentquatre=0
-        for i in range(pos+len(anim_name)+1,pos+60):
+        for i in range(pos+len(anim_name)+1,pos+52):
             if FXData[i]==204:
                 deuxcentquatre+=1
             else:
@@ -201,9 +209,13 @@ def parse_anim(pos, FXData):
                     args+=" 204("+str(deuxcentquatre)+")" if deuxcentquatre>1 else " 204"
                     deuxcentquatre=0
                 args+=" "+str(FXData[i])
-        found_count+=1
-        stringout = " - " + anim_name + "\t\t" + args
+        # todo: read as int instead of individual byte
+        frame_start=FXData[pos+52]
+        frame_end=FXData[pos+56]
+        #stringout = " - " + anim_name + "\t\t" + str(frame_start) + "\t" + str(frame_end) + "\t" + args
+        stringout = " - " + anim_name + "\t\t" + str(frame_start) + "\t" + str(frame_end)
         print(stringout)
+        found_count+=1
         pos+=60
     print("found animation:",found_count)
     return pos
@@ -212,14 +224,44 @@ def parse_xbf(fn):
     fd = open(os.path.join(wd,fn), "rb")
     version = readInt(fd)
     FXDataSize = readInt(fd)
-    FXData = fd.read(FXDataSize)
-    anim_count = FXData[24]
+    FXHeaderPosition = fd.tell()
+
+    unknown0 = fd.read(24)
+    anim_count = readInt(fd)
+    unknown1 = fd.read(1)
+    preheader_count = readInt(fd)
+    event_byte_length = readInt(fd) # not sure
+    unknown2 = readInt(fd) # seams to be 1
+    frame_count = readInt(fd)
+    # TMP: avoid reading frame_count if we have particle data for now
+    if preheader_count>0:
+        frame_count=0
+    unknown3 = readInt(fd)
+
+    # at start of event frames array
+    event_count=0
+    events = []
+    for i in range(frame_count):
+        event_count_this_frame = readInt(fd)
+        for j in range(event_count_this_frame):
+            events.append(i)
+        event_count += event_count_this_frame
+
+    print("event count:", event_count)
+    print(events)
+
+    Startoffset = fd.tell()-FXHeaderPosition
+    FXData = fd.read(FXDataSize-Startoffset)
     mastpos = find_string(FXData, "MASTER")
     if mastpos<0:
          return
-    pos=mastpos+8
+    pos=mastpos+7
+    #master=get_name(FXData, pos) # read "master"
+    #pos+=len(master)+1
+
     # Effects events:
-    pos=parse_events(pos, FXData)
+    pos=parse_events(pos, FXData, events)
+
     # animations:
     print("Animation count:",anim_count)
     pos=parse_anim(pos, FXData)
@@ -231,7 +273,7 @@ def parse_fx(fn):
     mastpos = find_string(FXData, "MASTER")
     if mastpos<0:
          return
-    pos=mastpos+8
+    pos=mastpos+7
     # Effects events:
     pos=parse_events(pos, FXData)
     
@@ -251,4 +293,4 @@ parse_xbf("IN_Medical_mod2.Xbf")
 #parse_xbf("HK_Deathhand_H0.xbf")
 #parse_fx("testing_fx.FX")
 #parse_fx("deathhand.FX")
-#to_text_file("AT_Sniper_H0",".xbf")
+#to_text_file("AT_MGT_H0_base",".xbf")
