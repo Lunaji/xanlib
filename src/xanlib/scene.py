@@ -94,7 +94,7 @@ class Scene:
     textureNameData: Optional[bytes] = None
     nodes: List[Node] = field(default_factory=list)
     error: Optional[Exception] = None
-    unparsed: Optional[Exception] = None
+    unparsed: Optional[bytes] = None
 
     @property
     def textures(self):
