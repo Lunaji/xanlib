@@ -35,7 +35,7 @@ def is_ascii(s):
 
 def load_file(fn):
     fd = open(os.path.join(wd,fn), "rb")
-    fw = open(os.path.join(wd,"animout3.txt"), "w")
+    #fw = open(os.path.join(wd,"animout4.txt"), "w")
     version = readInt(fd)
     FXDataSize = readInt(fd)
     FXData = fd.read(FXDataSize)
@@ -71,6 +71,12 @@ def load_file(fn):
          print(outstr)
          print(curstr)
 
+
+def to_text_file(fn,ext):
+    fd = open(os.path.join(wd,fn+ext), "rb")
+    fw = open(os.path.join(wd,fn+".txt"), "w")
+    fw.write(str(fd.read()))
+
 def find_string(t,s):
     b=0
     for i in range(len(t)):
@@ -94,8 +100,11 @@ def get_name(s, i):
 
 def parse_events(pos, FXData):
     print("Effects:")
+    found_count=0
     while pos<len(FXData):
         event_type=FXData[pos]
+
+        #print("         around:",FXData[pos-5:pos],FXData[pos:pos+5])
 
         if event_type>47:
             break
@@ -104,6 +113,7 @@ def parse_events(pos, FXData):
         # Effect events seems to be constituted mostly from a head part, an optionnal name and an optionnal post part
         head_len=8
         has_name = True
+        has_second_name = False
         post_len=0
         
         event_name="Unknown "+str(event_type)
@@ -113,10 +123,17 @@ def parse_events(pos, FXData):
             event_name="Unhide"
         elif event_type==3:      
             event_name="Emitter On"
-            head_len=21
+            is_long=FXData[pos+4]==6
+            if is_long:
+                head_len=21
         elif event_type==4:      
             event_name="Emitter Off"
-            head_len=21
+            is_long=FXData[pos+4]==6
+            if is_long:
+                head_len=21
+        elif event_type==6:      
+            event_name="Texture Change"
+            has_second_name=True
         elif event_type==7:
             event_name="UV anim On"
             post_len=8
@@ -126,6 +143,18 @@ def parse_events(pos, FXData):
             event_name="Sound"
         elif event_type==10:      
             event_name="Fire Weapon"
+            head_len=12
+            has_name=False
+        elif event_type==11:      
+            event_name="Speed Change"
+            head_len=16
+            has_name=False
+        elif event_type==12:      
+            event_name="Light On"
+            post_len=116
+            has_name=False
+        elif event_type==13:      
+            event_name="Light Off"
             head_len=12
             has_name=False
 
@@ -140,18 +169,26 @@ def parse_events(pos, FXData):
             target_name=get_name(FXData, pos)
             pos+=len(target_name)+1
 
+        second_name=""
+        if has_second_name:
+            second_name=get_name(FXData, pos)
+            pos+=len(second_name)+1
+
         post_args=""
         if post_len>0:
             for i in range(pos,pos+post_len):
                 post_args+=" "+str(FXData[i])
             pos+=post_len
 
-        stringout = event_name + ": " + target_name + head_args + post_args
+        found_count+=1
+        stringout = " - " + event_name + "\t\t" + target_name + "\t" + second_name + head_args + post_args
         print(stringout)
+    print("found events:",found_count)
     return pos
 
 def parse_anim(pos, FXData):
     print("Animations:")
+    found_count=0
     while pos<len(FXData)-60:
         anim_name=get_name(FXData, pos)
         args=""
@@ -164,10 +201,11 @@ def parse_anim(pos, FXData):
                     args+=" 204("+str(deuxcentquatre)+")" if deuxcentquatre>1 else " 204"
                     deuxcentquatre=0
                 args+=" "+str(FXData[i])
-            
-        stringout = anim_name + args
+        found_count+=1
+        stringout = " - " + anim_name + "\t\t" + args
         print(stringout)
         pos+=60
+    print("found animation:",found_count)
     return pos
 
 def parse_xbf(fn):
@@ -175,6 +213,7 @@ def parse_xbf(fn):
     version = readInt(fd)
     FXDataSize = readInt(fd)
     FXData = fd.read(FXDataSize)
+    anim_count = FXData[24]
     mastpos = find_string(FXData, "MASTER")
     if mastpos<0:
          return
@@ -182,19 +221,22 @@ def parse_xbf(fn):
     # Effects events:
     pos=parse_events(pos, FXData)
     # animations:
+    print("Animation count:",anim_count)
     pos=parse_anim(pos, FXData)
 
 def parse_fx(fn):
     fd = open(os.path.join(wd,fn), "rb")
+    animcount = readInt(fd)
     FXData = fd.read()
     mastpos = find_string(FXData, "MASTER")
     if mastpos<0:
          return
     pos=mastpos+8
     # Effects events:
-    #pos=parse_events(pos, FXData)
+    pos=parse_events(pos, FXData)
     
     # animations:
+    print("Animation count:",animcount)
     pos=4
     pos=parse_anim(pos, FXData)
     
@@ -202,8 +244,11 @@ def parse_fx(fn):
 # - replay count (4B?) -20
 # - at the end: start anim (4B) -8 end anim (4B) -4
 
-#parse_xbf("IN_Medical_H0.Xbf")
-parse_xbf("AT_Sniper_H0.XBF")
+parse_xbf("IN_Medical_mod2.Xbf")
+#parse_xbf("AT_Sniper_H0.XBF")
 #parse_xbf("AT_MGT_H0_base.xbf")
 #parse_xbf("IN_SurfaceWorm_H0.xbf")
+#parse_xbf("HK_Deathhand_H0.xbf")
 #parse_fx("testing_fx.FX")
+#parse_fx("deathhand.FX")
+#to_text_file("AT_Sniper_H0",".xbf")
