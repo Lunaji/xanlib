@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Tuple, List, NamedTuple, Union, TypeAlias
 from pathlib import Path
 from .xbf_base import NodeFlags
+import re
 
 Matrix: TypeAlias = Tuple[float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float]
 
@@ -98,7 +99,7 @@ class Scene:
 
     @property
     def textures(self):
-        return [texture.decode() for texture in self.textureNameData.split(b'\x00\x00') if texture]
+        return [texture.decode() for texture in re.split(b'\x00\x00|\x00\x02', self.textureNameData) if texture]
 
     def __iter__(self):
         for node in self.nodes:
