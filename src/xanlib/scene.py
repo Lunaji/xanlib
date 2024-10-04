@@ -4,6 +4,7 @@ from pathlib import Path
 from .xbf_base import NodeFlags
 import re
 
+
 Matrix: TypeAlias = Tuple[float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float]
 
 class Vector3(NamedTuple):
