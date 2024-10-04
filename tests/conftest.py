@@ -5,6 +5,7 @@ from collections import namedtuple
 from xanlib.scene import (
     Vertex,
     Face,
+    VertexAnimationFrameDatum,
     VertexAnimation,
     KeyAnimation
 )
@@ -91,7 +92,17 @@ def vertex_animation(request):
     data = request.param
     yield EncodedDecoded(
                             binascii.unhexlify(data['encoded']),
-                            VertexAnimation(**data['decoded'])
+                            VertexAnimation(
+                                            frame_count=data['decoded']['frame_count'],
+                                            count=data['decoded']['count'],
+                                            actual=data['decoded']['actual'],
+                                            keys=data['decoded']['keys'],
+                                            scale=data['decoded']['scale'],
+                                            base_count=data['decoded']['base_count'],
+                                            real_count=data['decoded']['real_count'],
+                                            frames=[[VertexAnimationFrameDatum(*datum) for datum in frame] for frame in data['decoded']['frames']]if data['decoded']['frames'] is not None else None,
+                                            interpolation_data=data['decoded']['interpolation_data'],
+                                        )
                         )
 
 @pytest.fixture(params=load_test_data('tests/test_data/key_animations.json'))

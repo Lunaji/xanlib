@@ -4,19 +4,16 @@ import pygame
 from pygame.locals import QUIT
 from pygame.math import Vector2, Vector3
 from xanlib import load_xbf
-from xanlib.xbf_load import convert_signed_5bit
+import sys
 
 
 def transform_vertex(vertex, transform):
-
-    position = np.array(vertex[:3]+[1]).dot(transform)
-
-    normal = np.array([
-        convert_signed_5bit((vertex[3] >> x) & 0x1F)
-        for x in (0, 5, 10)
-    ]+[0]).dot(transform)
-
+    position = np.array([*vertex.position, 1]).dot(transform)
+    normal = np.array([*vertex.normal,0]).dot(transform)
     return Vector3(*position[:3])/position[3], Vector3(*normal[:3])
+
+def as_matrix44(transform):
+    return np.array(transform).reshape(4,4)
 
 draw_index = 0
 
@@ -89,22 +86,16 @@ class Viewer():
         draw_index += 1
                 
                 
-    def recursive_display(self, node, frame, parent_transform=None):
-    
-        node_transform = np.array(node.transform).reshape(4,4)
-
-        if parent_transform is not None:
-            node_transform = node_transform.dot(parent_transform)
+    def display(self, node):
             
-        if node.vertex_animation is not None:
-            frames = len(node.vertex_animation.keys)
-            frame = frame%frames
-            key_frame = node.vertex_animation.keys[frame]
-            if key_frame < len(node.vertex_animation.body):
-                self.display_frame(node.faces, node.vertex_animation.body[key_frame], node_transform)
-            
-        for child in node.children:
-            self.recursive_display(child, frame, node_transform)
+        frames = len(node.vertex_animation.keys)
+        frame = self.curframe%frames
+        key_frame = node.vertex_animation.keys[frame]
+        if key_frame < len(node.vertex_animation.frames):
+            node_transform = as_matrix44(node.transform)
+            for ancestor in node.ancestors:
+                node_transform @= as_matrix44(ancestor.transform)
+            self.display_frame(node.faces, node.vertex_animation.frames[key_frame], node_transform)
             
         
     def view(self, scene):
@@ -121,15 +112,17 @@ class Viewer():
             self.curframe = int(np.floor(self.time*0.01))
             global draw_index
             draw_index = 0
-            for node in scene.nodes:
-                self.recursive_display(node, self.curframe)
+            for node in filter(lambda node: node.vertex_animation, scene):
+                self.display(node)
 
             pygame.display.update()
             
 
 if __name__ == '__main__':
     
-    filename = 'Data/3DData1/Buildings/AT_MGT_H0.xbf'    
+    filename = 'Data/3DDATA0001/Buildings/AT_MGT_H0.xbf'
     scene = load_xbf(filename)
     viewer = Viewer(1280, 720)    
     viewer.view(scene)
+    pygame.quit()
+    sys.exit()
