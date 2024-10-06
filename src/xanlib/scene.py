@@ -62,6 +62,33 @@ class KeyAnimation(NamedTuple):
     extra_data: Optional[List[int]]
     frames: Optional[List[KeyAnimationFrame]]
 
+@dataclass    
+class AnimationRange:
+    repeat: int
+    unknown1 : int
+    unknown2 : int
+    start: int
+    end: int
+    
+@dataclass    
+class Animation:
+    name: str
+    args: List[int]
+    ranges: List['AnimationRange']
+
+
+@dataclass    
+class FXEvent:
+    type: int
+    typename: str
+    unknown : int
+    is_long : int
+    head_args : List[int]
+    name1 : str
+    name2 : str
+    tail_args : List[int]
+    frame_index: int
+
 @dataclass
 class Node:
     parent: Optional['Node'] = None
@@ -95,6 +122,8 @@ class Scene:
     FXData: Optional[bytes] = None
     textureNameData: Optional[bytes] = None
     nodes: List[Node] = field(default_factory=list)
+    animations : List[Animation] = field(default_factory=list)
+    events : List[FXEvent] = field(default_factory=list)
     error: Optional[Exception] = None
     unparsed: Optional[bytes] = None
 
