@@ -34,7 +34,34 @@ class KeyAnimation:
     flags: int
     matrices: list
     actual: Optional[int]
-    extra_data: Optional[List[int]]    
+    extra_data: Optional[List[int]]
+
+@dataclass    
+class AnimationRange:
+    repeat: int
+    unknown1 : int
+    unknown2 : int
+    start: int
+    end: int
+    
+@dataclass    
+class Animation:
+    name: str
+    args: List[int]
+    ranges: List['AnimationRange']
+
+
+@dataclass    
+class FXEvent:
+    type: int
+    typename: str
+    unknown : int
+    is_long : int
+    head_args : List[int]
+    name1 : str
+    name2 : str
+    tail_args : List[int]
+    frame_index: int
 
 class Node:
     def __init__(self):
@@ -47,6 +74,8 @@ class Node:
 @dataclass
 class Scene:
     nodes: List['Node'] = field(default_factory=list)
+    animations : List['Animation'] = field(default_factory=list)
+    events : List['FXEvent'] = field(default_factory=list)
     error: Optional[Exception] = None
     unparsed: Optional[Exception] = None
     
