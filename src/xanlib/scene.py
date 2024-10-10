@@ -106,6 +106,9 @@ class Scene:
         for node in self.nodes:
             yield from node
 
+    def __getitem__(self, name):
+        return next(node for node in self if node.name == name)
+
 
 def traverse(node, func, parent=None, depth=0, **kwargs):
     func(node, parent=parent, depth=depth, **kwargs)
