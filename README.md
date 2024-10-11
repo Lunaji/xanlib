@@ -1,5 +1,5 @@
 # xanlib
-xanlib is a Python library designed for working with the 3D data formats of the Xanadu engine, used in the game *Emperor: Battle for Dune*.  
+xanlib is a Python library built to handle the 3D data format XBF of the Xanadu engine, used in the game *Emperor: Battle for Dune*.  
 It may be used to load and save all 1521 XBF files from the game.
 
 ## Examples
@@ -19,12 +19,11 @@ Explanation:
 
 Put the new file in a UI/SIDEBAR folder in the game's DATA folder to override the original and view the change in-game.
 
+### blender_import.py
+A script that can be run within Blender to import the meshes of a XBF file.
+![missile_tank_blender](https://github.com/user-attachments/assets/47bdbe22-556e-4556-bca6-8b0d4c755497)
+
 ### xbf_viewer.py
 A rudimentary vertex animation viewer made with `pygame`. It highlights the normals in these animations.  
 (A more functional viewer is [under development](https://github.com/Lunaji/Xanadu-Animation-Viewer))
 ![pygame_viewer_animation](https://github.com/user-attachments/assets/b20e0c67-2c84-48ac-9d34-cf5c22e3478e)
-
-### blender_import.py
-A script that can be run within Blender to import the meshes of a XBF file.
-![ordos_campaign_blender](https://github.com/user-attachments/assets/3dd75366-c3ed-44a4-8374-54ddffd868ed)
-
