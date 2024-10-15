@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "xanlib"
+version = "0.1.0"
+description = "A library to handle the 3D data format XBF from the game Emperor: Battle for Dune."
+authors = ["Lunaji <lunacyjay@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/Lunaji/xanlib"
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.3.3"
+
+
+[tool.poetry.group.examples]
+optional = true
+
+[tool.poetry.group.examples.dependencies]
+pygame = ">=2.6.1"
+numpy = ">=2.1.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,3 +1,4 @@
-Data 
+Data
+dist/
 __pycache__/
 *.py[cod]
