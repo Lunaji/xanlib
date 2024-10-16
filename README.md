@@ -1,6 +1,12 @@
 # xanlib
-xanlib is a Python library built to handle the 3D data format XBF of the Xanadu engine, used in the game *Emperor: Battle for Dune*.  
+[![Run tests](https://github.com/Lunaji/xanlib/actions/workflows/tests.yml/badge.svg)](https://github.com/Lunaji/xanlib/actions/workflows/tests.yml)
+
+A Python library to handle the 3D data format XBF of the Xanadu engine, used in the game *Emperor: Battle for Dune*.  
 It may be used to load and save all 1521 XBF files from the game.
+
+## Installation
+The library can be installed from pip:  
+`pip install xanlib`
 
 ## Examples
 ### Console Usage
