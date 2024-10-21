@@ -30,6 +30,22 @@ Put the new file in a UI/SIDEBAR folder in the game's DATA folder to override th
 A script that can be run within Blender to import the meshes of a XBF file.
 ![missile_tank_blender](https://github.com/user-attachments/assets/47bdbe22-556e-4556-bca6-8b0d4c755497)
 
+### extract_animations.py
+A script that extracts animation info from the FX Data Header of an xbf file,
+provided as a command line argument.  
+Currently stand-alone, the code has yet to be integrated into the library.
+
+Example usage:
+```bash
+python extract_anim_info.py Data/3DDATA0001/Buildings/AT_MGT_H0.xbf
+```
+will produce:
+```
+Stationary: 104-133, 0-50, 51-104, 133-163, 163-193
+Idle 0: 200-240
+Fire 0: 193-275
+```
+
 ### xbf_viewer.py
 A rudimentary vertex animation viewer made with `pygame`. It highlights the normals in these animations.  
 (A more functional viewer is [under development](https://github.com/Lunaji/Xanadu-Animation-Viewer))
