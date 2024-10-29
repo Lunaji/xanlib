@@ -16,7 +16,6 @@ from xanlib.xbf_load import (
     read_node,
     convert_signed_5bit,
 )
-from xanlib.xbf_base import NodeFlags
 
 
 def test_convert_signed_5bit(signed_5bit):
@@ -153,42 +152,10 @@ def test_read_key_animation(key_animation):
     result = read_key_animation(buffer)
     assert result == key_animation.decoded
 
-def test_read_node_basic(vertex, face):
-    
-    vertex_bin, expected_vertex = vertex
-    face_bin, expected_face = face
-    
-    # Binary data for vertexCount = 1, flags = NodeFlags.PRELIGHT, faceCount = 1, childCount = 0, name = "TestNode"
-    vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int
-    flags_bin = b'\x01\x00\x00\x00'        # NodeFlags.PRELIGHT (1)
-    faceCount_bin = b'\x01\x00\x00\x00'    # 1 as int
-    childCount_bin = b'\x00\x00\x00\x00'   # 0 as int (no children)
-    
-    matrix_bin = b'\x00' * (8 * 16)  # Simplified for the mock
-
-    # Name: length = 8, "TestNode"
-    nameLength_bin = b'\x08\x00\x00\x00'  # 8 as int
-    name_bin = b'TestNode'
-
-    # RGB color data for 1 vertex: (255, 0, 0)
-    rgb_bin = b'\xff\x00\x00'
-
-    binary_data = (
-        vertexCount_bin + flags_bin + faceCount_bin + childCount_bin + 
-        matrix_bin + nameLength_bin + name_bin + vertex_bin + face_bin + rgb_bin
-    )
-
-    buffer = io.BytesIO(binary_data)
-
-    node = read_node(buffer)
-
-    # Check basic attributes
-    assert node is not None
-    assert node.flags == NodeFlags.PRELIGHT
-    assert node.name == "TestNode"
-    assert node.vertices == [expected_vertex]
-    assert node.faces == [expected_face]
-    assert node.rgb == [(255, 0, 0)]
+def test_read_node_basic(node_basic):
+    buffer = io.BytesIO(node_basic.encoded)
+    result = read_node(buffer)
+    assert result == node_basic.decoded
     
 def test_read_node_with_children(vertex, face):
     

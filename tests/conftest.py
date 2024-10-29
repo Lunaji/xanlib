@@ -7,8 +7,10 @@ from xanlib.scene import (
     Face,
     VertexAnimationFrameDatum,
     VertexAnimation,
-    KeyAnimation
+    KeyAnimation,
+    Node
 )
+from xanlib.xbf_base import NodeFlags
 
 EncodedDecoded = namedtuple('EncodedDecoded', ['encoded', 'decoded'])
 
@@ -120,3 +122,39 @@ def key_animation(request):
               )
 
     yield EncodedDecoded(encoded, decoded)
+
+@pytest.fixture
+def node_basic(request, vertex, face):
+    vertex_bin, expected_vertex = vertex
+    face_bin, expected_face = face
+
+    # Binary data for vertexCount = 1, flags = NodeFlags.PRELIGHT, faceCount = 1, childCount = 0, name = "TestNode"
+    vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int
+    flags_bin = b'\x01\x00\x00\x00'  # NodeFlags.PRELIGHT (1)
+    faceCount_bin = b'\x01\x00\x00\x00'  # 1 as int
+    childCount_bin = b'\x00\x00\x00\x00'  # 0 as int (no children)
+
+    matrix_bin = b'\x00' * (8 * 16)  # Simplified for the mock
+
+    # Name: length = 8, "TestNode"
+    nameLength_bin = b'\x08\x00\x00\x00'  # 8 as int
+    name_bin = b'TestNode'
+
+    # RGB color data for 1 vertex: (255, 0, 0)
+    rgb_bin = b'\xff\x00\x00'
+
+    binary_data = (
+            vertexCount_bin + flags_bin + faceCount_bin + childCount_bin +
+            matrix_bin + nameLength_bin + name_bin + vertex_bin + face_bin + rgb_bin
+    )
+
+    decoded = Node(
+        flags= NodeFlags.PRELIGHT,
+        transform= (0.0,) * 16,
+        name= "TestNode",
+        vertices= [expected_vertex],
+        faces= [expected_face],
+        rgb= [(255, 0, 0)]
+    )
+
+    yield EncodedDecoded(binary_data, decoded)
