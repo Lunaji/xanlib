@@ -124,7 +124,13 @@ def key_animation(request):
     yield EncodedDecoded(encoded, decoded)
 
 @pytest.fixture
-def node_basic(request, vertex, face):
+def matrix():
+    decoded = (0.0,) * 16
+    encoded = b'\x00' * (8 * 16)
+    yield EncodedDecoded(encoded, decoded)
+
+@pytest.fixture
+def node_basic(vertex, face, matrix):
     vertex_bin, expected_vertex = vertex
     face_bin, expected_face = face
 
@@ -133,8 +139,6 @@ def node_basic(request, vertex, face):
     flags_bin = b'\x01\x00\x00\x00'  # NodeFlags.PRELIGHT (1)
     faceCount_bin = b'\x01\x00\x00\x00'  # 1 as int
     childCount_bin = b'\x00\x00\x00\x00'  # 0 as int (no children)
-
-    matrix_bin = b'\x00' * (8 * 16)  # Simplified for the mock
 
     # Name: length = 8, "TestNode"
     nameLength_bin = b'\x08\x00\x00\x00'  # 8 as int
@@ -145,12 +149,12 @@ def node_basic(request, vertex, face):
 
     binary_data = (
             vertexCount_bin + flags_bin + faceCount_bin + childCount_bin +
-            matrix_bin + nameLength_bin + name_bin + vertex_bin + face_bin + rgb_bin
+            matrix.encoded + nameLength_bin + name_bin + vertex_bin + face_bin + rgb_bin
     )
 
     decoded = Node(
         flags= NodeFlags.PRELIGHT,
-        transform= (0.0,) * 16,
+        transform= matrix.decoded,
         name= "TestNode",
         vertices= [expected_vertex],
         faces= [expected_face],
