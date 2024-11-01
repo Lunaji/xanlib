@@ -36,3 +36,8 @@ def test_write_key_animation(buffer, key_animation):
 def test_write_node_basic(buffer, node_basic):
     write_node(buffer, node_basic.decoded)
     assert buffer.getvalue() == node_basic.encoded
+
+def test_write_node_with_children(buffer, node_with_children):
+    node_with_children.decoded.children[0].parent = None #TODO: remove this line
+    write_node(buffer, node_with_children.decoded)
+    assert buffer.getvalue() == node_with_children.encoded
