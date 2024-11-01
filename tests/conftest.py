@@ -7,8 +7,11 @@ from xanlib.scene import (
     Face,
     VertexAnimationFrameDatum,
     VertexAnimation,
-    KeyAnimation
+    KeyAnimation,
+    Node,
+    Scene,
 )
+from xanlib.xbf_base import NodeFlags
 
 EncodedDecoded = namedtuple('EncodedDecoded', ['encoded', 'decoded'])
 
@@ -118,5 +121,133 @@ def key_animation(request):
                 extra_data=data['decoded']['extra_data'],
                 frames=data['decoded'].get('frames', None)
               )
+
+    yield EncodedDecoded(encoded, decoded)
+
+@pytest.fixture
+def matrix():
+    decoded = (0.0,) * 16
+    encoded = b'\x00' * (8 * 16)
+    yield EncodedDecoded(encoded, decoded)
+
+@pytest.fixture
+def node_basic(vertex, face, matrix):
+    vertex_bin, expected_vertex = vertex
+    face_bin, expected_face = face
+
+    # Binary data for vertexCount = 1, flags = NodeFlags.PRELIGHT, faceCount = 1, childCount = 0, name = "TestNode"
+    vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int
+    flags_bin = b'\x01\x00\x00\x00'  # NodeFlags.PRELIGHT (1)
+    faceCount_bin = b'\x01\x00\x00\x00'  # 1 as int
+    childCount_bin = b'\x00\x00\x00\x00'  # 0 as int (no children)
+
+    # Name: length = 8, "TestNode"
+    nameLength_bin = b'\x08\x00\x00\x00'  # 8 as int
+    name_bin = b'TestNode'
+
+    # RGB color data for 1 vertex: (255, 0, 0)
+    rgb_bin = b'\xff\x00\x00'
+
+    binary_data = (
+            vertexCount_bin + flags_bin + faceCount_bin + childCount_bin +
+            matrix.encoded + nameLength_bin + name_bin + vertex_bin + face_bin + rgb_bin
+    )
+
+    decoded = Node(
+        flags= NodeFlags.PRELIGHT,
+        transform= matrix.decoded,
+        name= "TestNode",
+        vertices= [expected_vertex],
+        faces= [expected_face],
+        rgb= [(255, 0, 0)]
+    )
+
+    yield EncodedDecoded(binary_data, decoded)
+
+@pytest.fixture
+def node_with_children(vertex, face, matrix):
+    vertex_bin, expected_vertex = vertex
+    face_bin, expected_face = face
+
+    # Binary data for parent node (vertexCount = 1, faceCount = 1, childCount = 1)
+    vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int
+    flags_bin = b'\x01\x00\x00\x00'        # NodeFlags.PRELIGHT (1)
+    faceCount_bin = b'\x01\x00\x00\x00'    # 1 as int
+    childCount_bin = b'\x01\x00\x00\x00'   # 1 as int (1 child)
+
+    # Name: length = 10, "ParentNode"
+    nameLength_bin = b'\x0a\x00\x00\x00'  # 10 as int
+    parent_name_bin = b'ParentNode'
+
+    # RGB color data for parent vertex: (255, 0, 0)
+    rgb_bin = b'\xff\x00\x00'
+
+    # Binary data for child node (vertexCount = 1, faceCount = 1, childCount = 0)
+    child_vertexCount_bin = b'\x01\x00\x00\x00'  # 1 as int
+    child_flags_bin = b'\x01\x00\x00\x00'        # NodeFlags.PRELIGHT (1)
+    child_faceCount_bin = b'\x01\x00\x00\x00'    # 1 as int
+    child_childCount_bin = b'\x00\x00\x00\x00'   # 0 as int (no children)
+
+    # Name: length = 9, "ChildNode"
+    child_nameLength_bin = b'\x09\x00\x00\x00'  # 9 as int
+    child_name_bin = b'ChildNode'
+
+    # RGB color data for child vertex: (0, 255, 0)
+    child_rgb_bin = b'\x00\xff\x00'
+
+    child_node_bin = (
+        child_vertexCount_bin + child_flags_bin + child_faceCount_bin + child_childCount_bin +
+        matrix.encoded + child_nameLength_bin + child_name_bin + vertex_bin + face_bin + child_rgb_bin
+    )
+
+    encoded = (
+        vertexCount_bin + flags_bin + faceCount_bin + childCount_bin +
+        matrix.encoded + nameLength_bin + parent_name_bin + child_node_bin +
+        vertex_bin + face_bin + rgb_bin
+    )
+
+    child = Node(
+        flags= NodeFlags.PRELIGHT,
+        transform= matrix.decoded,
+        name= "ChildNode",
+        vertices= [expected_vertex],
+        faces= [expected_face],
+        rgb= [(0, 255, 0)]
+    )
+
+    decoded = Node(
+        flags= NodeFlags.PRELIGHT,
+        transform= matrix.decoded,
+        name= "ParentNode",
+        vertices= [expected_vertex],
+        faces= [expected_face],
+        rgb= [(255, 0, 0)],
+        children= [child]
+    )
+
+    yield EncodedDecoded(encoded, decoded)
+
+@pytest.fixture
+def scene(node_basic):
+    file = 'foobar.xbf'
+    version = 1
+    FXData = b'FXDataHeader'
+    textureNameData = b'foobar.tga\x00\x00'
+    nodes = [node_basic.decoded]
+
+    encoded = (
+            version.to_bytes(4, 'little') +
+            len(FXData).to_bytes(4, 'little') + FXData +
+            len(textureNameData).to_bytes(4, 'little') + textureNameData +
+            node_basic.encoded +
+            (-1).to_bytes(4, 'little', signed=True) #EOF
+            )
+
+    decoded = Scene(
+        version=version,
+        FXData=FXData,
+        textureNameData=textureNameData,
+        nodes=nodes
+    )
 
     yield EncodedDecoded(encoded, decoded)
