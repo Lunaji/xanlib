@@ -15,6 +15,7 @@ from xanlib.xbf_load import (
     read_key_animation,
     read_node,
     convert_signed_5bit,
+    load_xbf,
 )
 from conftest import load_test_data
 
@@ -163,3 +164,9 @@ def test_read_node_with_children(node_with_children):
     result = read_node(buffer)
     result.children[0].parent = None #TODO: remove this line
     assert result == node_with_children.decoded
+
+def test_load_xbf(mocker, scene):
+    mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data=scene.encoded))
+    result = load_xbf(scene.decoded.file)
+    assert result == scene.decoded
+    mock_open.assert_called_once_with(scene.decoded.file, 'rb')

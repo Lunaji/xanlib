@@ -8,7 +8,8 @@ from xanlib.scene import (
     VertexAnimationFrameDatum,
     VertexAnimation,
     KeyAnimation,
-    Node
+    Node,
+    Scene,
 )
 from xanlib.xbf_base import NodeFlags
 
@@ -222,6 +223,31 @@ def node_with_children(vertex, face, matrix):
         faces= [expected_face],
         rgb= [(255, 0, 0)],
         children= [child]
+    )
+
+    yield EncodedDecoded(encoded, decoded)
+
+@pytest.fixture
+def scene(node_basic):
+    file = 'foobar.xbf'
+    version = 1
+    FXData = b'FXDataHeader'
+    textureNameData = b'foobar.tga\x00\x00'
+    nodes = [node_basic.decoded]
+
+    encoded = (
+            version.to_bytes(4, 'little') +
+            len(FXData).to_bytes(4, 'little') + FXData +
+            len(textureNameData).to_bytes(4, 'little') + textureNameData +
+            node_basic.encoded +
+            (-1).to_bytes(4, 'little', signed=True) #EOF
+            )
+
+    decoded = Scene(
+        version=version,
+        FXData=FXData,
+        textureNameData=textureNameData,
+        nodes=nodes
     )
 
     yield EncodedDecoded(encoded, decoded)
