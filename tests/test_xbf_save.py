@@ -6,6 +6,7 @@ from xanlib.xbf_save import (
     write_face,
     write_vertex_animation,
     write_key_animation,
+    write_node,
 )
 
 @pytest.fixture()
@@ -32,3 +33,6 @@ def test_write_key_animation(buffer, key_animation):
     write_key_animation(buffer, key_animation.decoded)
     assert buffer.getvalue() == key_animation.encoded
 
+def test_write_node_basic(buffer, node_basic):
+    write_node(buffer, node_basic.decoded)
+    assert buffer.getvalue() == node_basic.encoded
