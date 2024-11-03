@@ -1,4 +1,4 @@
-from struct import unpack, calcsize
+from struct import unpack, calcsize, iter_unpack
 from .scene import Scene, Node, CompressedVertex, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex, Vector3
 from .xbf_base import NodeFlags
 
@@ -64,7 +64,14 @@ def read_vertex_animation(stream):
         scale, base_count = unpack(compressed_header_fmt, stream.read(compressed_header_size))
         assert count == -base_count
         real_count = base_count//actual
-        frames = [[read_compressed_vertex(stream) for j in range(real_count)] for i in range(actual)]
+        compressed_vertex_fmt = '<3hH'
+        compressed_vertex_size = calcsize(compressed_vertex_fmt)
+        frames = [
+            [CompressedVertex(*fields) for fields in iter_unpack(
+                compressed_vertex_fmt, stream.read(
+                    compressed_vertex_size*real_count
+                ))]
+            for i in range(actual)]
         if (scale & 0x80000000): #interpolated
             interpolation_fmt = f'<{frame_count}I'
             interpolation_size = calcsize(interpolation_fmt)
