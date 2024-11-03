@@ -151,7 +151,7 @@ def read_node(stream, parent=None):
         childCount = readInt(stream)
         node.transform = readMatrix(stream)
         nameLength = readInt(stream)
-        node.name = stream.read(nameLength).decode()
+        node.name = stream.read(nameLength).decode('ascii')
         
         node.children = [read_node(stream, node)   for i in range(childCount)]
         node.vertices = [read_vertex(stream) for i in range(vertexCount)]

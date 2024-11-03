@@ -140,7 +140,7 @@ class Scene:
 
     @property
     def textures(self):
-        return [texture.decode() for texture in re.split(b'\x00\x00|\x00\x02', self.textureNameData) if texture]
+        return [texture.decode('ascii') for texture in re.split(b'\x00\x00|\x00\x02', self.textureNameData) if texture]
 
     def __iter__(self):
         for node in self.nodes:
