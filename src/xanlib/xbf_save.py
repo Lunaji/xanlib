@@ -68,7 +68,7 @@ def write_node(stream, node):
         len(node.children),
         *node.transform,
         len(node.name),
-        node.name.encode()
+        node.name.encode('ascii')
     ))
     
     for child in node.children:
