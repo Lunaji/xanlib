@@ -64,12 +64,10 @@ def read_vertex_animation(stream):
         scale, base_count = unpack(compressed_header_fmt, stream.read(compressed_header_size))
         assert count == -base_count
         real_count = base_count//actual
-        compressed_vertex_fmt = '<3hH'
-        compressed_vertex_size = calcsize(compressed_vertex_fmt)
         frames = [
             [CompressedVertex(*fields) for fields in iter_unpack(
-                compressed_vertex_fmt, stream.read(
-                    compressed_vertex_size*real_count
+                CompressedVertex.fmt, stream.read(
+                    CompressedVertex.size*real_count
                 ))]
             for i in range(actual)]
         if (scale & 0x80000000): #interpolated
