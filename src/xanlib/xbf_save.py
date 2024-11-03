@@ -31,8 +31,8 @@ def write_vertex(buffer, vertex):
     buffer.write(pack('<3f', *vertex.position))
     buffer.write(pack('<3f', *vertex.normal))
 
-def write_vertex_for_vertex_animation(buffer, vertex_animation_frame_datum):
-    buffer.write(pack('<3hH', *vertex_animation_frame_datum))
+def write_compressed_vertex(stream, compressed_vertex):
+    stream.write(pack('<3hH', *vars(compressed_vertex).values()))
     
 def write_face(buffer, face):
     buffer.write(pack('<3i', *face.vertex_indices))
@@ -53,7 +53,7 @@ def write_vertex_animation(buffer, va):
         write_Int32ul(buffer, va.base_count)
         for frame in va.frames:
             for vertex_flagged in frame:
-                write_vertex_for_vertex_animation(buffer, vertex_flagged)
+                write_compressed_vertex(buffer, vertex_flagged)
         if (va.scale & 0x80000000):
             for v in va.interpolation_data:
                 write_Int32ul(buffer, v)

@@ -14,9 +14,9 @@ from xanlib.xbf_load import (
     read_vertex_animation,
     read_key_animation,
     read_node,
-    convert_signed_5bit,
     load_xbf,
 )
+from xanlib.scene import convert_signed_5bit
 from conftest import load_test_data
 
 
