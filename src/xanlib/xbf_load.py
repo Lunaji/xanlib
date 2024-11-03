@@ -80,21 +80,23 @@ def read_vertex_animation(stream):
     )
 
 def read_key_animation(stream):
-    frameCount = readInt(stream)
-    flags = readInt(stream)
+    header_fmt = '<2i'
+    header_size = calcsize(header_fmt)
+    frame_count, flags = unpack(header_fmt, stream.read(header_size))
     if flags==-1:
         matrices = [
             unpack('<16f', stream.read(4*16))
-            for i in range(frameCount+1)
+            for i in range(frame_count+1)
         ]
     elif flags==-2:
         matrices = [
             unpack('<12f', stream.read(4*12))
-            for i in range(frameCount+1)
+            for i in range(frame_count+1)
         ]
     elif flags==-3:
-        actual = readInt(stream)
-        extra_data = [readInt16(stream) for i in range(frameCount+1)]
+        extra_fmt = f'i{frame_count + 1}h'
+        extra_size = calcsize(extra_fmt)
+        actual, *extra_data = unpack(extra_fmt, stream.read(extra_size))
         matrices = [
             unpack('<12f', stream.read(4 * 12))
             for i in range(actual)
@@ -128,7 +130,7 @@ def read_key_animation(stream):
                         ))
         
     return KeyAnimation(
-        frameCount,
+        frame_count,
         flags,
         matrices if flags in (-1,-2,-3) else None,
         actual if flags==-3 else None,
