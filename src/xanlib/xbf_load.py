@@ -33,13 +33,6 @@ def read_vertex(stream):
         unpack("<3f", stream.read(4 * 3))
     )
 
-def read_compressed_vertex(stream):
-    format_string = '<3hH'
-    byte_count_to_read = calcsize(format_string)
-    bytes_read = stream.read(byte_count_to_read)
-    unpacked = unpack(format_string, bytes_read)
-    return CompressedVertex(*unpacked)
-
 def read_face(stream):
     return Face(
         unpack("<3i", stream.read(4 * 3)),
