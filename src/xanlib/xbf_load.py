@@ -182,11 +182,12 @@ def load_xbf(filename):
     scene = Scene()
     scene.file = filename  
     with open(filename, 'rb') as f:
-        scene.version = readInt(f)
-        FXDataSize = readInt(f)
-        scene.FXData = f.read(FXDataSize)
-        textureNameDataSize = readInt(f)
-        scene.textureNameData = f.read(textureNameDataSize)
+        header_fmt = '<2i'
+        header_size = calcsize(header_fmt)
+        scene.version, fxdata_size = unpack(header_fmt, f.read(header_size))
+        scene.FXData = f.read(fxdata_size)
+        texture_data_size = unpack('<i', f.read(4))[0]
+        scene.textureNameData = f.read(texture_data_size)
         while True:
             try:
                 node = read_node(f)
