@@ -141,27 +141,31 @@ def read_key_animation(stream):
 def read_node(stream, parent=None):
     stream_position = stream.tell()
     try:
-        vertexCount = readInt(stream)
-        if vertexCount == -1:
+        vertex_count = unpack('<i', stream.read(4))[0]
+        if vertex_count == -1:
             return None
         node = Node()
         node.parent = parent
-        node.flags = NodeFlags(readInt(stream))
-        faceCount = readInt(stream)
-        childCount = readInt(stream)
-        node.transform = readMatrix(stream)
-        nameLength = readInt(stream)
-        node.name = stream.read(nameLength).decode('ascii')
+        header_fmt = '<3i16dI'
+        header_size = calcsize(header_fmt)
+        flags, face_count, child_count, *tranform, name_length = unpack(header_fmt, stream.read(header_size))
+        node.flags = NodeFlags(flags)
+        node.transform = tuple(tranform)
+        node.name = stream.read(name_length).decode('ascii')
         
-        node.children = [read_node(stream, node)   for i in range(childCount)]
-        node.vertices = [read_vertex(stream) for i in range(vertexCount)]
-        node.faces    = [read_face(stream)   for i in range(faceCount)]
+        node.children = [read_node(stream, node)   for i in range(child_count)]
+        node.vertices = [read_vertex(stream) for i in range(vertex_count)]
+        node.faces    = [read_face(stream)   for i in range(face_count)]
 
         if NodeFlags.PRELIGHT in node.flags:
-            node.rgb = [tuple(readUInt8(stream) for i in range(3)) for j in range(vertexCount)]
+            rgb_fmt = '<3B'
+            rgb_size = calcsize(rgb_fmt)
+            node.rgb = [rgb_tuple for rgb_tuple in iter_unpack(rgb_fmt, stream.read(rgb_size*vertex_count))]
 
         if NodeFlags.FACE_DATA in node.flags:
-            node.faceData = [readInt(stream) for i in range(faceCount)]
+            faceData_fmt = f'<{face_count}i'
+            faceData_size = calcsize(faceData_fmt)
+            node.faceData = list(unpack(faceData_fmt, stream.read(faceData_size)))
 
         if NodeFlags.VERTEX_ANIMATION in node.flags:
             node.vertex_animation = read_vertex_animation(stream)
