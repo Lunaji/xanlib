@@ -52,29 +52,34 @@ def read_face(stream):
     )
         
 def read_vertex_animation(stream):
-    frameCount = readInt(stream)
-    count = readInt(stream)
-    actual = readInt(stream)
-    keyList = [readUInt(stream) for i in range(actual)]
+    header_fmt = '<3i'
+    header_size = calcsize(header_fmt)
+    frame_count, count, actual = unpack(header_fmt, stream.read(header_size))
+    keys_fmt = f'<{actual}I'
+    keys_size = calcsize(keys_fmt)
+    keys = list(unpack(keys_fmt, stream.read(keys_size)))
     if count < 0: #compressed
-        scale = readUInt(stream)
-        base_count = readUInt(stream)
+        compressed_header_fmt = '<2I'
+        compressed_header_size = calcsize(compressed_header_fmt)
+        scale, base_count = unpack(compressed_header_fmt, stream.read(compressed_header_size))
         assert count == -base_count
         real_count = base_count//actual
         frames = [[read_compressed_vertex(stream) for j in range(real_count)] for i in range(actual)]
         if (scale & 0x80000000): #interpolated
-            interpolationData = [readUInt(stream) for i in range(frameCount)]
+            interpolation_fmt = f'<{frame_count}I'
+            interpolation_size = calcsize(interpolation_fmt)
+            interpolation_data = list(unpack(interpolation_fmt, stream.read(interpolation_size)))
             
     return VertexAnimation(
-        frameCount,
+        frame_count,
         count,
         actual,
-        keyList,
+        keys,
         scale if count<0 else None,
         base_count if count<0 else None,
         real_count if count<0 else None,
         frames if count<0 else None,
-        interpolationData if ((count<0) and (scale & 0x80000000)) else None
+        interpolation_data if ((count<0) and (scale & 0x80000000)) else None
     )
 
 def read_key_animation(stream):
