@@ -62,9 +62,8 @@ def write_key_animation(stream, ka):
         for matrix in ka.matrices:
             stream.write(pack('<12f', *matrix))
     elif ka.flags==-3:
-        write_Int32sl(stream, ka.actual)
-        for extra_datum in ka.extra_data:
-            write_Int16sl(stream, extra_datum)
+        extra_fmt = Struct(f'i{len(ka.extra_data)}h')
+        stream.write(extra_fmt.pack(ka.actual, *ka.extra_data))
         for matrix in ka.matrices:
             stream.write(pack('<12f', *matrix))
     else:
