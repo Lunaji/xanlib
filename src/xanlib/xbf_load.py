@@ -3,30 +3,6 @@ from .scene import Scene, Node, CompressedVertex, VertexAnimation, KeyAnimationF
 from .xbf_base import NodeFlags
 
 
-def readInt(file):
-        return unpack("<i", file.read(4))[0]
-
-def readUInt(file):
-        return unpack("<I", file.read(4))[0]
-
-def readInt16(file):
-    return unpack("<h", file.read(2))[0]
-
-def readInt8(file):
-    return unpack("<b", file.read(1))[0]
-
-def readUInt8(file):
-    return unpack("<B", file.read(1))[0]
-
-def readUInt16(file):
-    return unpack("<H", file.read(2))[0]
-
-def readMatrix(file):
-        return unpack("<16d", file.read(8*16))
-
-def readByte(file):
-    return unpack("<c", file.read(1))[0]
-
 def read_vertex(stream):
     return Vertex(
         unpack("<3f", stream.read(4 * 3)),
