@@ -1,5 +1,6 @@
 from struct import pack, Struct
 from .xbf_base import NodeFlags
+from xanlib.scene import CompressedVertex
 
 def convert_to_5bit_signed(v):
     v_clamped = max(-15, min(15, int(round(v))))
@@ -30,9 +31,6 @@ def write_matrix44dl(stream, v):
 def write_vertex(stream, vertex):
     stream.write(pack('<3f', *vertex.position))
     stream.write(pack('<3f', *vertex.normal))
-
-def write_compressed_vertex(stream, compressed_vertex):
-    stream.write(pack('<3hH', *vars(compressed_vertex).values()))
     
 def write_face(stream, face):
     stream.write(pack('<3i', *face.vertex_indices))
@@ -50,7 +48,7 @@ def write_vertex_animation(stream, va):
         stream.write(compressed_header_fmt.pack(va.scale, va.base_count))
         for frame in va.frames:
             for vertex in frame:
-                write_compressed_vertex(stream, vertex)
+                stream.write(CompressedVertex.fmt.pack(*vars(vertex).values()))
         if va.interpolation_data is not None:
             stream.write(pack(f'{len(va.interpolation_data)}I', *va.interpolation_data))
                 
