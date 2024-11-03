@@ -27,10 +27,10 @@ def readMatrix(file):
 def readByte(file):
     return unpack("<c", file.read(1))[0]
 
-def read_vertex(buffer):
+def read_vertex(stream):
     return Vertex(
-        unpack("<3f", buffer.read(4 * 3)),
-        unpack("<3f", buffer.read(4 * 3))
+        unpack("<3f", stream.read(4 * 3)),
+        unpack("<3f", stream.read(4 * 3))
     )
 
 def read_compressed_vertex(stream):
@@ -40,30 +40,30 @@ def read_compressed_vertex(stream):
     unpacked = unpack(format_string, bytes_read)
     return CompressedVertex(*unpacked)
 
-def read_face(buffer):
+def read_face(stream):
     return Face(
-        unpack("<3i", buffer.read(4 * 3)),
-        unpack("<1i", buffer.read(4 * 1))[0],
-        unpack("<1i", buffer.read(4 * 1))[0],
+        unpack("<3i", stream.read(4 * 3)),
+        unpack("<1i", stream.read(4 * 1))[0],
+        unpack("<1i", stream.read(4 * 1))[0],
         tuple(
-            unpack("<2f", buffer.read(4 * 2))
+            unpack("<2f", stream.read(4 * 2))
             for i in range(3)
         )
     )
         
-def read_vertex_animation(buffer):
-    frameCount = readInt(buffer)
-    count = readInt(buffer)
-    actual = readInt(buffer)
-    keyList = [readUInt(buffer) for i in range(actual)]
+def read_vertex_animation(stream):
+    frameCount = readInt(stream)
+    count = readInt(stream)
+    actual = readInt(stream)
+    keyList = [readUInt(stream) for i in range(actual)]
     if count < 0: #compressed
-        scale = readUInt(buffer)
-        base_count = readUInt(buffer)
+        scale = readUInt(stream)
+        base_count = readUInt(stream)
         assert count == -base_count
         real_count = base_count//actual
-        frames = [[read_compressed_vertex(buffer) for j in range(real_count)] for i in range(actual)]
+        frames = [[read_compressed_vertex(stream) for j in range(real_count)] for i in range(actual)]
         if (scale & 0x80000000): #interpolated
-            interpolationData = [readUInt(buffer) for i in range(frameCount)]
+            interpolationData = [readUInt(stream) for i in range(frameCount)]
             
     return VertexAnimation(
         frameCount,
@@ -77,43 +77,43 @@ def read_vertex_animation(buffer):
         interpolationData if ((count<0) and (scale & 0x80000000)) else None
     )
 
-def read_key_animation(buffer):
-    frameCount = readInt(buffer)
-    flags = readInt(buffer)
+def read_key_animation(stream):
+    frameCount = readInt(stream)
+    flags = readInt(stream)
     if flags==-1:
         matrices = [
-            unpack('<16f', buffer.read(4*16))
+            unpack('<16f', stream.read(4*16))
             for i in range(frameCount+1)
         ]
     elif flags==-2:
         matrices = [
-            unpack('<12f', buffer.read(4*12))
+            unpack('<12f', stream.read(4*12))
             for i in range(frameCount+1)
         ]
     elif flags==-3:
-        actual = readInt(buffer)
-        extra_data = [readInt16(buffer) for i in range(frameCount+1)]
+        actual = readInt(stream)
+        extra_data = [readInt16(stream) for i in range(frameCount+1)]
         matrices = [
-            unpack('<12f', buffer.read(4 * 12))
+            unpack('<12f', stream.read(4 * 12))
             for i in range(actual)
         ]
     else:
         frames = []
         for i in range(flags):
-            frame_id = readInt16(buffer)
-            flag = readInt16(buffer)
+            frame_id = readInt16(stream)
+            flag = readInt16(stream)
             assert not (flag & 0b1000111111111111)
 
             if ((flag >> 12) & 0b001):
-                rotation = unpack('<4f', buffer.read(4*4))
+                rotation = unpack('<4f', stream.read(4*4))
             else:
                 rotation = None
             if ((flag >> 12) & 0b010):
-                scale = unpack('<3f', buffer.read(4*3))
+                scale = unpack('<3f', stream.read(4*3))
             else:
                 scale = None
             if ((flag >> 12) & 0b100):
-                translation = unpack('<3f', buffer.read(4*3))
+                translation = unpack('<3f', stream.read(4*3))
             else:
                 translation = None
 
@@ -134,40 +134,40 @@ def read_key_animation(buffer):
         frames if flags not in (-1,-2,-3) else None
     )        
         
-def read_node(buffer, parent=None):
-    buffer_position = buffer.tell()
+def read_node(stream, parent=None):
+    stream_position = stream.tell()
     try:
-        vertexCount = readInt(buffer)
+        vertexCount = readInt(stream)
         if vertexCount == -1:
             return None
         node = Node()
         node.parent = parent
-        node.flags = NodeFlags(readInt(buffer))
-        faceCount = readInt(buffer)
-        childCount = readInt(buffer)
-        node.transform = readMatrix(buffer)
-        nameLength = readInt(buffer)
-        node.name = buffer.read(nameLength).decode()
+        node.flags = NodeFlags(readInt(stream))
+        faceCount = readInt(stream)
+        childCount = readInt(stream)
+        node.transform = readMatrix(stream)
+        nameLength = readInt(stream)
+        node.name = stream.read(nameLength).decode()
         
-        node.children = [read_node(buffer, node)   for i in range(childCount)]
-        node.vertices = [read_vertex(buffer) for i in range(vertexCount)]
-        node.faces    = [read_face(buffer)   for i in range(faceCount)]
+        node.children = [read_node(stream, node)   for i in range(childCount)]
+        node.vertices = [read_vertex(stream) for i in range(vertexCount)]
+        node.faces    = [read_face(stream)   for i in range(faceCount)]
 
         if NodeFlags.PRELIGHT in node.flags:
-            node.rgb = [tuple(readUInt8(buffer) for i in range(3)) for j in range(vertexCount)]
+            node.rgb = [tuple(readUInt8(stream) for i in range(3)) for j in range(vertexCount)]
 
         if NodeFlags.FACE_DATA in node.flags:
-            node.faceData = [readInt(buffer) for i in range(faceCount)]
+            node.faceData = [readInt(stream) for i in range(faceCount)]
 
         if NodeFlags.VERTEX_ANIMATION in node.flags:
-            node.vertex_animation = read_vertex_animation(buffer)
+            node.vertex_animation = read_vertex_animation(stream)
 
         if NodeFlags.KEY_ANIMATION in node.flags:
-            node.key_animation = read_key_animation(buffer)
+            node.key_animation = read_key_animation(stream)
             
         return node
     except Exception:
-        buffer.seek(buffer_position)
+        stream.seek(stream_position)
         raise
 
 def load_xbf(filename):
