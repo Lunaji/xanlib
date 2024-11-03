@@ -1,4 +1,4 @@
-from struct import pack
+from struct import pack, Struct
 from .xbf_base import NodeFlags
 
 def convert_to_5bit_signed(v):
@@ -42,21 +42,17 @@ def write_face(stream, face):
         stream.write(pack('2f', *uv))
         
 def write_vertex_animation(stream, va):
-    write_Int32sl(stream, va.frame_count)
-    write_Int32sl(stream, va.count)
-    write_Int32sl(stream, va.actual)
-    for key in va.keys:
-        write_Int32ul(stream, key)
+    header_fmt = Struct(f'<3i{len(va.keys)}I')
+    stream.write(header_fmt.pack(va.frame_count, va.count, va.actual, *va.keys))
     
     if va.count<0:
-        write_Int32ul(stream, va.scale)
-        write_Int32ul(stream, va.base_count)
+        compressed_header_fmt = Struct('<2I')
+        stream.write(compressed_header_fmt.pack(va.scale, va.base_count))
         for frame in va.frames:
-            for vertex_flagged in frame:
-                write_compressed_vertex(stream, vertex_flagged)
-        if (va.scale & 0x80000000):
-            for v in va.interpolation_data:
-                write_Int32ul(stream, v)
+            for vertex in frame:
+                write_compressed_vertex(stream, vertex)
+        if va.interpolation_data is not None:
+            stream.write(pack(f'{len(va.interpolation_data)}I', *va.interpolation_data))
                 
 def write_key_animation(stream, ka):
     write_Int32sl(stream, ka.frame_count)
