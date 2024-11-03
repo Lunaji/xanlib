@@ -1,7 +1,6 @@
 import io
 import pytest
 from xanlib.xbf_save import (
-    write_Int32sl,
     write_vertex,
     write_face,
     write_vertex_animation,
@@ -13,10 +12,6 @@ from xanlib.xbf_save import (
 @pytest.fixture()
 def stream():
     return io.BytesIO()
-
-def test_write_Int32sl(stream, pos_int):
-    write_Int32sl(stream, pos_int['decoded'])
-    assert stream.getvalue() == pos_int['binary']
 
 def test_write_vertex(stream, vertex):
     write_vertex(stream, vertex.decoded)

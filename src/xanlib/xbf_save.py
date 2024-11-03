@@ -9,24 +9,6 @@ def convert_to_5bit_signed(v):
         return v_clamped + 32
     else:
         return v_clamped
-
-def write_Int32sl(stream, v):
-	stream.write(pack('<i', v))
-	
-def write_Int32ul(stream, v):
-	stream.write(pack('<I', v))
-	
-def write_Int16sl(stream, v):
-	stream.write(pack('<h', v))
-	
-def write_Int16ul(stream, v):
-	stream.write(pack('<H', v))
-	
-def write_Int8ul(stream, v):
-	stream.write(pack('<B', v))
-	
-def write_matrix44dl(stream, v):
-    stream.write(pack('<16d', *v))
     
 def write_vertex(stream, vertex):
     stream.write(pack('<3f', *vertex.position))
