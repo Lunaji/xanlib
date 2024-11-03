@@ -104,8 +104,9 @@ def read_key_animation(stream):
     else:
         frames = []
         for i in range(flags):
-            frame_id = readInt16(stream)
-            flag = readInt16(stream)
+            pos_fmt = '<2h'
+            pos_size = calcsize(pos_fmt)
+            frame_id, flag = unpack(pos_fmt, stream.read(pos_size))
             assert not (flag & 0b1000111111111111)
 
             if ((flag >> 12) & 0b001):
