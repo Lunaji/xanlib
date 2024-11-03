@@ -111,18 +111,20 @@ def write_node(stream, node):
         
     if NodeFlags.KEY_ANIMATION in node.flags:
         write_key_animation(stream, node.key_animation)
-        
 
 def save_xbf(scene, filename):
     with open(filename, 'wb') as f:
-        write_Int32sl(f, scene.version)
-        write_Int32sl(f, len(scene.FXData))
-        f.write(scene.FXData)
-        write_Int32sl(f, len(scene.textureNameData))
-        f.write(scene.textureNameData)
+        header_fmt = Struct(f'<2i{len(scene.FXData)}si{len(scene.textureNameData)}s')
+        f.write(header_fmt.pack(
+            scene.version,
+            len(scene.FXData),
+            scene.FXData,
+            len(scene.textureNameData),
+            scene.textureNameData
+        ))
         for node in scene.nodes:
             write_node(f, node)
         if scene.unparsed is not None:
             f.write(scene.unparsed)
         else:
-            write_Int32sl(f, -1)
+            f.write(pack('i', -1))
