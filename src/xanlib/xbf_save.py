@@ -79,13 +79,16 @@ def write_key_animation(stream, ka):
                 stream.write(pack('<3f', *frame.translation))
 	
 def write_node(stream, node):
-    write_Int32sl(stream, len(node.vertices))
-    write_Int32sl(stream, node.flags)
-    write_Int32sl(stream, len(node.faces))
-    write_Int32sl(stream, len(node.children))
-    write_matrix44dl(stream, node.transform)
-    write_Int32sl(stream, len(node.name))
-    stream.write(node.name.encode())
+    header_fmt = Struct(f'<4i16dI{len(node.name)}s')
+    stream.write(header_fmt.pack(
+        len(node.vertices),
+        node.flags,
+        len(node.faces),
+        len(node.children),
+        *node.transform,
+        len(node.name),
+        node.name.encode()
+    ))
     
     for child in node.children:
         write_node(stream, child)
@@ -97,13 +100,11 @@ def write_node(stream, node):
         write_face(stream, face)
         
     if NodeFlags.PRELIGHT in node.flags:
-        for j, vertex in enumerate(node.vertices):
-            for i in range(3):
-                write_Int8ul(stream, node.rgb[j][i])
+        rgb_fmt = Struct(f'<{3*len(node.rgb)}B')
+        stream.write(rgb_fmt.pack(*(c for rgb in node.rgb for c in rgb)))
 
     if NodeFlags.FACE_DATA in node.flags:
-        for faceDatum in node.faceData:
-            write_Int32sl(stream, faceDatum)
+        stream.write(pack(f'<{len(node.faceData)}i', *node.faceData))
 
     if NodeFlags.VERTEX_ANIMATION in node.flags:
         write_vertex_animation(stream, node.vertex_animation)
