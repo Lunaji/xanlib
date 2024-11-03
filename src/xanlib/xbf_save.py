@@ -53,8 +53,8 @@ def write_vertex_animation(stream, va):
             stream.write(pack(f'{len(va.interpolation_data)}I', *va.interpolation_data))
                 
 def write_key_animation(stream, ka):
-    write_Int32sl(stream, ka.frame_count)
-    write_Int32sl(stream, ka.flags)
+    header_fmt = Struct('<2i')
+    stream.write(header_fmt.pack(ka.frame_count, ka.flags))
     if ka.flags==-1:
         for matrix in ka.matrices:
             stream.write(pack('<16f', *matrix))
@@ -69,8 +69,8 @@ def write_key_animation(stream, ka):
             stream.write(pack('<12f', *matrix))
     else:
         for frame in ka.frames:
-            write_Int16sl(stream, frame.frame_id)
-            write_Int16sl(stream, frame.flag)
+            pos_fmt = Struct('<2h')
+            stream.write(pos_fmt.pack(frame.frame_id, frame.flag))
             if frame.rotation is not None:
                 stream.write(pack('<4f', *frame.rotation))
             if frame.scale is not None:
