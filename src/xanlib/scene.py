@@ -3,7 +3,7 @@ from typing import Optional, Tuple, List, NamedTuple, Union, TypeAlias
 from pathlib import Path
 from .xbf_base import NodeFlags
 import re
-from struct import calcsize
+from struct import Struct
 
 
 Matrix: TypeAlias = Tuple[float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float]
@@ -49,8 +49,7 @@ class CompressedVertex:
     y: int
     z: int
     normal_packed: int
-    fmt = '<3hH'
-    size = calcsize(fmt)
+    fmt = Struct('<3hH')
 
     @property
     def position(self):
