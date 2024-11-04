@@ -3,16 +3,11 @@ from typing import Optional, Tuple, List, NamedTuple, Union
 from pathlib import Path
 from .xbf_base import NodeFlags
 import re
-from xanlib.math_utils import Vector3, Quaternion, UV, Matrix
+from xanlib.math_utils import Vector3, Quaternion, Matrix
 from xanlib.vertex import Vertex
+from xanlib.face import Face
 from xanlib.compressed_vertex import CompressedVertex
 
-
-class Face(NamedTuple):
-    vertex_indices: Tuple[int, int, int]
-    texture_index: int
-    flags: int
-    uv_coords: Tuple[UV, UV, UV]
 
 class VertexAnimation(NamedTuple):
     frame_count: int
