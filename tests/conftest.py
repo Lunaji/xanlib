@@ -2,6 +2,7 @@ import pytest
 import json
 import binascii
 from collections import namedtuple
+from xanlib.math_utils import Vector3, UV
 from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.compressed_vertex import CompressedVertex
@@ -65,8 +66,8 @@ def vertex(request):
     encoded = encoded_position + encoded_normal
 
     decoded = Vertex(
-        position=tuple(data['decoded']['position']),
-        normal=tuple(data['decoded']['normal'])
+        position=Vector3(*data['decoded']['position']),
+        normal=Vector3(*data['decoded']['normal'])
     )
 
     yield EncodedDecoded(encoded, decoded)
@@ -81,7 +82,7 @@ def face(request):
         tuple(data['decoded']['vertex_indices']),
         data['decoded']['texture_index'],
         data['decoded']['flags'],
-        tuple(tuple(uv) for uv in data['decoded']['uv_coords'])
+        tuple(UV(*uv) for uv in data['decoded']['uv_coords'])
     )
 
     yield EncodedDecoded(encoded, decoded)

@@ -1,5 +1,6 @@
 from struct import unpack, calcsize, iter_unpack
 from xanlib.vertex_animation import CompressedVertex
+from xanlib.math_utils import Vector3, UV
 from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.vertex_animation import VertexAnimation
@@ -10,8 +11,8 @@ from xanlib.scene import Scene
 
 def read_vertex(stream):
     return Vertex(
-        unpack("<3f", stream.read(4 * 3)),
-        unpack("<3f", stream.read(4 * 3))
+        Vector3(*unpack("<3f", stream.read(4 * 3))),
+        Vector3(*unpack("<3f", stream.read(4 * 3)))
     )
 
 def read_face(stream):
@@ -20,7 +21,7 @@ def read_face(stream):
         unpack("<1i", stream.read(4 * 1))[0],
         unpack("<1i", stream.read(4 * 1))[0],
         tuple(
-            unpack("<2f", stream.read(4 * 2))
+            UV(*unpack("<2f", stream.read(4 * 2)))
             for i in range(3)
         )
     )
