@@ -1,7 +1,7 @@
 from typing import BinaryIO
 from struct import unpack, calcsize, iter_unpack
 from xanlib.vertex_animation import CompressedVertex
-from xanlib.math_utils import Vector3, UV
+from xanlib.math_utils import Vector3, UV, Quaternion
 from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.vertex_animation import VertexAnimation
@@ -63,7 +63,7 @@ def read_vertex_animation(stream: BinaryIO) -> VertexAnimation:
         interpolation_data if ((count<0) and (scale & 0x80000000)) else None
     )
 
-def read_key_animation(stream):
+def read_key_animation(stream: BinaryIO) -> KeyAnimation:
     header_fmt = '<2i'
     header_size = calcsize(header_fmt)
     frame_count, flags = unpack(header_fmt, stream.read(header_size))
@@ -94,15 +94,16 @@ def read_key_animation(stream):
             assert not (flag & 0b1000111111111111)
 
             if (flag >> 12) & 0b001:
-                rotation = unpack('<4f', stream.read(4*4))
+                w, *v = unpack('<4f', stream.read(4 * 4))
+                rotation = Quaternion(w, Vector3(*v))
             else:
                 rotation = None
             if (flag >> 12) & 0b010:
-                scale = unpack('<3f', stream.read(4*3))
+                scale = Vector3(*unpack('<3f', stream.read(4*3)))
             else:
                 scale = None
             if (flag >> 12) & 0b100:
-                translation = unpack('<3f', stream.read(4*3))
+                translation = Vector3(*unpack('<3f', stream.read(4*3)))
             else:
                 translation = None
 
