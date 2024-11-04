@@ -1,7 +1,9 @@
-from typing import NamedTuple, Optional
+from dataclasses import dataclass
+from typing import Optional
 from xanlib.compressed_vertex import CompressedVertex
 
-class VertexAnimation(NamedTuple):
+@dataclass
+class VertexAnimation:
     frame_count: int
     count: int
     actual: int
