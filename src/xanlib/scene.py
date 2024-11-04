@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional, List, Union
+from typing import Optional
 from pathlib import Path
 import re
 from xanlib.node import Node, traverse
@@ -7,11 +7,11 @@ from xanlib.node import Node, traverse
 
 @dataclass
 class Scene:
-    file: Optional[Union[str, Path]] = None
+    file: Optional[str | Path] = None
     version: Optional[int] = None
     FXData: Optional[bytes] = None
     textureNameData: Optional[bytes] = None
-    nodes: List[Node] = field(default_factory=list)
+    nodes: list[Node] = field(default_factory=list)
     error: Optional[Exception] = None
     unparsed: Optional[bytes] = None
 
