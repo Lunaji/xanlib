@@ -24,6 +24,10 @@ def process_node(node, materials, parent_obj=None):
         for j, loop_index in enumerate(face.loop_indices):
             u = node.faces[i].uv_coords[j][0]
             v = 1 - node.faces[i].uv_coords[j][1]
+            if not mesh.uv_layers:
+                mesh.uv_layers.new(name="UVMap")
+            if not mesh.uv_layers.active:
+                mesh.uv_layers.active = mesh.uv_layers[0]
             mesh.uv_layers.active.data[loop_index].uv = [u,v]
 
     obj.matrix_local = Matrix([node.transform[i*4:(i+1)*4] for i in range(4)]).transposed()

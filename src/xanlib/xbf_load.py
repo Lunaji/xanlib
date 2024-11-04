@@ -1,6 +1,11 @@
 from struct import unpack, calcsize, iter_unpack
-from .scene import Scene, Node, CompressedVertex, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex, Vector3
-from .xbf_base import NodeFlags
+from xanlib.vertex_animation import CompressedVertex
+from xanlib.vertex import Vertex
+from xanlib.face import Face
+from xanlib.vertex_animation import VertexAnimation
+from xanlib.key_animation import KeyAnimation, KeyAnimationFrame
+from xanlib.node import Node, NodeFlags
+from xanlib.scene import Scene
 
 
 def read_vertex(stream):

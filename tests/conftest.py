@@ -2,16 +2,13 @@ import pytest
 import json
 import binascii
 from collections import namedtuple
-from xanlib.scene import (
-    Vertex,
-    Face,
-    CompressedVertex,
-    VertexAnimation,
-    KeyAnimation,
-    Node,
-    Scene,
-)
-from xanlib.xbf_base import NodeFlags
+from xanlib.vertex import Vertex
+from xanlib.face import Face
+from xanlib.compressed_vertex import CompressedVertex
+from xanlib.vertex_animation import VertexAnimation
+from xanlib.key_animation import KeyAnimation
+from xanlib.node import Node, NodeFlags
+from xanlib.scene import Scene
 
 EncodedDecoded = namedtuple('EncodedDecoded', ['encoded', 'decoded'])
 
