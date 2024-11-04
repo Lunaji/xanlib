@@ -2,14 +2,7 @@ from struct import pack, Struct
 from xanlib.compressed_vertex import CompressedVertex
 from xanlib.node import NodeFlags
 
-def convert_to_5bit_signed(v):
-    v_clamped = max(-15, min(15, int(round(v))))
 
-    if v_clamped < 0:
-        return v_clamped + 32
-    else:
-        return v_clamped
-    
 def write_vertex(stream, vertex):
     stream.write(pack('<3f', *vertex.position))
     stream.write(pack('<3f', *vertex.normal))
