@@ -1,3 +1,4 @@
+from typing import BinaryIO
 from struct import unpack, calcsize, iter_unpack
 from xanlib.vertex_animation import CompressedVertex
 from xanlib.math_utils import Vector3, UV
@@ -9,20 +10,21 @@ from xanlib.node import Node, NodeFlags
 from xanlib.scene import Scene
 
 
-def read_vertex(stream):
+def read_vertex(stream: BinaryIO) -> Vertex:
     return Vertex(
         Vector3(*unpack("<3f", stream.read(4 * 3))),
         Vector3(*unpack("<3f", stream.read(4 * 3)))
     )
 
-def read_face(stream):
+def read_face(stream: BinaryIO) -> Face:
     return Face(
         unpack("<3i", stream.read(4 * 3)),
         unpack("<1i", stream.read(4 * 1))[0],
         unpack("<1i", stream.read(4 * 1))[0],
-        tuple(
+        (
+            UV(*unpack("<2f", stream.read(4 * 2))),
+            UV(*unpack("<2f", stream.read(4 * 2))),
             UV(*unpack("<2f", stream.read(4 * 2)))
-            for i in range(3)
         )
     )
         
