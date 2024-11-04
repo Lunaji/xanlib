@@ -4,6 +4,7 @@ from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.compressed_vertex import CompressedVertex
 from xanlib.vertex_animation import VertexAnimation
+from xanlib.key_animation import KeyAnimation
 from xanlib.node import NodeFlags
 
 
@@ -31,7 +32,7 @@ def write_vertex_animation(stream: BinaryIO, va: VertexAnimation) -> None:
         if va.interpolation_data:
             stream.write(pack(f'{len(va.interpolation_data)}I', *va.interpolation_data))
                 
-def write_key_animation(stream, ka):
+def write_key_animation(stream, ka: KeyAnimation) -> None:
     header_fmt = Struct('<2i')
     stream.write(header_fmt.pack(ka.frame_count, ka.flags))
     if ka.flags==-1:
@@ -42,7 +43,7 @@ def write_key_animation(stream, ka):
             stream.write(pack('<12f', *matrix))
     elif ka.flags==-3:
         extra_fmt = Struct(f'i{len(ka.extra_data)}h')
-        stream.write(extra_fmt.pack(ka.actual, *ka.extra_data))
+        stream.write(extra_fmt.pack(len(ka.matrices), *ka.extra_data))
         for matrix in ka.matrices:
             stream.write(pack('<12f', *matrix))
     else:

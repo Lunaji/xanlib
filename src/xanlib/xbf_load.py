@@ -81,10 +81,10 @@ def read_key_animation(stream: BinaryIO) -> KeyAnimation:
     elif flags==-3:
         extra_fmt = f'i{frame_count + 1}h'
         extra_size = calcsize(extra_fmt)
-        actual, *extra_data = unpack(extra_fmt, stream.read(extra_size))
+        matrix_count, *extra_data = unpack(extra_fmt, stream.read(extra_size))
         matrices = [
             unpack('<12f', stream.read(4 * 12))
-            for i in range(actual)
+            for i in range(matrix_count)
         ]
     else:
         frames = []
@@ -119,10 +119,9 @@ def read_key_animation(stream: BinaryIO) -> KeyAnimation:
     return KeyAnimation(
         frame_count,
         flags,
-        matrices if flags in (-1,-2,-3) else None,
-        actual if flags==-3 else None,
-        extra_data if flags==-3 else None,
-        frames if flags not in (-1,-2,-3) else None
+        matrices if flags in (-1,-2,-3) else [],
+        extra_data if flags==-3 else [],
+        frames if flags not in (-1,-2,-3) else []
     )        
         
 def read_node(stream: BinaryIO, parent: Optional[Node] = None) -> Node:

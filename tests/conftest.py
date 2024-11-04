@@ -115,9 +115,8 @@ def key_animation(request):
                 frame_count=data['decoded']['frame_count'],
                 flags=data['decoded']['flags'],
                 matrices=[tuple(matrix) for matrix in data['decoded']['matrices']],
-                actual=data['decoded']['actual'],
-                extra_data=data['decoded']['extra_data'],
-                frames=data['decoded'].get('frames', None)
+                extra_data=data['decoded']['extra_data'] or [],
+                frames=data['decoded'].get('frames', None) or []
               )
 
     yield EncodedDecoded(encoded, decoded)
