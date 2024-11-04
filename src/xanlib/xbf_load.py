@@ -28,7 +28,7 @@ def read_face(stream: BinaryIO) -> Face:
         )
     )
         
-def read_vertex_animation(stream):
+def read_vertex_animation(stream: BinaryIO) -> VertexAnimation:
     header_fmt = '<3i'
     header_size = calcsize(header_fmt)
     frame_count, count, actual = unpack(header_fmt, stream.read(header_size))

@@ -11,5 +11,5 @@ class VertexAnimation:
     scale: Optional[int]
     base_count: Optional[int]
     real_count: Optional[int]
-    frames: Optional[list[CompressedVertex]]
+    frames: Optional[list[list[CompressedVertex]]]
     interpolation_data: Optional[list[int]]
