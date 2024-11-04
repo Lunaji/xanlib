@@ -242,6 +242,7 @@ def scene(node_basic):
             )
 
     decoded = Scene(
+        file=file,
         version=version,
         FXData=FXData,
         textureNameData=textureNameData,
