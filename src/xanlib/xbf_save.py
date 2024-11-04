@@ -32,7 +32,7 @@ def write_vertex_animation(stream: BinaryIO, va: VertexAnimation) -> None:
         if va.interpolation_data:
             stream.write(pack(f'{len(va.interpolation_data)}I', *va.interpolation_data))
                 
-def write_key_animation(stream, ka: KeyAnimation) -> None:
+def write_key_animation(stream: BinaryIO, ka: KeyAnimation) -> None:
     header_fmt = Struct('<2i')
     stream.write(header_fmt.pack(ka.frame_count, ka.flags))
     if ka.flags==-1:
