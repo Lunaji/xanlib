@@ -47,13 +47,6 @@ def pytest_collection_modifyitems(config, items):
 def signed_5bit(request):
     yield request.param
 
-@pytest.fixture
-def pos_int():
-    yield {
-            'binary': b'\x40\xe2\x01\x00',
-            'decoded': 123456
-        }
-
 def load_test_data(json_file):
     with open(json_file, 'r') as file:
         return json.load(file)
