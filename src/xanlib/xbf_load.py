@@ -1,4 +1,4 @@
-from typing import BinaryIO
+from typing import BinaryIO, Optional
 from struct import unpack, calcsize, iter_unpack
 from xanlib.vertex_animation import CompressedVertex
 from xanlib.math_utils import Vector3, UV, Quaternion
@@ -124,7 +124,7 @@ def read_key_animation(stream: BinaryIO) -> KeyAnimation:
         frames if flags not in (-1,-2,-3) else None
     )        
         
-def read_node(stream, parent=None):
+def read_node(stream: BinaryIO, parent: Optional[Node] = None) -> Optional[Node]:
     stream_position = stream.tell()
     try:
         vertex_count = unpack('<i', stream.read(4))[0]
