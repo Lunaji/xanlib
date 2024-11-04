@@ -53,7 +53,12 @@ def write_key_animation(stream, ka):
             pos_fmt = Struct('<2h')
             stream.write(pos_fmt.pack(frame.frame_id, frame.flag))
             if frame.rotation is not None:
-                stream.write(pack('<4f', *frame.rotation))
+                stream.write(pack('<4f',
+                                  frame.rotation.w,
+                                  frame.rotation.v.x,
+                                  frame.rotation.v.y,
+                                  frame.rotation.v.z
+                                  ))
             if frame.scale is not None:
                 stream.write(pack('<3f', *frame.scale))
             if frame.translation is not None:
