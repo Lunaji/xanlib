@@ -1,25 +1,11 @@
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, List, NamedTuple, Union, TypeAlias
+from typing import Optional, Tuple, List, NamedTuple, Union
 from pathlib import Path
 from .xbf_base import NodeFlags
 import re
 from struct import Struct
+from xanlib.math_utils import Vector3, Quaternion, UV, Matrix
 
-
-Matrix: TypeAlias = Tuple[float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float]
-
-class Vector3(NamedTuple):
-    x: float
-    y: float
-    z: float
-
-class Quaternion(NamedTuple):
-    w: float
-    v: Vector3
-
-class UV(NamedTuple):
-    u: float
-    v: float
 
 class Vertex(NamedTuple):
     position: Vector3
