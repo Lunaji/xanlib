@@ -124,13 +124,13 @@ def read_key_animation(stream: BinaryIO) -> KeyAnimation:
         frames if flags not in (-1,-2,-3) else None
     )        
         
-def read_node(stream: BinaryIO, parent: Optional[Node] = None) -> Optional[Node]:
+def read_node(stream: BinaryIO, parent: Optional[Node] = None) -> Node:
     stream_position = stream.tell()
     try:
+        node = Node()
         vertex_count = unpack('<i', stream.read(4))[0]
         if vertex_count == -1:
-            return None
-        node = Node()
+            return node
         node.parent = parent
         header_fmt = '<3i16dI'
         header_size = calcsize(header_fmt)
@@ -177,7 +177,7 @@ def load_xbf(filename):
         while True:
             try:
                 node = read_node(f)
-                if node is None:
+                if node.flags is None:
                     current_position = f.tell()
                     f.seek(0, 2)
                     assert current_position == f.tell(), 'Not at EOF'
