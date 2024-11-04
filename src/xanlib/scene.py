@@ -5,11 +5,8 @@ from .xbf_base import NodeFlags
 import re
 from struct import Struct
 from xanlib.math_utils import Vector3, Quaternion, UV, Matrix
+from xanlib.vertex import Vertex
 
-
-class Vertex(NamedTuple):
-    position: Vector3
-    normal: Vector3
 
 class Face(NamedTuple):
     vertex_indices: Tuple[int, int, int]
