@@ -1,28 +1,14 @@
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, List, NamedTuple, Union
+from typing import Optional, Tuple, List, Union
 from pathlib import Path
 from .xbf_base import NodeFlags
 import re
-from xanlib.math_utils import Vector3, Quaternion, Matrix
+from xanlib.math_utils import Matrix
 from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.vertex_animation import VertexAnimation
+from xanlib.key_animation import KeyAnimation
 
-
-class KeyAnimationFrame(NamedTuple):
-    frame_id: int
-    flag: int
-    rotation: Optional[Quaternion]
-    scale: Optional[Vector3]
-    translation: Optional[Vector3]
-    
-class KeyAnimation(NamedTuple):
-    frame_count: int
-    flags: int
-    matrices: Optional[List[Matrix]]
-    actual: Optional[int]
-    extra_data: Optional[List[int]]
-    frames: Optional[List[KeyAnimationFrame]]
 
 @dataclass
 class Node:
