@@ -1,3 +1,9 @@
+# This script imports a 3D model from the game "Emperor:Battle for Dune" into Blender.
+# Open and run it in Blender's script editor.
+# Alternatively, run blender from the command line with the --python flag:
+# blender --python examples/blender_import.py
+# Assumes the game assets can be found from the working directory.
+# Adjust the paths as needed.
 import bpy
 from mathutils import Matrix
 from xanlib import load_xbf
