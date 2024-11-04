@@ -6,19 +6,8 @@ import re
 from xanlib.math_utils import Vector3, Quaternion, Matrix
 from xanlib.vertex import Vertex
 from xanlib.face import Face
-from xanlib.compressed_vertex import CompressedVertex
+from xanlib.vertex_animation import VertexAnimation
 
-
-class VertexAnimation(NamedTuple):
-    frame_count: int
-    count: int
-    actual: int
-    keys: List[int]
-    scale: Optional[int]
-    base_count: Optional[int]
-    real_count: Optional[int]
-    frames: Optional[list[CompressedVertex]]
-    interpolation_data: Optional[List[int]]
 
 class KeyAnimationFrame(NamedTuple):
     frame_id: int

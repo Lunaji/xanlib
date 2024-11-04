@@ -1,5 +1,6 @@
 from struct import unpack, calcsize, iter_unpack
-from .scene import Scene, Node, CompressedVertex, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex, Vector3
+from .scene import Scene, Node, VertexAnimation, KeyAnimationFrame, KeyAnimation, Face, Vertex
+from xanlib.vertex_animation import CompressedVertex
 from .xbf_base import NodeFlags
 
 

@@ -5,12 +5,12 @@ from collections import namedtuple
 from xanlib.scene import (
     Vertex,
     Face,
-    CompressedVertex,
     VertexAnimation,
     KeyAnimation,
     Node,
     Scene,
 )
+from xanlib.compressed_vertex import CompressedVertex
 from xanlib.xbf_base import NodeFlags
 
 EncodedDecoded = namedtuple('EncodedDecoded', ['encoded', 'decoded'])
