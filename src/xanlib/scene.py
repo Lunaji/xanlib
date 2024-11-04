@@ -1,40 +1,9 @@
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, List, Union
+from typing import Optional, List, Union
 from pathlib import Path
-from .xbf_base import NodeFlags
 import re
-from xanlib.math_utils import Matrix
-from xanlib.vertex import Vertex
-from xanlib.face import Face
-from xanlib.vertex_animation import VertexAnimation
-from xanlib.key_animation import KeyAnimation
+from xanlib.node import Node, traverse
 
-
-@dataclass
-class Node:
-    parent: Optional['Node'] = None
-    flags: Optional[NodeFlags] = None
-    transform: Optional[Matrix] = None
-    name: Optional[str] = None
-    children: List['Node'] = field(default_factory=list)
-    vertices: List[Vertex] = field(default_factory=list)
-    faces: List[Face] = field(default_factory=list)
-    rgb: Optional[List[Tuple[int, int, int]]] = None
-    faceData: Optional[List[int]] = None
-    vertex_animation: Optional[VertexAnimation] = None
-    key_animation: Optional[KeyAnimation] = None
-
-    def __iter__(self):
-        yield self
-        for child in self.children:
-            yield from child
-
-    @property
-    def ancestors(self):
-        node = self
-        while node.parent is not None:
-            yield node.parent
-            node = node.parent
 
 @dataclass
 class Scene:
@@ -57,12 +26,6 @@ class Scene:
     def __getitem__(self, name):
         return next(node for node in self if node.name == name)
 
-
-def traverse(node, func, parent=None, depth=0, **kwargs):
-    func(node, parent=parent, depth=depth, **kwargs)
-
-    for child in node.children:
-        traverse(child, func, parent=node, depth=depth+1)
 
 def print_node_names(scene):
     for node in scene.nodes:

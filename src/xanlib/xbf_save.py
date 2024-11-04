@@ -1,6 +1,6 @@
 from struct import pack, Struct
-from .xbf_base import NodeFlags
 from xanlib.compressed_vertex import CompressedVertex
+from xanlib.node import NodeFlags
 
 def convert_to_5bit_signed(v):
     v_clamped = max(-15, min(15, int(round(v))))
