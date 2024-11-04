@@ -1,20 +1,24 @@
+from typing import BinaryIO
 from struct import pack, Struct
+from xanlib.vertex import Vertex
+from xanlib.face import Face
 from xanlib.compressed_vertex import CompressedVertex
+from xanlib.vertex_animation import VertexAnimation
 from xanlib.node import NodeFlags
 
 
-def write_vertex(stream, vertex):
+def write_vertex(stream: BinaryIO, vertex: Vertex) -> None:
     stream.write(pack('<3f', *vertex.position))
     stream.write(pack('<3f', *vertex.normal))
     
-def write_face(stream, face):
+def write_face(stream: BinaryIO, face: Face) -> None:
     stream.write(pack('<3i', *face.vertex_indices))
     stream.write(pack('<1i', face.texture_index))
     stream.write(pack('<1i', face.flags))
     for uv in face.uv_coords:
         stream.write(pack('2f', *uv))
         
-def write_vertex_animation(stream, va):
+def write_vertex_animation(stream: BinaryIO, va: VertexAnimation) -> None:
     header_fmt = Struct(f'<3i{len(va.keys)}I')
     stream.write(header_fmt.pack(va.frame_count, va.count, va.actual, *va.keys))
     
@@ -24,7 +28,7 @@ def write_vertex_animation(stream, va):
         for frame in va.frames:
             for vertex in frame:
                 stream.write(CompressedVertex.fmt.pack(*vars(vertex).values()))
-        if va.interpolation_data is not None:
+        if va.interpolation_data:
             stream.write(pack(f'{len(va.interpolation_data)}I', *va.interpolation_data))
                 
 def write_key_animation(stream, ka):

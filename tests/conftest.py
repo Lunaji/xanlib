@@ -101,8 +101,8 @@ def vertex_animation(request):
                                             scale=data['decoded']['scale'],
                                             base_count=data['decoded']['base_count'],
                                             real_count=data['decoded']['real_count'],
-                                            frames=[[CompressedVertex(*datum) for datum in frame] for frame in data['decoded']['frames']]if data['decoded']['frames'] is not None else None,
-                                            interpolation_data=data['decoded']['interpolation_data'],
+                                            frames=[[CompressedVertex(*datum) for datum in frame] for frame in data['decoded']['frames']]if data['decoded']['frames'] is not None else [],
+                                            interpolation_data=data['decoded']['interpolation_data'] if data['decoded']['interpolation_data'] is not None else []
                                         )
                         )
 

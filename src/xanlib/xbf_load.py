@@ -60,8 +60,8 @@ def read_vertex_animation(stream: BinaryIO) -> VertexAnimation:
         scale if count<0 else None,
         base_count if count<0 else None,
         real_count if count<0 else None,
-        frames if count<0 else None,
-        interpolation_data if ((count<0) and (scale & 0x80000000)) else None
+        frames if count<0 else [],
+        interpolation_data if count<0 and scale & 0x80000000 else []
     )
 
 def read_key_animation(stream: BinaryIO) -> KeyAnimation:
