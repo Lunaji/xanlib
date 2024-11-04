@@ -77,7 +77,7 @@ for texture in scene.textures:
 
     try:
         texture_image = bpy.data.images.load(f'Data/3DDATA0001/Textures/{texture}')
-    except:
+    except RuntimeError:
         texture_image = None
 
     if texture_image is not None:
