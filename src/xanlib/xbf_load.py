@@ -44,7 +44,7 @@ def read_vertex_animation(stream):
                 stream.read(CompressedVertex.fmt.size*real_count
                 ))]
             for i in range(actual)]
-        if (scale & 0x80000000): #interpolated
+        if scale & 0x80000000: #interpolated
             interpolation_fmt = f'<{frame_count}I'
             interpolation_size = calcsize(interpolation_fmt)
             interpolation_data = list(unpack(interpolation_fmt, stream.read(interpolation_size)))
@@ -91,15 +91,15 @@ def read_key_animation(stream):
             frame_id, flag = unpack(pos_fmt, stream.read(pos_size))
             assert not (flag & 0b1000111111111111)
 
-            if ((flag >> 12) & 0b001):
+            if (flag >> 12) & 0b001:
                 rotation = unpack('<4f', stream.read(4*4))
             else:
                 rotation = None
-            if ((flag >> 12) & 0b010):
+            if (flag >> 12) & 0b010:
                 scale = unpack('<3f', stream.read(4*3))
             else:
                 scale = None
-            if ((flag >> 12) & 0b100):
+            if (flag >> 12) & 0b100:
                 translation = unpack('<3f', stream.read(4*3))
             else:
                 translation = None

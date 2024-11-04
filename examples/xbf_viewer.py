@@ -17,7 +17,7 @@ def as_matrix44(transform):
 
 draw_index = 0
 
-class Viewer():   
+class Viewer:
     
     def __init__(self, width, height):
         
