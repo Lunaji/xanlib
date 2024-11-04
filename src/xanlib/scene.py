@@ -1,13 +1,13 @@
 from dataclasses import dataclass, field
 from typing import Optional
-from pathlib import Path
+from os import PathLike
 import re
 from xanlib.node import Node, traverse
 
 
 @dataclass
 class Scene:
-    file: Optional[str | Path] = None
+    file: str | PathLike
     version: Optional[int] = None
     FXData: Optional[bytes] = None
     textureNameData: Optional[bytes] = None

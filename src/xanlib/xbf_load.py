@@ -1,4 +1,5 @@
 from typing import BinaryIO, Optional
+from os import PathLike
 from struct import unpack, calcsize, iter_unpack
 from xanlib.vertex_animation import CompressedVertex
 from xanlib.math_utils import Vector3, UV, Quaternion
@@ -164,9 +165,8 @@ def read_node(stream: BinaryIO, parent: Optional[Node] = None) -> Node:
         stream.seek(stream_position)
         raise
 
-def load_xbf(filename):
-    scene = Scene()
-    scene.file = filename  
+def load_xbf(filename: str | PathLike) -> Scene:
+    scene = Scene(file=filename)
     with open(filename, 'rb') as f:
         header_fmt = '<2i'
         header_size = calcsize(header_fmt)
