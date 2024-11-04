@@ -8,7 +8,7 @@ from xanlib.xbf_load import (
     read_node,
     load_xbf,
 )
-from xanlib.scene import convert_signed_5bit
+from xanlib.compressed_vertex import convert_signed_5bit
 
 
 def test_convert_signed_5bit(signed_5bit):
