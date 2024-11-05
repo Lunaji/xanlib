@@ -6,12 +6,12 @@
 # Adjust the paths as needed.
 import bpy
 from mathutils import Matrix
-from xanlib import load_xbf
+import xanlib
 
-def should_hide(name):
+def should_hide(name: str) -> bool:
     return name == "#^^0" or "{LEECH}" in name or name.startswith("SLCT")
 
-def process_node(node, materials, parent_obj=None):
+def process_node(node: xanlib.Node, materials: list[str], parent_obj: bpy.types.Object | None = None):
     mesh = bpy.data.meshes.new(name=f'{node.name}_mesh')
 
     obj = bpy.data.objects.new(name=node.name, object_data=mesh)
@@ -36,6 +36,7 @@ def process_node(node, materials, parent_obj=None):
                 mesh.uv_layers.active = mesh.uv_layers[0]
             mesh.uv_layers.active.data[loop_index].uv = [u,v]
 
+    assert node.transform is not None
     obj.matrix_local = Matrix([node.transform[i*4:(i+1)*4] for i in range(4)]).transposed()
 
     if parent_obj is not None:
@@ -51,7 +52,7 @@ def process_node(node, materials, parent_obj=None):
 
 
 
-scene = load_xbf('Data/3DDATA0001/Units/HK_missile_H0.xbf')
+scene: xanlib.Scene = xanlib.load_xbf('Data/3DDATA0001/Units/HK_missile_H0.xbf')
 materials = []
 for texture in scene.textures:
     material = bpy.data.materials.new(name=f"Material_{texture}")
