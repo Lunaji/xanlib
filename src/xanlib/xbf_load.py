@@ -46,7 +46,7 @@ def read_vertex_animation(stream: BinaryIO) -> VertexAnimation:
             [CompressedVertex(*fields) for fields in CompressedVertex.fmt.iter_unpack(
                 stream.read(CompressedVertex.fmt.size*real_count
                 ))]
-            for i in range(actual)]
+            for _ in range(actual)]
         if scale & 0x80000000: #interpolated
             interpolation_fmt = f'<{frame_count}I'
             interpolation_size = calcsize(interpolation_fmt)
@@ -71,12 +71,12 @@ def read_key_animation(stream: BinaryIO) -> KeyAnimation:
     if flags==-1:
         matrices = [
             unpack('<16f', stream.read(4*16))
-            for i in range(frame_count+1)
+            for _ in range(frame_count+1)
         ]
     elif flags==-2:
         matrices = [
             unpack('<12f', stream.read(4*12))
-            for i in range(frame_count+1)
+            for _ in range(frame_count + 1)
         ]
     elif flags==-3:
         extra_fmt = f'i{frame_count + 1}h'
@@ -84,7 +84,7 @@ def read_key_animation(stream: BinaryIO) -> KeyAnimation:
         matrix_count, *extra_data = unpack(extra_fmt, stream.read(extra_size))
         matrices = [
             unpack('<12f', stream.read(4 * 12))
-            for i in range(matrix_count)
+            for _ in range(matrix_count)
         ]
     else:
         frames = []
@@ -139,9 +139,9 @@ def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
         node.transform = tuple(tranform)
         node.name = stream.read(name_length).decode('ascii')
         
-        node.children = [read_node(stream, node)   for i in range(child_count)]
-        node.vertices = [read_vertex(stream) for i in range(vertex_count)]
-        node.faces    = [read_face(stream)   for i in range(face_count)]
+        node.children = [read_node(stream, node) for _ in range(child_count)]
+        node.vertices = [read_vertex(stream) for _ in range(vertex_count)]
+        node.faces    = [read_face(stream) for _ in range(face_count)]
 
         if Node.Flags.PRELIGHT in flags:
             rgb_fmt = '<3B'
