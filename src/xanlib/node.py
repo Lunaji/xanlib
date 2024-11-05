@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Optional
 from enum import IntFlag
 from xanlib.math_utils import Matrix
 from xanlib.vertex import Vertex
@@ -17,16 +16,16 @@ class Node:
         VERTEX_ANIMATION = 4,
         KEY_ANIMATION = 8
 
-    parent: Optional['Node'] = None
-    transform: Optional[Matrix] = None
+    parent: 'Node | None' = None
+    transform: Matrix | None = None
     name: str = ''
     children: list['Node'] = field(default_factory=list)
     vertices: list[Vertex] = field(default_factory=list)
     faces: list[Face] = field(default_factory=list)
-    rgb: Optional[list[tuple[int, int, int]]] = None
-    faceData: Optional[list[int]] = None
-    vertex_animation: Optional[VertexAnimation] = None
-    key_animation: Optional[KeyAnimation] = None
+    rgb: list[tuple[int, int, int]] | None = None
+    faceData: list[int] | None = None
+    vertex_animation: VertexAnimation | None = None
+    key_animation: KeyAnimation | None = None
 
     def __iter__(self):
         yield self

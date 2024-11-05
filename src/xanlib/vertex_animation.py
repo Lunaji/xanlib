@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 from xanlib.compressed_vertex import CompressedVertex
 
 @dataclass
@@ -8,8 +7,8 @@ class VertexAnimation:
     count: int
     actual: int
     keys: list[int]
-    scale: Optional[int]
-    base_count: Optional[int]
-    real_count: Optional[int]
+    scale: int | None
+    base_count: int | None
+    real_count: int | None
     frames: list[list[CompressedVertex]]
     interpolation_data: list[int]

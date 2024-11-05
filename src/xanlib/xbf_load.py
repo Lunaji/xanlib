@@ -1,4 +1,4 @@
-from typing import BinaryIO, Optional
+from typing import BinaryIO
 from os import PathLike
 from struct import unpack, calcsize, iter_unpack
 from xanlib.vertex_animation import CompressedVertex
@@ -124,7 +124,7 @@ def read_key_animation(stream: BinaryIO) -> KeyAnimation:
         frames if flags not in (-1,-2,-3) else []
     )        
         
-def read_node(stream: BinaryIO, parent: Optional[Node] = None) -> Node:
+def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
     stream_position = stream.tell()
     try:
         node = Node()

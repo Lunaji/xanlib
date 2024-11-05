@@ -1,12 +1,12 @@
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 from xanlib.math_utils import Vector3, Quaternion, Matrix
 
 class KeyAnimationFrame(NamedTuple):
     frame_id: int
     flag: int
-    rotation: Optional[Quaternion]
-    scale: Optional[Vector3]
-    translation: Optional[Vector3]
+    rotation: Quaternion | None
+    scale: Vector3 | None
+    translation: Vector3 | None
 
 
 class KeyAnimation(NamedTuple):

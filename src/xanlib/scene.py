@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Optional
 from os import PathLike
 import re
 from xanlib.node import Node, traverse
@@ -8,12 +7,12 @@ from xanlib.node import Node, traverse
 @dataclass
 class Scene:
     file: str | PathLike
-    version: Optional[int] = None
+    version: int | None = None
     FXData: bytes = b''
     textureNameData: bytes = b''
     nodes: list[Node] = field(default_factory=list)
-    error: Optional[Exception] = None
-    unparsed: Optional[bytes] = None
+    error: Exception | None = None
+    unparsed: bytes | None = None
 
     @property
     def textures(self):
