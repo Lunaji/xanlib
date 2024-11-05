@@ -9,8 +9,8 @@ from xanlib.node import Node, traverse
 class Scene:
     file: str | PathLike
     version: Optional[int] = None
-    FXData: Optional[bytes] = None
-    textureNameData: Optional[bytes] = None
+    FXData: bytes = b''
+    textureNameData: bytes = b''
     nodes: list[Node] = field(default_factory=list)
     error: Optional[Exception] = None
     unparsed: Optional[bytes] = None

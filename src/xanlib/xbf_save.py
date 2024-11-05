@@ -1,4 +1,5 @@
 from typing import BinaryIO
+from os import PathLike
 from struct import pack, Struct
 from xanlib.vertex import Vertex
 from xanlib.face import Face
@@ -6,6 +7,7 @@ from xanlib.compressed_vertex import CompressedVertex
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
 from xanlib.node import Node
+from xanlib.scene import Scene
 
 
 def write_vertex(stream: BinaryIO, vertex: Vertex) -> None:
@@ -108,7 +110,7 @@ def write_node(stream: BinaryIO, node: Node) -> None:
     if node.key_animation is not None:
         write_key_animation(stream, node.key_animation)
 
-def save_xbf(scene, filename):
+def save_xbf(scene: Scene, filename: str | PathLike) -> None:
     with open(filename, 'wb') as f:
         header_fmt = Struct(f'<2i{len(scene.FXData)}si{len(scene.textureNameData)}s')
         f.write(header_fmt.pack(
