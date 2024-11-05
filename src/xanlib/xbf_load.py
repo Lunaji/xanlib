@@ -176,7 +176,7 @@ def load_xbf(filename: str | PathLike) -> Scene:
         while True:
             try:
                 node = read_node(f)
-                if node.flags is None:
+                if node.transform is None:
                     current_position = f.tell()
                     f.seek(0, 2)
                     assert current_position == f.tell(), 'Not at EOF'

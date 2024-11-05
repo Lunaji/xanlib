@@ -64,9 +64,20 @@ def write_key_animation(stream: BinaryIO, ka: KeyAnimation) -> None:
 	
 def write_node(stream, node):
     header_fmt = Struct(f'<4i16dI{len(node.name)}s')
+
+    flags = NodeFlags(0)
+    if node.rgb is not None:
+        flags |= NodeFlags.PRELIGHT
+    if node.faceData is not None:
+        flags |= NodeFlags.FACE_DATA
+    if node.vertex_animation is not None:
+        flags |= NodeFlags.VERTEX_ANIMATION
+    if node.key_animation is not None:
+        flags |= NodeFlags.KEY_ANIMATION
+
     stream.write(header_fmt.pack(
         len(node.vertices),
-        node.flags,
+        flags,
         len(node.faces),
         len(node.children),
         *node.transform,
@@ -83,17 +94,17 @@ def write_node(stream, node):
     for face in node.faces:
         write_face(stream, face)
         
-    if NodeFlags.PRELIGHT in node.flags:
+    if node.rgb is not None:
         rgb_fmt = Struct(f'<{3*len(node.rgb)}B')
         stream.write(rgb_fmt.pack(*(c for rgb in node.rgb for c in rgb)))
 
-    if NodeFlags.FACE_DATA in node.flags:
+    if node.faceData is not None:
         stream.write(pack(f'<{len(node.faceData)}i', *node.faceData))
 
-    if NodeFlags.VERTEX_ANIMATION in node.flags:
+    if node.vertex_animation is not None:
         write_vertex_animation(stream, node.vertex_animation)
         
-    if NodeFlags.KEY_ANIMATION in node.flags:
+    if node.key_animation is not None:
         write_key_animation(stream, node.key_animation)
 
 def save_xbf(scene, filename):
