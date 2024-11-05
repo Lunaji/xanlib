@@ -13,15 +13,15 @@ from xanlib.key_animation import KeyAnimation
 class Node:
 
     class Flags(IntFlag):
-        PRELIGHT = 1,
-        FACE_DATA = 2,
-        VERTEX_ANIMATION = 4,
+        PRELIGHT = 1
+        FACE_DATA = 2
+        VERTEX_ANIMATION = 4
         KEY_ANIMATION = 8
 
-    parent: 'Node | None' = None
+    parent: "Node | None" = None
     transform: Matrix | None = None
-    name: str = ''
-    children: list['Node'] = field(default_factory=list)
+    name: str = ""
+    children: list["Node"] = field(default_factory=list)
     vertices: list[Vertex] = field(default_factory=list)
     faces: list[Face] = field(default_factory=list)
     rgb: list[tuple[int, int, int]] | None = None
@@ -29,13 +29,13 @@ class Node:
     vertex_animation: VertexAnimation | None = None
     key_animation: KeyAnimation | None = None
 
-    def __iter__(self) -> Iterator['Node']:
+    def __iter__(self) -> Iterator["Node"]:
         yield self
         for child in self.children:
             yield from child
 
     @property
-    def ancestors(self) -> Iterator['Node']:
+    def ancestors(self) -> Iterator["Node"]:
         node = self
         while node.parent is not None:
             yield node.parent
@@ -43,13 +43,13 @@ class Node:
 
 
 def traverse(
-        node: Node,
-        func: Callable[..., None],
-        parent: Node | None = None,
-        depth: int = 0,
-        **kwargs: Any
+    node: Node,
+    func: Callable[..., None],
+    parent: Node | None = None,
+    depth: int = 0,
+    **kwargs: Any
 ) -> None:
     func(node, parent=parent, depth=depth, **kwargs)
 
     for child in node.children:
-        traverse(child, func, parent=node, depth=depth+1)
+        traverse(child, func, parent=node, depth=depth + 1)

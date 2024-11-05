@@ -6,13 +6,17 @@
 # Adjust the paths as needed.
 import bpy
 from mathutils import Matrix
-from xanlib import load_xbf
+import xanlib
 
-def should_hide(name):
+
+def should_hide(name: str) -> bool:
     return name == "#^^0" or "{LEECH}" in name or name.startswith("SLCT")
 
-def process_node(node, materials, parent_obj=None):
-    mesh = bpy.data.meshes.new(name=f'{node.name}_mesh')
+
+def process_node(
+    node: xanlib.Node, materials: list[str], parent_obj: bpy.types.Object | None = None
+):
+    mesh = bpy.data.meshes.new(name=f"{node.name}_mesh")
 
     obj = bpy.data.objects.new(name=node.name, object_data=mesh)
     for material in materials:
@@ -21,7 +25,7 @@ def process_node(node, materials, parent_obj=None):
     mesh.from_pydata(
         [vertex.position for vertex in node.vertices],
         [],
-        [face.vertex_indices for face in node.faces]
+        [face.vertex_indices for face in node.faces],
     )
 
     for i, face in enumerate(mesh.polygons):
@@ -34,9 +38,12 @@ def process_node(node, materials, parent_obj=None):
                 mesh.uv_layers.new(name="UVMap")
             if not mesh.uv_layers.active:
                 mesh.uv_layers.active = mesh.uv_layers[0]
-            mesh.uv_layers.active.data[loop_index].uv = [u,v]
+            mesh.uv_layers.active.data[loop_index].uv = [u, v]
 
-    obj.matrix_local = Matrix([node.transform[i*4:(i+1)*4] for i in range(4)]).transposed()
+    assert node.transform is not None
+    obj.matrix_local = Matrix(
+        [node.transform[i * 4 : (i + 1) * 4] for i in range(4)]
+    ).transposed()
 
     if parent_obj is not None:
         obj.parent = parent_obj
@@ -50,8 +57,7 @@ def process_node(node, materials, parent_obj=None):
         process_node(child, materials, obj)
 
 
-
-scene = load_xbf('Data/3DDATA0001/Units/HK_missile_H0.xbf')
+scene: xanlib.Scene = xanlib.load_xbf("Data/3DDATA0001/Units/HK_missile_H0.xbf")
 materials = []
 for texture in scene.textures:
     material = bpy.data.materials.new(name=f"Material_{texture}")
@@ -61,29 +67,29 @@ for texture in scene.textures:
     links = material.node_tree.links
     nodes.clear()
 
-    bsdf_node = nodes.new(type='ShaderNodeBsdfPrincipled')
+    bsdf_node = nodes.new(type="ShaderNodeBsdfPrincipled")
     bsdf_node.location = (0, 0)
 
-    output_node = nodes.new(type='ShaderNodeOutputMaterial')
+    output_node = nodes.new(type="ShaderNodeOutputMaterial")
     output_node.location = (400, 0)
 
-    texture_node = nodes.new('ShaderNodeTexImage')
+    texture_node = nodes.new("ShaderNodeTexImage")
     texture_node.location = (-400, 0)
 
-    links.new(bsdf_node.outputs['BSDF'], output_node.inputs['Surface'])
+    links.new(bsdf_node.outputs["BSDF"], output_node.inputs["Surface"])
 
-    texture_node = nodes.new('ShaderNodeTexImage')
+    texture_node = nodes.new("ShaderNodeTexImage")
     texture_node.location = (-400, 0)
 
     try:
-        texture_image = bpy.data.images.load(f'Data/3DDATA0001/Textures/{texture}')
+        texture_image = bpy.data.images.load(f"Data/3DDATA0001/Textures/{texture}")
     except RuntimeError:
         texture_image = None
 
     if texture_image is not None:
         texture_node.image = texture_image
 
-    links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+    links.new(texture_node.outputs["Color"], bsdf_node.inputs["Base Color"])
 
     materials.append(material)
 

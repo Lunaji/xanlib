@@ -11,61 +11,68 @@ from xanlib.scene import Scene
 
 
 def write_vertex(stream: BinaryIO, vertex: Vertex) -> None:
-    stream.write(pack('<3f', *vertex.position))
-    stream.write(pack('<3f', *vertex.normal))
-    
+    stream.write(pack("<3f", *vertex.position))
+    stream.write(pack("<3f", *vertex.normal))
+
+
 def write_face(stream: BinaryIO, face: Face) -> None:
-    stream.write(pack('<3i', *face.vertex_indices))
-    stream.write(pack('<1i', face.texture_index))
-    stream.write(pack('<1i', face.flags))
+    stream.write(pack("<3i", *face.vertex_indices))
+    stream.write(pack("<1i", face.texture_index))
+    stream.write(pack("<1i", face.flags))
     for uv in face.uv_coords:
-        stream.write(pack('2f', *uv))
-        
+        stream.write(pack("2f", *uv))
+
+
 def write_vertex_animation(stream: BinaryIO, va: VertexAnimation) -> None:
-    header_fmt = Struct(f'<3i{len(va.keys)}I')
+    header_fmt = Struct(f"<3i{len(va.keys)}I")
     stream.write(header_fmt.pack(va.frame_count, va.count, va.actual, *va.keys))
-    
-    if va.count<0:
-        compressed_header_fmt = Struct('<2I')
+
+    if va.count < 0:
+        compressed_header_fmt = Struct("<2I")
         stream.write(compressed_header_fmt.pack(va.scale, va.base_count))
         for frame in va.frames:
             for vertex in frame:
                 stream.write(CompressedVertex.fmt.pack(*vars(vertex).values()))
         if va.interpolation_data:
-            stream.write(pack(f'{len(va.interpolation_data)}I', *va.interpolation_data))
-                
+            stream.write(pack(f"{len(va.interpolation_data)}I", *va.interpolation_data))
+
+
 def write_key_animation(stream: BinaryIO, ka: KeyAnimation) -> None:
-    header_fmt = Struct('<2i')
+    header_fmt = Struct("<2i")
     stream.write(header_fmt.pack(ka.frame_count, ka.flags))
-    if ka.flags==-1:
+    if ka.flags == -1:
         for matrix in ka.matrices:
-            stream.write(pack('<16f', *matrix))
-    elif ka.flags==-2:
+            stream.write(pack("<16f", *matrix))
+    elif ka.flags == -2:
         for matrix in ka.matrices:
-            stream.write(pack('<12f', *matrix))
-    elif ka.flags==-3:
-        extra_fmt = Struct(f'i{len(ka.extra_data)}h')
+            stream.write(pack("<12f", *matrix))
+    elif ka.flags == -3:
+        extra_fmt = Struct(f"i{len(ka.extra_data)}h")
         stream.write(extra_fmt.pack(len(ka.matrices), *ka.extra_data))
         for matrix in ka.matrices:
-            stream.write(pack('<12f', *matrix))
+            stream.write(pack("<12f", *matrix))
     else:
         for frame in ka.frames:
-            pos_fmt = Struct('<2h')
+            pos_fmt = Struct("<2h")
             stream.write(pos_fmt.pack(frame.frame_id, frame.flag))
             if frame.rotation is not None:
-                stream.write(pack('<4f',
-                                  frame.rotation.w,
-                                  frame.rotation.v.x,
-                                  frame.rotation.v.y,
-                                  frame.rotation.v.z
-                                  ))
+                stream.write(
+                    pack(
+                        "<4f",
+                        frame.rotation.w,
+                        frame.rotation.v.x,
+                        frame.rotation.v.y,
+                        frame.rotation.v.z,
+                    )
+                )
             if frame.scale is not None:
-                stream.write(pack('<3f', *frame.scale))
+                stream.write(pack("<3f", *frame.scale))
             if frame.translation is not None:
-                stream.write(pack('<3f', *frame.translation))
-	
+                stream.write(pack("<3f", *frame.translation))
+
+
 def write_node(stream: BinaryIO, node: Node) -> None:
-    header_fmt = Struct(f'<4i16dI{len(node.name)}s')
+    header_fmt = Struct(f"<4i16dI{len(node.name)}s")
 
     flags = Node.Flags(0)
     if node.rgb is not None:
@@ -78,51 +85,56 @@ def write_node(stream: BinaryIO, node: Node) -> None:
         flags |= Node.Flags.KEY_ANIMATION
 
     assert node.transform is not None
-    stream.write(header_fmt.pack(
-        len(node.vertices),
-        flags,
-        len(node.faces),
-        len(node.children),
-        *node.transform,
-        len(node.name),
-        node.name.encode('ascii')
-    ))
-    
+    stream.write(
+        header_fmt.pack(
+            len(node.vertices),
+            flags,
+            len(node.faces),
+            len(node.children),
+            *node.transform,
+            len(node.name),
+            node.name.encode("ascii"),
+        )
+    )
+
     for child in node.children:
         write_node(stream, child)
-        
+
     for vertex in node.vertices:
         write_vertex(stream, vertex)
-        
+
     for face in node.faces:
         write_face(stream, face)
-        
+
     if node.rgb is not None:
-        rgb_fmt = Struct(f'<{3*len(node.rgb)}B')
+        rgb_fmt = Struct(f"<{3*len(node.rgb)}B")
         stream.write(rgb_fmt.pack(*(c for rgb in node.rgb for c in rgb)))
 
     if node.faceData is not None:
-        stream.write(pack(f'<{len(node.faceData)}i', *node.faceData))
+        stream.write(pack(f"<{len(node.faceData)}i", *node.faceData))
 
     if node.vertex_animation is not None:
         write_vertex_animation(stream, node.vertex_animation)
-        
+
     if node.key_animation is not None:
         write_key_animation(stream, node.key_animation)
 
+
 def save_xbf(scene: Scene, filename: str | PathLike) -> None:
-    with open(filename, 'wb') as f:
-        header_fmt = Struct(f'<2i{len(scene.FXData)}si{len(scene.textureNameData)}s')
-        f.write(header_fmt.pack(
-            scene.version,
-            len(scene.FXData),
-            scene.FXData,
-            len(scene.textureNameData),
-            scene.textureNameData
-        ))
+    with open(filename, "wb") as f:
+        header_fmt = Struct(f"<2i{len(scene.FXData)}si{len(scene.textureNameData)}s")
+        f.write(
+            header_fmt.pack(
+                scene.version,
+                len(scene.FXData),
+                scene.FXData,
+                len(scene.textureNameData),
+                scene.textureNameData,
+            )
+        )
         for node in scene.nodes:
             write_node(f, node)
         if scene.unparsed is not None:
             f.write(scene.unparsed)
         else:
-            f.write(pack('i', -1))
+            f.write(pack("i", -1))
