@@ -1,6 +1,7 @@
 from typing import NamedTuple
 from xanlib.math_utils import Vector3, Quaternion, Matrix
 
+
 class KeyAnimationFrame(NamedTuple):
     frame_id: int
     flag: int

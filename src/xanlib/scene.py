@@ -9,15 +9,19 @@ from xanlib.node import Node, traverse
 class Scene:
     file: str | PathLike
     version: int | None = None
-    FXData: bytes = b''
-    textureNameData: bytes = b''
+    FXData: bytes = b""
+    textureNameData: bytes = b""
     nodes: list[Node] = field(default_factory=list)
     error: Exception | None = None
     unparsed: bytes | None = None
 
     @property
     def textures(self) -> list[str]:
-        return [texture.decode('ascii') for texture in re.split(b'\x00\x00|\x00\x02', self.textureNameData) if texture]
+        return [
+            texture.decode("ascii")
+            for texture in re.split(b"\x00\x00|\x00\x02", self.textureNameData)
+            if texture
+        ]
 
     def __iter__(self) -> Iterator[Node]:
         for node in self.nodes:
@@ -29,7 +33,4 @@ class Scene:
 
 def print_node_names(scene: Scene) -> None:
     for node in scene.nodes:
-        traverse(
-            node,
-            lambda n, depth, **kwargs: print(' ' * depth * 2 + n.name)
-        )
+        traverse(node, lambda n, depth, **kwargs: print(" " * depth * 2 + n.name))

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from xanlib.compressed_vertex import CompressedVertex
 
+
 @dataclass
 class VertexAnimation:
     frame_count: int
