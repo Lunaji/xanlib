@@ -11,13 +11,6 @@ from xanlib.node import Node
 from xanlib.scene import Scene
 
 
-def read_vertex(stream: BinaryIO) -> Vertex:
-    return Vertex(
-        Vector3(*unpack("<3f", stream.read(4 * 3))),
-        Vector3(*unpack("<3f", stream.read(4 * 3))),
-    )
-
-
 def read_face(stream: BinaryIO) -> Face:
     return Face(
         unpack("<3i", stream.read(4 * 3)),
@@ -141,7 +134,7 @@ def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
         node.name = stream.read(name_length).decode("ascii")
 
         node.children = [read_node(stream, node) for _ in range(child_count)]
-        node.vertices = [read_vertex(stream) for _ in range(vertex_count)]
+        node.vertices = [Vertex.fromstream(stream) for _ in range(vertex_count)]
         node.faces = [read_face(stream) for _ in range(face_count)]
 
         if Node.Flags.PRELIGHT in flags:

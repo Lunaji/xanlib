@@ -1,12 +1,12 @@
 import io
 from xanlib.xbf_load import (
-    read_vertex,
     read_face,
     read_vertex_animation,
     read_key_animation,
     read_node,
     load_xbf,
 )
+from xanlib.vertex import Vertex
 from xanlib.compressed_vertex import convert_signed_5bit
 
 
@@ -17,7 +17,7 @@ def test_convert_signed_5bit(signed_5bit):
 
 def test_read_vertex(vertex):
     stream = io.BytesIO(vertex.encoded)
-    result = read_vertex(stream)
+    result = Vertex.fromstream(stream)
     assert result == vertex.decoded
 
 
