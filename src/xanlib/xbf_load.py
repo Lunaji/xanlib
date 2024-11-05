@@ -7,7 +7,7 @@ from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation, KeyAnimationFrame
-from xanlib.node import Node, NodeFlags
+from xanlib.node import Node
 from xanlib.scene import Scene
 
 
@@ -135,7 +135,7 @@ def read_node(stream: BinaryIO, parent: Optional[Node] = None) -> Node:
         header_fmt = '<3i16dI'
         header_size = calcsize(header_fmt)
         flags, face_count, child_count, *tranform, name_length = unpack(header_fmt, stream.read(header_size))
-        node.flags = NodeFlags(flags)
+        flags = Node.Flags(flags)
         node.transform = tuple(tranform)
         node.name = stream.read(name_length).decode('ascii')
         
@@ -143,20 +143,20 @@ def read_node(stream: BinaryIO, parent: Optional[Node] = None) -> Node:
         node.vertices = [read_vertex(stream) for i in range(vertex_count)]
         node.faces    = [read_face(stream)   for i in range(face_count)]
 
-        if NodeFlags.PRELIGHT in node.flags:
+        if Node.Flags.PRELIGHT in flags:
             rgb_fmt = '<3B'
             rgb_size = calcsize(rgb_fmt)
             node.rgb = [rgb_tuple for rgb_tuple in iter_unpack(rgb_fmt, stream.read(rgb_size*vertex_count))]
 
-        if NodeFlags.FACE_DATA in node.flags:
+        if Node.Flags.FACE_DATA in flags:
             faceData_fmt = f'<{face_count}i'
             faceData_size = calcsize(faceData_fmt)
             node.faceData = list(unpack(faceData_fmt, stream.read(faceData_size)))
 
-        if NodeFlags.VERTEX_ANIMATION in node.flags:
+        if Node.Flags.VERTEX_ANIMATION in flags:
             node.vertex_animation = read_vertex_animation(stream)
 
-        if NodeFlags.KEY_ANIMATION in node.flags:
+        if Node.Flags.KEY_ANIMATION in flags:
             node.key_animation = read_key_animation(stream)
             
         return node

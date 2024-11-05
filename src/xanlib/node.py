@@ -8,16 +8,16 @@ from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
 
 
-class NodeFlags(IntFlag):
-    PRELIGHT = 1,
-    FACE_DATA = 2,
-    VERTEX_ANIMATION = 4,
-    KEY_ANIMATION = 8
-
 @dataclass
 class Node:
+
+    class Flags(IntFlag):
+        PRELIGHT = 1,
+        FACE_DATA = 2,
+        VERTEX_ANIMATION = 4,
+        KEY_ANIMATION = 8
+
     parent: Optional['Node'] = None
-    flags: Optional[NodeFlags] = None
     transform: Optional[Matrix] = None
     name: Optional[str] = None
     children: list['Node'] = field(default_factory=list)

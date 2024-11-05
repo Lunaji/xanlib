@@ -5,7 +5,7 @@ from xanlib.face import Face
 from xanlib.compressed_vertex import CompressedVertex
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
-from xanlib.node import NodeFlags
+from xanlib.node import Node
 
 
 def write_vertex(stream: BinaryIO, vertex: Vertex) -> None:
@@ -65,15 +65,15 @@ def write_key_animation(stream: BinaryIO, ka: KeyAnimation) -> None:
 def write_node(stream, node):
     header_fmt = Struct(f'<4i16dI{len(node.name)}s')
 
-    flags = NodeFlags(0)
+    flags = Node.Flags(0)
     if node.rgb is not None:
-        flags |= NodeFlags.PRELIGHT
+        flags |= Node.Flags.PRELIGHT
     if node.faceData is not None:
-        flags |= NodeFlags.FACE_DATA
+        flags |= Node.Flags.FACE_DATA
     if node.vertex_animation is not None:
-        flags |= NodeFlags.VERTEX_ANIMATION
+        flags |= Node.Flags.VERTEX_ANIMATION
     if node.key_animation is not None:
-        flags |= NodeFlags.KEY_ANIMATION
+        flags |= Node.Flags.KEY_ANIMATION
 
     stream.write(header_fmt.pack(
         len(node.vertices),

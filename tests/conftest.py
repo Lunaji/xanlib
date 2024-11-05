@@ -9,7 +9,7 @@ from xanlib.face import Face
 from xanlib.compressed_vertex import CompressedVertex
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
-from xanlib.node import Node, NodeFlags
+from xanlib.node import Node
 from xanlib.scene import Scene
 
 EncodedDecoded = namedtuple('EncodedDecoded', ['encoded', 'decoded'])
@@ -147,7 +147,6 @@ def node_basic(vertex, face, matrix):
     )
 
     decoded = Node(
-        flags= NodeFlags.PRELIGHT,
         transform= matrix.decoded,
         name= "TestNode",
         vertices= [expected_vertex],
@@ -200,7 +199,6 @@ def node_with_children(vertex, face, matrix):
     )
 
     child = Node(
-        flags= NodeFlags.PRELIGHT,
         transform= matrix.decoded,
         name= "ChildNode",
         vertices= [expected_vertex],
@@ -209,7 +207,6 @@ def node_with_children(vertex, face, matrix):
     )
 
     decoded = Node(
-        flags= NodeFlags.PRELIGHT,
         transform= matrix.decoded,
         name= "ParentNode",
         vertices= [expected_vertex],
