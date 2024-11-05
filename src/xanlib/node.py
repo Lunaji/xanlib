@@ -19,7 +19,7 @@ class Node:
 
     parent: Optional['Node'] = None
     transform: Optional[Matrix] = None
-    name: Optional[str] = None
+    name: str = ''
     children: list['Node'] = field(default_factory=list)
     vertices: list[Vertex] = field(default_factory=list)
     faces: list[Face] = field(default_factory=list)

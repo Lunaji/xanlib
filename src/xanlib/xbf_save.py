@@ -62,7 +62,7 @@ def write_key_animation(stream: BinaryIO, ka: KeyAnimation) -> None:
             if frame.translation is not None:
                 stream.write(pack('<3f', *frame.translation))
 	
-def write_node(stream, node):
+def write_node(stream: BinaryIO, node: Node) -> None:
     header_fmt = Struct(f'<4i16dI{len(node.name)}s')
 
     flags = Node.Flags(0)
@@ -75,6 +75,7 @@ def write_node(stream, node):
     if node.key_animation is not None:
         flags |= Node.Flags.KEY_ANIMATION
 
+    assert node.transform is not None
     stream.write(header_fmt.pack(
         len(node.vertices),
         flags,
