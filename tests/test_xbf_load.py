@@ -1,5 +1,4 @@
 import io
-import pytest
 from xanlib.xbf_load import (
     read_vertex,
     read_face,

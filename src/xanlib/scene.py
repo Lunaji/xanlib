@@ -1,33 +1,33 @@
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Optional, List, Union
-from pathlib import Path
+from os import PathLike
 import re
 from xanlib.node import Node, traverse
 
 
 @dataclass
 class Scene:
-    file: Optional[Union[str, Path]] = None
-    version: Optional[int] = None
-    FXData: Optional[bytes] = None
-    textureNameData: Optional[bytes] = None
-    nodes: List[Node] = field(default_factory=list)
-    error: Optional[Exception] = None
-    unparsed: Optional[bytes] = None
+    file: str | PathLike
+    version: int | None = None
+    FXData: bytes = b''
+    textureNameData: bytes = b''
+    nodes: list[Node] = field(default_factory=list)
+    error: Exception | None = None
+    unparsed: bytes | None = None
 
     @property
-    def textures(self):
+    def textures(self) -> list[str]:
         return [texture.decode('ascii') for texture in re.split(b'\x00\x00|\x00\x02', self.textureNameData) if texture]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Node]:
         for node in self.nodes:
             yield from node
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str) -> Node:
         return next(node for node in self if node.name == name)
 
 
-def print_node_names(scene):
+def print_node_names(scene: Scene) -> None:
     for node in scene.nodes:
         traverse(
             node,

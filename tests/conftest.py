@@ -1,13 +1,15 @@
 import pytest
 import json
 import binascii
+from pathlib import Path
 from collections import namedtuple
+from xanlib.math_utils import Vector3, UV
 from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.compressed_vertex import CompressedVertex
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
-from xanlib.node import Node, NodeFlags
+from xanlib.node import Node
 from xanlib.scene import Scene
 
 EncodedDecoded = namedtuple('EncodedDecoded', ['encoded', 'decoded'])
@@ -46,18 +48,13 @@ def pytest_collection_modifyitems(config, items):
 def signed_5bit(request):
     yield request.param
 
-@pytest.fixture
-def pos_int():
-    yield {
-            'binary': b'\x40\xe2\x01\x00',
-            'decoded': 123456
-        }
-
 def load_test_data(json_file):
-    with open(json_file, 'r') as file:
+    test_data_dir = Path(__file__).parent / 'test_data'
+    test_data_path = test_data_dir / json_file
+    with test_data_path.open('r') as file:
         return json.load(file)
 
-@pytest.fixture(params=load_test_data('tests/test_data/vertices.json'))
+@pytest.fixture(params=load_test_data('vertices.json'))
 def vertex(request):
     data = request.param
     encoded_position = binascii.unhexlify(data['encoded']['position'])
@@ -65,13 +62,13 @@ def vertex(request):
     encoded = encoded_position + encoded_normal
 
     decoded = Vertex(
-        position=tuple(data['decoded']['position']),
-        normal=tuple(data['decoded']['normal'])
+        position=Vector3(*data['decoded']['position']),
+        normal=Vector3(*data['decoded']['normal'])
     )
 
     yield EncodedDecoded(encoded, decoded)
 
-@pytest.fixture(params=load_test_data('tests/test_data/faces.json'))
+@pytest.fixture(params=load_test_data('faces.json'))
 def face(request):
     data = request.param
     attrs = ['vertex_indices', 'texture_index', 'flags', 'uv_coords']
@@ -81,13 +78,13 @@ def face(request):
         tuple(data['decoded']['vertex_indices']),
         data['decoded']['texture_index'],
         data['decoded']['flags'],
-        tuple(tuple(uv) for uv in data['decoded']['uv_coords'])
+        tuple(UV(*uv) for uv in data['decoded']['uv_coords'])
     )
 
     yield EncodedDecoded(encoded, decoded)
 
 
-@pytest.fixture(params=load_test_data('tests/test_data/vertex_animations.json'))
+@pytest.fixture(params=load_test_data('vertex_animations.json'))
 def vertex_animation(request):
     data = request.param
     yield EncodedDecoded(
@@ -100,12 +97,12 @@ def vertex_animation(request):
                                             scale=data['decoded']['scale'],
                                             base_count=data['decoded']['base_count'],
                                             real_count=data['decoded']['real_count'],
-                                            frames=[[CompressedVertex(*datum) for datum in frame] for frame in data['decoded']['frames']]if data['decoded']['frames'] is not None else None,
-                                            interpolation_data=data['decoded']['interpolation_data'],
+                                            frames=[[CompressedVertex(*datum) for datum in frame] for frame in data['decoded']['frames']]if data['decoded']['frames'] is not None else [],
+                                            interpolation_data=data['decoded']['interpolation_data'] if data['decoded']['interpolation_data'] is not None else []
                                         )
                         )
 
-@pytest.fixture(params=load_test_data('tests/test_data/key_animations.json'))
+@pytest.fixture(params=load_test_data('key_animations.json'))
 def key_animation(request):
     data = request.param
 
@@ -114,9 +111,8 @@ def key_animation(request):
                 frame_count=data['decoded']['frame_count'],
                 flags=data['decoded']['flags'],
                 matrices=[tuple(matrix) for matrix in data['decoded']['matrices']],
-                actual=data['decoded']['actual'],
-                extra_data=data['decoded']['extra_data'],
-                frames=data['decoded'].get('frames', None)
+                extra_data=data['decoded']['extra_data'] or [],
+                frames=data['decoded'].get('frames', None) or []
               )
 
     yield EncodedDecoded(encoded, decoded)
@@ -151,7 +147,6 @@ def node_basic(vertex, face, matrix):
     )
 
     decoded = Node(
-        flags= NodeFlags.PRELIGHT,
         transform= matrix.decoded,
         name= "TestNode",
         vertices= [expected_vertex],
@@ -204,7 +199,6 @@ def node_with_children(vertex, face, matrix):
     )
 
     child = Node(
-        flags= NodeFlags.PRELIGHT,
         transform= matrix.decoded,
         name= "ChildNode",
         vertices= [expected_vertex],
@@ -213,7 +207,6 @@ def node_with_children(vertex, face, matrix):
     )
 
     decoded = Node(
-        flags= NodeFlags.PRELIGHT,
         transform= matrix.decoded,
         name= "ParentNode",
         vertices= [expected_vertex],
@@ -241,6 +234,7 @@ def scene(node_basic):
             )
 
     decoded = Scene(
+        file=file,
         version=version,
         FXData=FXData,
         textureNameData=textureNameData,
