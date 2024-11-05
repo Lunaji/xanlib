@@ -1,6 +1,7 @@
 import pytest
 import json
 import binascii
+from pathlib import Path
 from collections import namedtuple
 from xanlib.math_utils import Vector3, UV
 from xanlib.vertex import Vertex
@@ -48,10 +49,12 @@ def signed_5bit(request):
     yield request.param
 
 def load_test_data(json_file):
-    with open(json_file, 'r') as file:
+    test_data_dir = Path(__file__).parent / 'test_data'
+    test_data_path = test_data_dir / json_file
+    with test_data_path.open('r') as file:
         return json.load(file)
 
-@pytest.fixture(params=load_test_data('tests/test_data/vertices.json'))
+@pytest.fixture(params=load_test_data('vertices.json'))
 def vertex(request):
     data = request.param
     encoded_position = binascii.unhexlify(data['encoded']['position'])
@@ -65,7 +68,7 @@ def vertex(request):
 
     yield EncodedDecoded(encoded, decoded)
 
-@pytest.fixture(params=load_test_data('tests/test_data/faces.json'))
+@pytest.fixture(params=load_test_data('faces.json'))
 def face(request):
     data = request.param
     attrs = ['vertex_indices', 'texture_index', 'flags', 'uv_coords']
@@ -81,7 +84,7 @@ def face(request):
     yield EncodedDecoded(encoded, decoded)
 
 
-@pytest.fixture(params=load_test_data('tests/test_data/vertex_animations.json'))
+@pytest.fixture(params=load_test_data('vertex_animations.json'))
 def vertex_animation(request):
     data = request.param
     yield EncodedDecoded(
@@ -99,7 +102,7 @@ def vertex_animation(request):
                                         )
                         )
 
-@pytest.fixture(params=load_test_data('tests/test_data/key_animations.json'))
+@pytest.fixture(params=load_test_data('key_animations.json'))
 def key_animation(request):
     data = request.param
 
