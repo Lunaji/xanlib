@@ -134,9 +134,9 @@ def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
         node.parent = parent
         header_fmt = '<3i16dI'
         header_size = calcsize(header_fmt)
-        flags, face_count, child_count, *tranform, name_length = unpack(header_fmt, stream.read(header_size))
+        flags, face_count, child_count, *transform, name_length = unpack(header_fmt, stream.read(header_size))
         flags = Node.Flags(flags)
-        node.transform = tuple(tranform)
+        node.transform = tuple(transform)
         node.name = stream.read(name_length).decode('ascii')
         
         node.children = [read_node(stream, node) for _ in range(child_count)]
