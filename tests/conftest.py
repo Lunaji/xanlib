@@ -59,9 +59,7 @@ def load_test_data(json_file):
         return json.load(file)
 
 
-@pytest.fixture(params=load_test_data("vertices.json"))
-def vertex(request):
-    data = request.param
+def prepare_vertex(data):
     encoded_position = binascii.unhexlify(data["encoded"]["position"])
     encoded_normal = binascii.unhexlify(data["encoded"]["normal"])
     encoded = encoded_position + encoded_normal
@@ -71,7 +69,12 @@ def vertex(request):
         normal=Vector3(*data["decoded"]["normal"]),
     )
 
-    yield EncodedDecoded(encoded, decoded)
+    return EncodedDecoded(encoded, decoded)
+
+
+@pytest.fixture(params=load_test_data("vertices.json"))
+def vertex(request):
+    yield prepare_vertex(request.param)
 
 
 @pytest.fixture(params=load_test_data("faces.json"))
@@ -144,12 +147,15 @@ def matrix():
 
 
 @pytest.fixture
-def node_basic(vertex, face, matrix):
-    vertex_bin, expected_vertex = vertex
+def node_basic(face, matrix):
     face_bin, expected_face = face
 
-    # Binary data for vertexCount = 1, flags = NodeFlags.PRELIGHT, faceCount = 1, childCount = 0, name = "TestNode"
-    vertexCount_bin = b"\x01\x00\x00\x00"  # 1 as int
+    vertex_data = load_test_data("vertices.json")
+    vertices_prepared = [prepare_vertex(data) for data in vertex_data]
+    vertices_encoded = b"".join([vertex.encoded for vertex in vertices_prepared])
+    vertices_decoded = [vertex.decoded for vertex in vertices_prepared]
+
+    vertexCount_bin = len(vertices_prepared).to_bytes(4, "little")
     flags_bin = b"\x01\x00\x00\x00"  # NodeFlags.PRELIGHT (1)
     faceCount_bin = b"\x01\x00\x00\x00"  # 1 as int
     childCount_bin = b"\x00\x00\x00\x00"  # 0 as int (no children)
@@ -158,8 +164,7 @@ def node_basic(vertex, face, matrix):
     nameLength_bin = b"\x08\x00\x00\x00"  # 8 as int
     name_bin = b"TestNode"
 
-    # RGB color data for 1 vertex: (255, 0, 0)
-    rgb_bin = b"\xff\x00\x00"
+    rgb_bin = b"\xff\x00\x00\xff\xff\xff"
 
     binary_data = (
         vertexCount_bin
@@ -169,7 +174,7 @@ def node_basic(vertex, face, matrix):
         + matrix.encoded
         + nameLength_bin
         + name_bin
-        + vertex_bin
+        + vertices_encoded
         + face_bin
         + rgb_bin
     )
@@ -177,9 +182,9 @@ def node_basic(vertex, face, matrix):
     decoded = Node(
         transform=matrix.decoded,
         name="TestNode",
-        vertices=[expected_vertex],
+        vertices=vertices_decoded,
         faces=[expected_face],
-        rgb=[(255, 0, 0)],
+        rgb=[(255, 0, 0), (255, 255, 255)],
     )
 
     yield EncodedDecoded(binary_data, decoded)
