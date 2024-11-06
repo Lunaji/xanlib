@@ -4,19 +4,20 @@ from xanlib.math_utils import Vector3
 from struct import Struct
 
 
-@dataclass
+@dataclass(init=False)
 class Vertex:
-    position: Vector3
-    normal: Vector3
     cstruct = Struct("<6f")
+
+    def __init__(
+        self, x: float, y: float, z: float, nx: float, ny: float, nz: float
+    ) -> None:
+        self.position = Vector3(x, y, z)
+        self.normal = Vector3(nx, ny, nz)
 
     @classmethod
     def frombuffer(cls, buffer: Buffer) -> "Vertex":
         coords = cls.cstruct.unpack(buffer)
-        return cls(
-            Vector3(*coords[:3]),
-            Vector3(*coords[3:]),
-        )
+        return cls(*coords)
 
     def __bytes__(self) -> bytes:
         return self.cstruct.pack(*self.position, *self.normal)

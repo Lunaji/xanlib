@@ -40,7 +40,7 @@ class CompressedVertex:
         )
 
     def as_vertex(self) -> Vertex:
-        return Vertex(self.position, self.normal)
+        return Vertex(*self.position, *self.normal)
 
     def from_vertex(self, vertex: Vertex) -> None:
         """Warning: does not roundtrip"""

@@ -3,7 +3,7 @@ import json
 import binascii
 from pathlib import Path
 from collections import namedtuple
-from xanlib.math_utils import Vector3, UV
+from xanlib.math_utils import UV
 from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.compressed_vertex import CompressedVertex
@@ -64,10 +64,7 @@ def prepare_vertex(data):
     encoded_normal = binascii.unhexlify(data["encoded"]["normal"])
     encoded = encoded_position + encoded_normal
 
-    decoded = Vertex(
-        position=Vector3(*data["decoded"]["position"]),
-        normal=Vector3(*data["decoded"]["normal"]),
-    )
+    decoded = Vertex(*data["decoded"]["position"], *data["decoded"]["normal"])
 
     return EncodedDecoded(encoded, decoded)
 
