@@ -26,6 +26,9 @@ class CompressedVertex:
     normal_packed: int
     cstruct = Struct("<3hH")
 
+    def __bytes__(self) -> bytes:
+        return self.cstruct.pack(self.x, self.y, self.z, self.normal_packed)
+
     @property
     def position(self) -> Vector3:
         return Vector3(self.x, self.y, self.z)

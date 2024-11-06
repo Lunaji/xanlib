@@ -1,7 +1,6 @@
 from typing import BinaryIO
 from os import PathLike
 from struct import pack, Struct
-from xanlib.compressed_vertex import CompressedVertex
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
 from xanlib.node import Node
@@ -15,9 +14,10 @@ def write_vertex_animation(stream: BinaryIO, va: VertexAnimation) -> None:
     if va.count < 0:
         compressed_header_fmt = Struct("<2I")
         stream.write(compressed_header_fmt.pack(va.scale, va.base_count))
-        for frame in va.frames:
-            for vertex in frame:
-                stream.write(CompressedVertex.cstruct.pack(*vars(vertex).values()))
+        frames_buffer = b"".join(
+            bytes(vertex) for frame in va.frames for vertex in frame
+        )
+        stream.write(frames_buffer)
         if va.interpolation_data:
             stream.write(pack(f"{len(va.interpolation_data)}I", *va.interpolation_data))
 
