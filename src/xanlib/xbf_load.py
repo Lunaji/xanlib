@@ -122,16 +122,20 @@ def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
 
         node.children = [read_node(stream, node) for _ in range(child_count)]
 
-        vertices_buffer = stream.read(Vertex.size() * vertex_count)
+        vertices_size = Vertex.size() * vertex_count
+        faces_size = Face.cstruct.size * face_count
+        mesh_buffer = stream.read(vertices_size + faces_size)
+
+        vertices_buffer = mesh_buffer[:vertices_size]
         node.vertices = [
             Vertex.frombytes(vertices_buffer[i : i + Vertex.size()])
-            for i in range(0, len(vertices_buffer), Vertex.size())
+            for i in range(0, vertices_size, Vertex.size())
         ]
 
-        face_buffer = stream.read(Face.cstruct.size * face_count)
+        faces_buffer = mesh_buffer[vertices_size:]
         node.faces = [
-            Face.frombuffer(face_buffer[i : i + Face.cstruct.size])
-            for i in range(0, len(face_buffer), Face.cstruct.size)
+            Face.frombuffer(faces_buffer[i : i + Face.cstruct.size])
+            for i in range(0, len(faces_buffer), Face.cstruct.size)
         ]
 
         if Node.Flags.PRELIGHT in flags:
