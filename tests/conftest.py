@@ -191,7 +191,7 @@ def node_basic(face, matrix):
 
 
 @pytest.fixture
-def node_with_children(vertex, face, matrix):
+def node_with_children(vertex, face, matrix, node_basic):
     vertex_bin, expected_vertex = vertex
     face_bin, expected_face = face
 
@@ -208,32 +208,6 @@ def node_with_children(vertex, face, matrix):
     # RGB color data for parent vertex: (255, 0, 0)
     rgb_bin = b"\xff\x00\x00"
 
-    # Binary data for child node (vertexCount = 1, faceCount = 1, childCount = 0)
-    child_vertexCount_bin = b"\x01\x00\x00\x00"  # 1 as int
-    child_flags_bin = b"\x01\x00\x00\x00"  # NodeFlags.PRELIGHT (1)
-    child_faceCount_bin = b"\x01\x00\x00\x00"  # 1 as int
-    child_childCount_bin = b"\x00\x00\x00\x00"  # 0 as int (no children)
-
-    # Name: length = 9, "ChildNode"
-    child_nameLength_bin = b"\x09\x00\x00\x00"  # 9 as int
-    child_name_bin = b"ChildNode"
-
-    # RGB color data for child vertex: (0, 255, 0)
-    child_rgb_bin = b"\x00\xff\x00"
-
-    child_node_bin = (
-        child_vertexCount_bin
-        + child_flags_bin
-        + child_faceCount_bin
-        + child_childCount_bin
-        + matrix.encoded
-        + child_nameLength_bin
-        + child_name_bin
-        + vertex_bin
-        + face_bin
-        + child_rgb_bin
-    )
-
     encoded = (
         vertexCount_bin
         + flags_bin
@@ -242,18 +216,10 @@ def node_with_children(vertex, face, matrix):
         + matrix.encoded
         + nameLength_bin
         + parent_name_bin
-        + child_node_bin
+        + node_basic.encoded
         + vertex_bin
         + face_bin
         + rgb_bin
-    )
-
-    child = Node(
-        transform=matrix.decoded,
-        name="ChildNode",
-        vertices=[expected_vertex],
-        faces=[expected_face],
-        rgb=[(0, 255, 0)],
     )
 
     decoded = Node(
@@ -262,7 +228,7 @@ def node_with_children(vertex, face, matrix):
         vertices=[expected_vertex],
         faces=[expected_face],
         rgb=[(255, 0, 0)],
-        children=[child],
+        children=[node_basic.decoded],
     )
 
     yield EncodedDecoded(encoded, decoded)
