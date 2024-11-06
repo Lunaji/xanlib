@@ -14,9 +14,8 @@ def stream():
     return io.BytesIO()
 
 
-def test_write_vertex(stream, vertex):
-    vertex.decoded.tostream(stream)
-    assert stream.getvalue() == vertex.encoded
+def test_write_vertex(vertex):
+    assert bytes(vertex.decoded) == vertex.encoded
 
 
 def test_write_face(stream, face):
