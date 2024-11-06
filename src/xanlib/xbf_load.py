@@ -134,7 +134,13 @@ def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
         node.name = stream.read(name_length).decode("ascii")
 
         node.children = [read_node(stream, node) for _ in range(child_count)]
-        node.vertices = [Vertex.fromstream(stream) for _ in range(vertex_count)]
+
+        vertices_buffer = stream.read(Vertex.size() * vertex_count)
+        node.vertices = [
+            Vertex.frombytes(vertices_buffer[i : i + Vertex.size()])
+            for i in range(0, len(vertices_buffer), Vertex.size())
+        ]
+
         node.faces = [read_face(stream) for _ in range(face_count)]
 
         if Node.Flags.PRELIGHT in flags:

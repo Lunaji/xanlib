@@ -1,4 +1,3 @@
-from typing import BinaryIO
 from collections.abc import Buffer
 from dataclasses import dataclass
 from xanlib.math_utils import Vector3
@@ -22,8 +21,3 @@ class Vertex:
             Vector3(*coords[:3]),
             Vector3(*coords[3:]),
         )
-
-    @classmethod
-    def fromstream(cls, stream: BinaryIO) -> "Vertex":
-        buffer = stream.read(cls._struct.size)
-        return cls.frombytes(buffer)
