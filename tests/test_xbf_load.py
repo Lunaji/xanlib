@@ -16,9 +16,7 @@ def test_convert_signed_5bit(signed_5bit):
 
 
 def test_read_vertex(vertex):
-    stream = io.BytesIO(vertex.encoded)
-    result = Vertex.fromstream(stream)
-    assert result == vertex.decoded
+    assert Vertex.frombytes(vertex.encoded) == vertex.decoded
 
 
 def test_read_face(face):
