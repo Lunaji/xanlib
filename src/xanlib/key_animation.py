@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import BinaryIO, NamedTuple
 from xanlib.math_utils import Vector3, Quaternion, Matrix
-from struct import unpack, calcsize
+from struct import Struct
 
 
 class KeyAnimationFrame(NamedTuple):
@@ -19,46 +19,59 @@ class KeyAnimation:
     matrices: list[Matrix]
     extra_data: list[int]
     frames: list[KeyAnimationFrame]
+    _header_struct = Struct("<2i")
+    _matrix16_struct = Struct("<16f")
+    _matrix12_struct = Struct("<12f")
+    _extra_fmt = "<i{count}h"
+    _pos = Struct("<2h")
+    _quaternion = Struct("<4f")
+    _vector3 = Struct("<3f")
 
     @classmethod
     def fromstream(cls, stream: BinaryIO) -> "KeyAnimation":
-        header_fmt = "<2i"
-        header_size = calcsize(header_fmt)
-        frame_count, flags = unpack(header_fmt, stream.read(header_size))
+        frame_count, flags = cls._header_struct.unpack(
+            stream.read(cls._header_struct.size)
+        )
         if flags == -1:
+            matrix_buffer = stream.read(cls._matrix16_struct.size * (frame_count + 1))
             matrices = [
-                unpack("<16f", stream.read(4 * 16)) for _ in range(frame_count + 1)
+                matrix for matrix in cls._matrix16_struct.iter_unpack(matrix_buffer)
             ]
         elif flags == -2:
+            matrix_buffer = stream.read(cls._matrix12_struct.size * (frame_count + 1))
             matrices = [
-                unpack("<12f", stream.read(4 * 12)) for _ in range(frame_count + 1)
+                matrix for matrix in cls._matrix12_struct.iter_unpack(matrix_buffer)
             ]
         elif flags == -3:
-            extra_fmt = f"i{frame_count + 1}h"
-            extra_size = calcsize(extra_fmt)
-            matrix_count, *extra_data = unpack(extra_fmt, stream.read(extra_size))
+            extra_struct = Struct(cls._extra_fmt.format(count=frame_count + 1))
+            matrix_count, *extra_data = extra_struct.unpack(
+                stream.read(extra_struct.size)
+            )
+            matrix_buffer = stream.read(cls._matrix12_struct.size * matrix_count)
             matrices = [
-                unpack("<12f", stream.read(4 * 12)) for _ in range(matrix_count)
+                matrix for matrix in cls._matrix12_struct.iter_unpack(matrix_buffer)
             ]
         else:
             frames = []
             for i in range(flags):
-                pos_fmt = "<2h"
-                pos_size = calcsize(pos_fmt)
-                frame_id, flag = unpack(pos_fmt, stream.read(pos_size))
+                frame_id, flag = cls._pos.unpack(stream.read(cls._pos.size))
                 assert not (flag & 0b1000111111111111)
 
                 if (flag >> 12) & 0b001:
-                    w, *v = unpack("<4f", stream.read(4 * 4))
+                    w, *v = cls._quaternion.unpack(stream.read(cls._quaternion.size))
                     rotation = Quaternion(w, Vector3(*v))
                 else:
                     rotation = None
                 if (flag >> 12) & 0b010:
-                    scale = Vector3(*unpack("<3f", stream.read(4 * 3)))
+                    scale = Vector3(
+                        *cls._vector3.unpack(stream.read(cls._vector3.size))
+                    )
                 else:
                     scale = None
                 if (flag >> 12) & 0b100:
-                    translation = Vector3(*unpack("<3f", stream.read(4 * 3)))
+                    translation = Vector3(
+                        *cls._vector3.unpack(stream.read(cls._vector3.size))
+                    )
                 else:
                     translation = None
 
