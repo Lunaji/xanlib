@@ -27,6 +27,36 @@ class KeyAnimation:
     _quaternion = Struct("<4f")
     _vector3 = Struct("<3f")
 
+    def __bytes__(self) -> bytes:
+        extra_data = b""
+        if self.flags in (-1, -2, -3):
+            if self.flags == -1:
+                matrix_struct = self._matrix16_struct
+            elif self.flags == -2:
+                matrix_struct = self._matrix12_struct
+            else:
+                extra_struct = Struct(
+                    self._extra_fmt.format(count=self.frame_count + 1)
+                )
+                extra_data = extra_struct.pack(len(self.matrices), *self.extra_data)
+                matrix_struct = self._matrix12_struct
+            return (
+                self._header_struct.pack(self.frame_count, self.flags)
+                + extra_data
+                + b"".join(matrix_struct.pack(*matrix) for matrix in self.matrices)
+            )
+        else:
+            buffer = self._header_struct.pack(self.frame_count, self.flags)
+            for frame in self.frames:
+                buffer += self._pos.pack(frame.frame_id, frame.flag)
+                if frame.rotation is not None:
+                    buffer += self._quaternion.pack(frame.rotation.w, *frame.rotation.v)
+                if frame.scale is not None:
+                    buffer += self._vector3.pack(*frame.scale)
+                if frame.translation is not None:
+                    buffer += self._vector3.pack(*frame.translation)
+            return buffer
+
     @classmethod
     def fromstream(cls, stream: BinaryIO) -> "KeyAnimation":
         frame_count, flags = cls._header_struct.unpack(

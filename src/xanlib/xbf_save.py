@@ -84,7 +84,7 @@ def write_node(stream: BinaryIO, node: Node) -> None:
         stream.write(bytes(node.vertex_animation))
 
     if node.key_animation is not None:
-        write_key_animation(stream, node.key_animation)
+        stream.write(bytes(node.key_animation))
 
 
 def save_xbf(scene: Scene, filename: str | PathLike) -> None:
