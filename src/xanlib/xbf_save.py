@@ -1,43 +1,8 @@
 from typing import BinaryIO
 from os import PathLike
 from struct import pack, Struct
-from xanlib.key_animation import KeyAnimation
 from xanlib.node import Node
 from xanlib.scene import Scene
-
-
-def write_key_animation(stream: BinaryIO, ka: KeyAnimation) -> None:
-    header_fmt = Struct("<2i")
-    stream.write(header_fmt.pack(ka.frame_count, ka.flags))
-    if ka.flags == -1:
-        for matrix in ka.matrices:
-            stream.write(pack("<16f", *matrix))
-    elif ka.flags == -2:
-        for matrix in ka.matrices:
-            stream.write(pack("<12f", *matrix))
-    elif ka.flags == -3:
-        extra_fmt = Struct(f"i{len(ka.extra_data)}h")
-        stream.write(extra_fmt.pack(len(ka.matrices), *ka.extra_data))
-        for matrix in ka.matrices:
-            stream.write(pack("<12f", *matrix))
-    else:
-        for frame in ka.frames:
-            pos_fmt = Struct("<2h")
-            stream.write(pos_fmt.pack(frame.frame_id, frame.flag))
-            if frame.rotation is not None:
-                stream.write(
-                    pack(
-                        "<4f",
-                        frame.rotation.w,
-                        frame.rotation.v.x,
-                        frame.rotation.v.y,
-                        frame.rotation.v.z,
-                    )
-                )
-            if frame.scale is not None:
-                stream.write(pack("<3f", *frame.scale))
-            if frame.translation is not None:
-                stream.write(pack("<3f", *frame.translation))
 
 
 def write_node(stream: BinaryIO, node: Node) -> None:
