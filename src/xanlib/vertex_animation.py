@@ -17,6 +17,7 @@ class VertexAnimation:
     interpolation_data: list[int]
     _header_struct = Struct("<3i")
     _key_fmt = "{actual}I"
+    _compressed_header_struct = Struct("<2I")
 
     @classmethod
     def fromstream(cls, stream: BinaryIO) -> "VertexAnimation":
@@ -26,10 +27,8 @@ class VertexAnimation:
         keys_buffer = stream.read(keys_struct.size)
         keys = list(keys_struct.unpack(keys_buffer))
         if count < 0:  # compressed
-            compressed_header_fmt = "<2I"
-            compressed_header_size = calcsize(compressed_header_fmt)
-            scale, base_count = unpack(
-                compressed_header_fmt, stream.read(compressed_header_size)
+            scale, base_count = cls._compressed_header_struct.unpack(
+                stream.read(cls._compressed_header_struct.size)
             )
             assert count == -base_count
             real_count = base_count // actual
