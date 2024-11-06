@@ -2,26 +2,13 @@ from typing import BinaryIO
 from os import PathLike
 from struct import unpack, calcsize, iter_unpack
 from xanlib.vertex_animation import CompressedVertex
-from xanlib.math_utils import Vector3, UV, Quaternion
+from xanlib.math_utils import Vector3, Quaternion
 from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation, KeyAnimationFrame
 from xanlib.node import Node
 from xanlib.scene import Scene
-
-
-def read_face(stream: BinaryIO) -> Face:
-    return Face(
-        unpack("<3i", stream.read(4 * 3)),
-        unpack("<1i", stream.read(4 * 1))[0],
-        unpack("<1i", stream.read(4 * 1))[0],
-        (
-            UV(*unpack("<2f", stream.read(4 * 2))),
-            UV(*unpack("<2f", stream.read(4 * 2))),
-            UV(*unpack("<2f", stream.read(4 * 2))),
-        ),
-    )
 
 
 def read_vertex_animation(stream: BinaryIO) -> VertexAnimation:
@@ -141,7 +128,7 @@ def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
             for i in range(0, len(vertices_buffer), Vertex.size())
         ]
 
-        node.faces = [read_face(stream) for _ in range(face_count)]
+        node.faces = [Face.fromstream(stream) for _ in range(face_count)]
 
         if Node.Flags.PRELIGHT in flags:
             rgb_fmt = "<3B"
