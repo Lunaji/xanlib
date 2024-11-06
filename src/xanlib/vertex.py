@@ -1,4 +1,3 @@
-from typing import BinaryIO
 from collections.abc import Buffer
 from dataclasses import dataclass
 from xanlib.math_utils import Vector3
@@ -25,6 +24,3 @@ class Vertex:
 
     def __bytes__(self) -> bytes:
         return self._struct.pack(*self.position, *self.normal)
-
-    def tostream(self, stream: BinaryIO) -> None:
-        stream.write(bytes(self))

@@ -94,8 +94,7 @@ def write_node(stream: BinaryIO, node: Node) -> None:
     for child in node.children:
         write_node(stream, child)
 
-    for vertex in node.vertices:
-        vertex.tostream(stream)
+    stream.write(b"".join(bytes(vertex) for vertex in node.vertices))
 
     for face in node.faces:
         write_face(stream, face)
