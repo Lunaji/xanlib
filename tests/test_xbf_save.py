@@ -18,8 +18,7 @@ def test_write_vertex(vertex):
 
 
 def test_write_face(stream, face):
-    face.decoded.tostream(stream)
-    assert stream.getvalue() == face.encoded
+    assert bytes(face.decoded) == face.encoded
 
 
 def test_write_vertex_animation(stream, vertex_animation):
