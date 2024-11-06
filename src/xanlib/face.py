@@ -7,25 +7,31 @@ from struct import pack, Struct
 
 @dataclass
 class Face:
-    vertex_indices: tuple[int, int, int]
-    texture_index: int
-    flags: int
-    uv_coords: tuple[UV, UV, UV]
     cstruct = Struct("<5i6f")
+
+    def __init__(
+        self,
+        vertex_index_1: int,
+        vertex_index_2: int,
+        vertex_index_3: int,
+        texture_index: int,
+        flags: int,
+        uv1u: float,
+        uv1v: float,
+        uv2u: float,
+        uv2v: float,
+        uv3u: float,
+        uv3v: float,
+    ) -> None:
+        self.vertex_indices = (vertex_index_1, vertex_index_2, vertex_index_3)
+        self.texture_index = texture_index
+        self.flags = flags
+        self.uv_coords = (UV(uv1u, uv1v), UV(uv2u, uv2v), UV(uv3u, uv3v))
 
     @classmethod
     def frombuffer(cls, buffer: Buffer) -> "Face":
         data = cls.cstruct.unpack(buffer)
-        return Face(
-            vertex_indices=(data[0], data[1], data[2]),
-            texture_index=data[3],
-            flags=data[4],
-            uv_coords=(
-                UV(data[5], data[6]),
-                UV(data[7], data[8]),
-                UV(data[9], data[10]),
-            ),
-        )
+        return Face(*data)
 
     def tostream(self, stream: BinaryIO) -> None:
         stream.write(pack("<3i", *self.vertex_indices))

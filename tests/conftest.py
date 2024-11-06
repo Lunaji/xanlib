@@ -3,7 +3,6 @@ import json
 import binascii
 from pathlib import Path
 from collections import namedtuple
-from xanlib.math_utils import UV
 from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.compressed_vertex import CompressedVertex
@@ -80,11 +79,13 @@ def face(request):
     attrs = ["vertex_indices", "texture_index", "flags", "uv_coords"]
     encoded = b"".join([binascii.unhexlify(data["encoded"][attr]) for attr in attrs])
 
+    uv_coords = [coord for uv in data["decoded"]["uv_coords"] for coord in uv]
+
     decoded = Face(
-        tuple(data["decoded"]["vertex_indices"]),
+        *data["decoded"]["vertex_indices"],
         data["decoded"]["texture_index"],
         data["decoded"]["flags"],
-        tuple(UV(*uv) for uv in data["decoded"]["uv_coords"]),
+        *uv_coords,
     )
 
     yield EncodedDecoded(encoded, decoded)
