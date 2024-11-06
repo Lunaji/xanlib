@@ -99,7 +99,6 @@ def vertex_animation(request):
         VertexAnimation(
             frame_count=data["decoded"]["frame_count"],
             count=data["decoded"]["count"],
-            actual=data["decoded"]["actual"],
             keys=data["decoded"]["keys"],
             scale=data["decoded"]["scale"],
             base_count=data["decoded"]["base_count"],

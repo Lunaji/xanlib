@@ -8,7 +8,6 @@ from struct import Struct, pack
 class VertexAnimation:
     frame_count: int
     count: int
-    actual: int
     keys: list[int]
     scale: int | None
     base_count: int | None
@@ -21,7 +20,7 @@ class VertexAnimation:
     _interpolation_fmt = "<{frame_count}I"
 
     def __bytes__(self) -> bytes:
-        buffer = self._header_struct.pack(self.frame_count, self.count, self.actual)
+        buffer = self._header_struct.pack(self.frame_count, self.count, len(self.keys))
         buffer += pack(self._key_fmt.format(actual=len(self.keys)), *self.keys)
         if self.frames:
             buffer += self._compressed_header_struct.pack(self.scale, self.base_count)
@@ -75,7 +74,6 @@ class VertexAnimation:
         return VertexAnimation(
             frame_count,
             count,
-            actual,
             keys,
             scale if count < 0 else None,
             base_count if count < 0 else None,
