@@ -1,6 +1,5 @@
 import io
 from xanlib.xbf_load import (
-    read_vertex_animation,
     read_key_animation,
     read_node,
     load_xbf,
@@ -8,6 +7,7 @@ from xanlib.xbf_load import (
 from xanlib.face import Face
 from xanlib.vertex import Vertex
 from xanlib.compressed_vertex import convert_signed_5bit
+from xanlib.vertex_animation import VertexAnimation
 
 
 def test_convert_signed_5bit(signed_5bit):
@@ -25,7 +25,7 @@ def test_read_face(face):
 
 def test_read_vertex_animation(vertex_animation):
     stream = io.BytesIO(vertex_animation.encoded)
-    result = read_vertex_animation(stream)
+    result = VertexAnimation.fromstream(stream)
     assert result == vertex_animation.decoded
 
 
