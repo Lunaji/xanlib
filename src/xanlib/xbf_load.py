@@ -29,8 +29,8 @@ def read_vertex_animation(stream: BinaryIO) -> VertexAnimation:
         frames = [
             [
                 CompressedVertex(*fields)
-                for fields in CompressedVertex.fmt.iter_unpack(
-                    stream.read(CompressedVertex.fmt.size * real_count)
+                for fields in CompressedVertex.cstruct.iter_unpack(
+                    stream.read(CompressedVertex.cstruct.size * real_count)
                 )
             ]
             for _ in range(actual)

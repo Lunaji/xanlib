@@ -24,7 +24,7 @@ class CompressedVertex:
     y: int
     z: int
     normal_packed: int
-    fmt = Struct("<3hH")
+    cstruct = Struct("<3hH")
 
     @property
     def position(self) -> Vector3:

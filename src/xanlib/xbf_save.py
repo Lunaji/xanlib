@@ -17,7 +17,7 @@ def write_vertex_animation(stream: BinaryIO, va: VertexAnimation) -> None:
         stream.write(compressed_header_fmt.pack(va.scale, va.base_count))
         for frame in va.frames:
             for vertex in frame:
-                stream.write(CompressedVertex.fmt.pack(*vars(vertex).values()))
+                stream.write(CompressedVertex.cstruct.pack(*vars(vertex).values()))
         if va.interpolation_data:
             stream.write(pack(f"{len(va.interpolation_data)}I", *va.interpolation_data))
 
