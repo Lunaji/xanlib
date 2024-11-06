@@ -128,7 +128,11 @@ def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
             for i in range(0, len(vertices_buffer), Vertex.size())
         ]
 
-        node.faces = [Face.fromstream(stream) for _ in range(face_count)]
+        face_buffer = stream.read(Face.cstruct.size * face_count)
+        node.faces = [
+            Face.frombuffer(face_buffer[i : i + Face.cstruct.size])
+            for i in range(0, len(face_buffer), Face.cstruct.size)
+        ]
 
         if Node.Flags.PRELIGHT in flags:
             rgb_fmt = "<3B"
