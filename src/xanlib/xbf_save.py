@@ -1,18 +1,12 @@
 from typing import BinaryIO
 from os import PathLike
 from struct import pack, Struct
-from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.compressed_vertex import CompressedVertex
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
 from xanlib.node import Node
 from xanlib.scene import Scene
-
-
-def write_vertex(stream: BinaryIO, vertex: Vertex) -> None:
-    stream.write(pack("<3f", *vertex.position))
-    stream.write(pack("<3f", *vertex.normal))
 
 
 def write_face(stream: BinaryIO, face: Face) -> None:
@@ -101,7 +95,7 @@ def write_node(stream: BinaryIO, node: Node) -> None:
         write_node(stream, child)
 
     for vertex in node.vertices:
-        write_vertex(stream, vertex)
+        vertex.tostream(stream)
 
     for face in node.faces:
         write_face(stream, face)

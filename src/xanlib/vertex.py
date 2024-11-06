@@ -1,7 +1,8 @@
+from typing import BinaryIO
 from collections.abc import Buffer
 from dataclasses import dataclass
 from xanlib.math_utils import Vector3
-from struct import Struct
+from struct import Struct, pack
 
 
 @dataclass
@@ -21,3 +22,7 @@ class Vertex:
             Vector3(*coords[:3]),
             Vector3(*coords[3:]),
         )
+
+    def tostream(self, stream: BinaryIO) -> None:
+        stream.write(pack("<3f", *self.position))
+        stream.write(pack("<3f", *self.normal))
