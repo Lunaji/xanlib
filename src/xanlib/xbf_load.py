@@ -122,14 +122,14 @@ def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
 
         node.children = [read_node(stream, node) for _ in range(child_count)]
 
-        vertices_size = Vertex.size() * vertex_count
+        vertices_size = Vertex.cstruct.size * vertex_count
         faces_size = Face.cstruct.size * face_count
         mesh_buffer = stream.read(vertices_size + faces_size)
 
         vertices_buffer = mesh_buffer[:vertices_size]
         node.vertices = [
-            Vertex.frombytes(vertices_buffer[i : i + Vertex.size()])
-            for i in range(0, vertices_size, Vertex.size())
+            Vertex.frombuffer(vertices_buffer[i : i + Vertex.cstruct.size])
+            for i in range(0, vertices_size, Vertex.cstruct.size)
         ]
 
         faces_buffer = mesh_buffer[vertices_size:]

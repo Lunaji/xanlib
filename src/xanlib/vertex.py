@@ -8,19 +8,15 @@ from struct import Struct
 class Vertex:
     position: Vector3
     normal: Vector3
-    _struct = Struct("<6f")
+    cstruct = Struct("<6f")
 
     @classmethod
-    def size(cls) -> int:
-        return cls._struct.size
-
-    @classmethod
-    def frombytes(cls, buffer: Buffer) -> "Vertex":
-        coords = cls._struct.unpack(buffer)
+    def frombuffer(cls, buffer: Buffer) -> "Vertex":
+        coords = cls.cstruct.unpack(buffer)
         return cls(
             Vector3(*coords[:3]),
             Vector3(*coords[3:]),
         )
 
     def __bytes__(self) -> bytes:
-        return self._struct.pack(*self.position, *self.normal)
+        return self.cstruct.pack(*self.position, *self.normal)
