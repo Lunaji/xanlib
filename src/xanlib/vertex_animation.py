@@ -1,7 +1,7 @@
 from typing import BinaryIO
 from dataclasses import dataclass
 from xanlib.compressed_vertex import CompressedVertex
-from struct import unpack, calcsize, Struct
+from struct import Struct
 
 
 @dataclass
@@ -16,8 +16,9 @@ class VertexAnimation:
     frames: list[list[CompressedVertex]]
     interpolation_data: list[int]
     _header_struct = Struct("<3i")
-    _key_fmt = "{actual}I"
+    _key_fmt = "<{actual}I"
     _compressed_header_struct = Struct("<2I")
+    _interpolation_fmt = "<{frame_count}I"
 
     @classmethod
     def fromstream(cls, stream: BinaryIO) -> "VertexAnimation":
@@ -47,10 +48,12 @@ class VertexAnimation:
                 for j in range(actual)
             ]
             if scale & 0x80000000:  # interpolated
-                interpolation_fmt = f"<{frame_count}I"
-                interpolation_size = calcsize(interpolation_fmt)
+                interpolation_struct = Struct(
+                    cls._interpolation_fmt.format(frame_count=frame_count)
+                )
+                interpolation_buffer = stream.read(interpolation_struct.size)
                 interpolation_data = list(
-                    unpack(interpolation_fmt, stream.read(interpolation_size))
+                    interpolation_struct.unpack(interpolation_buffer)
                 )
 
         return VertexAnimation(
