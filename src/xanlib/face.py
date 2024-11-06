@@ -1,7 +1,7 @@
 from typing import BinaryIO
 from dataclasses import dataclass
 from xanlib.math_utils import UV
-from struct import pack, Struct
+from struct import Struct
 
 
 @dataclass
@@ -27,9 +27,14 @@ class Face:
         self.flags = flags
         self.uv_coords = (UV(uv1u, uv1v), UV(uv2u, uv2v), UV(uv3u, uv3v))
 
+    def __bytes__(self):
+        uv_coords = (coord for uv in self.uv_coords for coord in uv)
+        return self.cstruct.pack(
+            *self.vertex_indices,
+            self.texture_index,
+            self.flags,
+            *uv_coords,
+        )
+
     def tostream(self, stream: BinaryIO) -> None:
-        stream.write(pack("<3i", *self.vertex_indices))
-        stream.write(pack("<1i", self.texture_index))
-        stream.write(pack("<1i", self.flags))
-        for uv in self.uv_coords:
-            stream.write(pack("2f", *uv))
+        stream.write(bytes(self))
