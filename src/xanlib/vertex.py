@@ -12,6 +12,10 @@ class Vertex:
     _struct = Struct("<6f")
 
     @classmethod
+    def size(cls) -> int:
+        return cls._struct.size
+
+    @classmethod
     def frombytes(cls, buffer: Buffer) -> "Vertex":
         coords = cls._struct.unpack(buffer)
         return cls(
