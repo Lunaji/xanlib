@@ -20,9 +20,7 @@ def test_read_vertex(vertex):
 
 
 def test_read_face(face):
-    stream = io.BytesIO(face.encoded)
-    result = Face.fromstream(stream)
-    assert result == face.decoded
+    assert Face.frombuffer(face.encoded) == face.decoded
 
 
 def test_read_vertex_animation(vertex_animation):
