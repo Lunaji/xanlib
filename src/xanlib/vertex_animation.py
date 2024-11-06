@@ -16,14 +16,15 @@ class VertexAnimation:
     frames: list[list[CompressedVertex]]
     interpolation_data: list[int]
     _header_struct = Struct("<3i")
+    _key_fmt = "{actual}I"
 
     @classmethod
     def fromstream(cls, stream: BinaryIO) -> "VertexAnimation":
         header_buffer = stream.read(cls._header_struct.size)
         frame_count, count, actual = cls._header_struct.unpack(header_buffer)
-        keys_fmt = f"<{actual}I"
-        keys_size = calcsize(keys_fmt)
-        keys = list(unpack(keys_fmt, stream.read(keys_size)))
+        keys_struct = Struct(cls._key_fmt.format(actual=actual))
+        keys_buffer = stream.read(keys_struct.size)
+        keys = list(keys_struct.unpack(keys_buffer))
         if count < 0:  # compressed
             compressed_header_fmt = "<2I"
             compressed_header_size = calcsize(compressed_header_fmt)
