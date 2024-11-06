@@ -1,7 +1,6 @@
 import io
 import pytest
 from xanlib.xbf_save import (
-    write_face,
     write_vertex_animation,
     write_key_animation,
     write_node,
@@ -19,7 +18,7 @@ def test_write_vertex(vertex):
 
 
 def test_write_face(stream, face):
-    write_face(stream, face.decoded)
+    face.decoded.tostream(stream)
     assert stream.getvalue() == face.encoded
 
 
