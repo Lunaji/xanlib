@@ -20,7 +20,7 @@ def test_read_vertex(vertex):
 
 
 def test_read_face(face):
-    assert Face.frombuffer(face.encoded) == face.decoded
+    assert Face(*Face.cstruct.unpack(face.encoded)) == face.decoded
 
 
 def test_read_vertex_animation(vertex_animation):

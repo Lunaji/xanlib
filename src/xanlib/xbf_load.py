@@ -133,8 +133,7 @@ def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
 
         faces_buffer = mesh_buffer[vertices_size:]
         node.faces = [
-            Face.frombuffer(faces_buffer[i : i + Face.cstruct.size])
-            for i in range(0, len(faces_buffer), Face.cstruct.size)
+            Face(*fields) for fields in Face.cstruct.iter_unpack(faces_buffer)
         ]
 
         if Node.Flags.PRELIGHT in flags:

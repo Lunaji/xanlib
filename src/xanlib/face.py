@@ -1,4 +1,3 @@
-from collections.abc import Buffer
 from typing import BinaryIO
 from dataclasses import dataclass
 from xanlib.math_utils import UV
@@ -27,11 +26,6 @@ class Face:
         self.texture_index = texture_index
         self.flags = flags
         self.uv_coords = (UV(uv1u, uv1v), UV(uv2u, uv2v), UV(uv3u, uv3v))
-
-    @classmethod
-    def frombuffer(cls, buffer: Buffer) -> "Face":
-        data = cls.cstruct.unpack(buffer)
-        return Face(*data)
 
     def tostream(self, stream: BinaryIO) -> None:
         stream.write(pack("<3i", *self.vertex_indices))
