@@ -85,8 +85,9 @@ def write_node(stream: BinaryIO, node: Node) -> None:
     for child in node.children:
         write_node(stream, child)
 
-    stream.write(b"".join(bytes(vertex) for vertex in node.vertices))
-    stream.write(b"".join(bytes(face) for face in node.faces))
+    vertices = b"".join(bytes(vertex) for vertex in node.vertices)
+    faces = b"".join(bytes(face) for face in node.faces)
+    stream.write(vertices + faces)
 
     if node.rgb is not None:
         rgb_fmt = Struct(f"<{3*len(node.rgb)}B")
