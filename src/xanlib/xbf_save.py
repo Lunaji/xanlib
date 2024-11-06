@@ -1,25 +1,9 @@
 from typing import BinaryIO
 from os import PathLike
 from struct import pack, Struct
-from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
 from xanlib.node import Node
 from xanlib.scene import Scene
-
-
-def write_vertex_animation(stream: BinaryIO, va: VertexAnimation) -> None:
-    header_fmt = Struct(f"<3i{len(va.keys)}I")
-    stream.write(header_fmt.pack(va.frame_count, va.count, va.actual, *va.keys))
-
-    if va.count < 0:
-        compressed_header_fmt = Struct("<2I")
-        stream.write(compressed_header_fmt.pack(va.scale, va.base_count))
-        frames_buffer = b"".join(
-            bytes(vertex) for frame in va.frames for vertex in frame
-        )
-        stream.write(frames_buffer)
-        if va.interpolation_data:
-            stream.write(pack(f"{len(va.interpolation_data)}I", *va.interpolation_data))
 
 
 def write_key_animation(stream: BinaryIO, ka: KeyAnimation) -> None:
@@ -97,7 +81,7 @@ def write_node(stream: BinaryIO, node: Node) -> None:
         stream.write(pack(f"<{len(node.faceData)}i", *node.faceData))
 
     if node.vertex_animation is not None:
-        write_vertex_animation(stream, node.vertex_animation)
+        stream.write(bytes(node.vertex_animation))
 
     if node.key_animation is not None:
         write_key_animation(stream, node.key_animation)

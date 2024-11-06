@@ -1,7 +1,7 @@
 from typing import BinaryIO
 from dataclasses import dataclass
 from xanlib.compressed_vertex import CompressedVertex
-from struct import Struct
+from struct import Struct, pack
 
 
 @dataclass
@@ -19,6 +19,22 @@ class VertexAnimation:
     _key_fmt = "<{actual}I"
     _compressed_header_struct = Struct("<2I")
     _interpolation_fmt = "<{frame_count}I"
+
+    def __bytes__(self) -> bytes:
+        buffer = self._header_struct.pack(self.frame_count, self.count, self.actual)
+        buffer += pack(self._key_fmt.format(actual=len(self.keys)), *self.keys)
+        if self.frames:
+            buffer += self._compressed_header_struct.pack(self.scale, self.base_count)
+            buffer += b"".join(
+                bytes(vertex) for frame in self.frames for vertex in frame
+            )
+            if self.interpolation_data:
+                buffer += pack(
+                    self._interpolation_fmt.format(frame_count=self.frame_count),
+                    *self.interpolation_data,
+                )
+
+        return buffer
 
     @classmethod
     def fromstream(cls, stream: BinaryIO) -> "VertexAnimation":
