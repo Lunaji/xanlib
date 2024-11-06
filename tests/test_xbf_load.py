@@ -16,7 +16,7 @@ def test_convert_signed_5bit(signed_5bit):
 
 
 def test_read_vertex(vertex):
-    assert Vertex.frombuffer(vertex.encoded) == vertex.decoded
+    assert Vertex(*Vertex.cstruct.unpack(vertex.encoded)) == vertex.decoded
 
 
 def test_read_face(face):
