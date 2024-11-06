@@ -26,14 +26,17 @@ def read_vertex_animation(stream: BinaryIO) -> VertexAnimation:
         )
         assert count == -base_count
         real_count = base_count // actual
+        frames_buffer = stream.read(CompressedVertex.cstruct.size * real_count * actual)
         frames = [
             [
-                CompressedVertex(*fields)
-                for fields in CompressedVertex.cstruct.iter_unpack(
-                    stream.read(CompressedVertex.cstruct.size * real_count)
+                CompressedVertex(
+                    *CompressedVertex.cstruct.unpack_from(
+                        frames_buffer, i * CompressedVertex.cstruct.size
+                    )
                 )
+                for i in range(j * real_count, (j + 1) * real_count)
             ]
-            for _ in range(actual)
+            for j in range(actual)
         ]
         if scale & 0x80000000:  # interpolated
             interpolation_fmt = f"<{frame_count}I"
