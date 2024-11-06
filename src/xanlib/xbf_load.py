@@ -128,8 +128,7 @@ def read_node(stream: BinaryIO, parent: Node | None = None) -> Node:
 
         vertices_buffer = mesh_buffer[:vertices_size]
         node.vertices = [
-            Vertex.frombuffer(vertices_buffer[i : i + Vertex.cstruct.size])
-            for i in range(0, vertices_size, Vertex.cstruct.size)
+            Vertex(*coords) for coords in Vertex.cstruct.iter_unpack(vertices_buffer)
         ]
 
         faces_buffer = mesh_buffer[vertices_size:]
