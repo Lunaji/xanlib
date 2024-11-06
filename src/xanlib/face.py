@@ -27,10 +27,6 @@ class Face:
             ),
         )
 
-    @classmethod
-    def fromstream(cls, stream: BinaryIO) -> "Face":
-        return cls.frombuffer(stream.read(cls.cstruct.size))
-
     def tostream(self, stream: BinaryIO) -> None:
         stream.write(pack("<3i", *self.vertex_indices))
         stream.write(pack("<1i", self.texture_index))
