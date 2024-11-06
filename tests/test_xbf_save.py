@@ -15,15 +15,15 @@ def test_write_vertex(vertex):
     assert bytes(vertex.decoded) == vertex.encoded
 
 
-def test_write_face(stream, face):
+def test_write_face(face):
     assert bytes(face.decoded) == face.encoded
 
 
-def test_write_vertex_animation(stream, vertex_animation):
+def test_write_vertex_animation(vertex_animation):
     assert bytes(vertex_animation.decoded) == vertex_animation.encoded
 
 
-def test_write_key_animation(stream, key_animation):
+def test_write_key_animation(key_animation):
     assert bytes(key_animation.decoded) == key_animation.encoded
 
 
