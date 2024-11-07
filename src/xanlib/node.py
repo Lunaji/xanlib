@@ -7,7 +7,7 @@ from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
-from struct import unpack, Struct
+from struct import Struct
 
 
 @dataclass
@@ -50,7 +50,7 @@ class Node:
         stream_position = stream.tell()
         try:
             node = cls()
-            vertex_count = unpack("<i", stream.read(4))[0]
+            vertex_count = int.from_bytes(stream.read(4), "little", signed=True)
             if vertex_count == -1:
                 return node
             node.parent = parent
