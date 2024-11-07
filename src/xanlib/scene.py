@@ -3,7 +3,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 import re
 from xanlib.node import Node, traverse
-from struct import unpack, calcsize
+from struct import Struct
 
 
 @dataclass
@@ -14,6 +14,7 @@ class Scene:
     nodes: list[Node] = field(default_factory=list)
     error: Exception | None = None
     unparsed: bytes | None = None
+    _header = Struct("<2i")
 
     @property
     def textures(self) -> list[str]:
@@ -33,11 +34,9 @@ class Scene:
     @classmethod
     def fromstream(cls, stream: BinaryIO) -> "Scene":
         scene = Scene()
-        header_fmt = "<2i"
-        header_size = calcsize(header_fmt)
-        scene.version, fxdata_size = unpack(header_fmt, stream.read(header_size))
+        scene.version, fxdata_size = cls._header.unpack(stream.read(cls._header.size))
         scene.FXData = stream.read(fxdata_size)
-        texture_data_size = unpack("<i", stream.read(4))[0]
+        texture_data_size = int.from_bytes(stream.read(4), "little")
         scene.textureNameData = stream.read(texture_data_size)
         while True:
             try:
