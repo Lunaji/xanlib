@@ -7,7 +7,7 @@ from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
-from struct import unpack, calcsize, iter_unpack, Struct
+from struct import unpack, calcsize, Struct
 
 
 @dataclass
@@ -30,6 +30,7 @@ class Node:
     vertex_animation: VertexAnimation | None = None
     key_animation: KeyAnimation | None = None
     _header = Struct("<3i16dI")
+    _rgb = Struct("<3B")
 
     def __iter__(self) -> Iterator["Node"]:
         yield self
@@ -77,14 +78,8 @@ class Node:
             ]
 
             if Node.Flags.PRELIGHT in flags:
-                rgb_fmt = "<3B"
-                rgb_size = calcsize(rgb_fmt)
-                node.rgb = [
-                    rgb_tuple
-                    for rgb_tuple in iter_unpack(
-                        rgb_fmt, stream.read(rgb_size * vertex_count)
-                    )
-                ]
+                rgb_buffer = stream.read(cls._rgb.size * vertex_count)
+                node.rgb = [rgb_tuple for rgb_tuple in cls._rgb.iter_unpack(rgb_buffer)]
 
             if Node.Flags.FACE_DATA in flags:
                 faceData_fmt = f"<{face_count}i"
