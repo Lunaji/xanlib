@@ -25,6 +25,9 @@ def test_read_vertex_animation(vertex_animation):
     stream = io.BytesIO(vertex_animation.encoded)
     result = VertexAnimation.fromstream(stream)
     assert result == vertex_animation.decoded
+    assert (
+        VertexAnimation.frombuffer(vertex_animation.encoded) == vertex_animation.decoded
+    )
 
 
 def test_read_key_animation(key_animation):

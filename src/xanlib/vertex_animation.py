@@ -36,6 +36,67 @@ class VertexAnimation:
         return buffer
 
     @classmethod
+    def frombuffer(cls, buffer: bytes) -> "VertexAnimation":
+        header_buffer = buffer[: cls._header_struct.size]
+        frame_count, count, actual = cls._header_struct.unpack(header_buffer)
+        keys_struct = Struct(cls._key_fmt.format(actual=actual))
+        keys_buffer = buffer[
+            cls._header_struct.size : cls._header_struct.size + keys_struct.size
+        ]
+        keys = list(keys_struct.unpack(keys_buffer))
+        if count < 0:
+            scale, base_count = cls._compressed_header_struct.unpack(
+                buffer[
+                    cls._header_struct.size
+                    + keys_struct.size : cls._header_struct.size
+                    + keys_struct.size
+                    + cls._compressed_header_struct.size
+                ]
+            )
+            assert count == -base_count
+            real_count = base_count // actual
+            frames_buffer = buffer[
+                cls._header_struct.size
+                + keys_struct.size
+                + cls._compressed_header_struct.size :
+            ]
+            frames = [
+                [
+                    CompressedVertex(
+                        *CompressedVertex.cstruct.unpack_from(
+                            frames_buffer, i * CompressedVertex.cstruct.size
+                        )
+                    )
+                    for i in range(j * real_count, (j + 1) * real_count)
+                ]
+                for j in range(actual)
+            ]
+            if scale & 0x80000000:
+                interpolation_struct = Struct(
+                    cls._interpolation_fmt.format(frame_count=frame_count)
+                )
+                interpolation_buffer = buffer[
+                    cls._header_struct.size
+                    + keys_struct.size
+                    + cls._compressed_header_struct.size
+                    + CompressedVertex.cstruct.size * real_count * actual :
+                ]
+                interpolation_data = list(
+                    interpolation_struct.unpack(interpolation_buffer)
+                )
+
+        return VertexAnimation(
+            frame_count,
+            count,
+            keys,
+            scale if count < 0 else None,
+            base_count if count < 0 else None,
+            real_count if count < 0 else None,
+            frames if count < 0 else [],
+            interpolation_data if count < 0 and scale & 0x80000000 else [],
+        )
+
+    @classmethod
     def fromstream(cls, stream: BinaryIO) -> "VertexAnimation":
         header_buffer = stream.read(cls._header_struct.size)
         frame_count, count, actual = cls._header_struct.unpack(header_buffer)
