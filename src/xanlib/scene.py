@@ -80,24 +80,8 @@ class Scene:
 
     @classmethod
     def fromstream(cls, stream: BinaryIO) -> "Scene":
-        scene = Scene()
-        scene.version, fxdata_size = cls._header.unpack(stream.read(cls._header.size))
-        scene.FXData = stream.read(fxdata_size)
-        texture_data_size = int.from_bytes(stream.read(4), "little")
-        scene.textureNameData = stream.read(texture_data_size)
-        while True:
-            try:
-                node = Node.fromstream(stream)
-                if node.transform is None:
-                    current_position = stream.tell()
-                    stream.seek(0, 2)
-                    assert current_position == stream.tell(), "Not at EOF"
-                    return scene
-                scene.nodes.append(node)
-            except Exception as e:
-                scene.error = e
-                scene.unparsed = stream.read()
-                return scene
+        buffer = stream.read()
+        return cls.frombuffer(buffer)
 
 
 def print_node_names(scene: Scene) -> None:
