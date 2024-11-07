@@ -81,7 +81,12 @@ class KeyAnimation:
             matrices = [
                 matrix
                 for matrix in matrix_struct.iter_unpack(
-                    buffer[cls._header_struct.size + extra_size :]
+                    buffer[
+                        cls._header_struct.size
+                        + extra_size : cls._header_struct.size
+                        + extra_size
+                        + matrix_struct.size * (frame_count + 1)
+                    ]
                 )
             ]
         else:
