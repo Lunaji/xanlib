@@ -36,35 +36,26 @@ class VertexAnimation:
         return buffer
 
     @classmethod
-    def frombuffer(cls, buffer: bytes) -> "VertexAnimation":
-        header_buffer = buffer[: cls._header_struct.size]
-        frame_count, count, actual = cls._header_struct.unpack(header_buffer)
+    def frombuffer(cls, buffer: bytes, offset: int = 0) -> "VertexAnimation":
+        frame_count, count, actual = cls._header_struct.unpack_from(buffer, offset)
         keys_struct = Struct(cls._key_fmt.format(actual=actual))
-        keys_buffer = buffer[
-            cls._header_struct.size : cls._header_struct.size + keys_struct.size
-        ]
-        keys = list(keys_struct.unpack(keys_buffer))
+        keys = list(keys_struct.unpack_from(buffer, offset + cls._header_struct.size))
         if count < 0:
-            scale, base_count = cls._compressed_header_struct.unpack(
-                buffer[
-                    cls._header_struct.size
-                    + keys_struct.size : cls._header_struct.size
-                    + keys_struct.size
-                    + cls._compressed_header_struct.size
-                ]
+            scale, base_count = cls._compressed_header_struct.unpack_from(
+                buffer, offset + cls._header_struct.size + keys_struct.size
             )
             assert count == -base_count
             real_count = base_count // actual
-            frames_buffer = buffer[
-                cls._header_struct.size
-                + keys_struct.size
-                + cls._compressed_header_struct.size :
-            ]
             frames = [
                 [
                     CompressedVertex(
                         *CompressedVertex.cstruct.unpack_from(
-                            frames_buffer, i * CompressedVertex.cstruct.size
+                            buffer,
+                            offset
+                            + cls._header_struct.size
+                            + keys_struct.size
+                            + cls._compressed_header_struct.size
+                            + CompressedVertex.cstruct.size * i,
                         )
                     )
                     for i in range(j * real_count, (j + 1) * real_count)
@@ -75,14 +66,15 @@ class VertexAnimation:
                 interpolation_struct = Struct(
                     cls._interpolation_fmt.format(frame_count=frame_count)
                 )
-                interpolation_buffer = buffer[
-                    cls._header_struct.size
-                    + keys_struct.size
-                    + cls._compressed_header_struct.size
-                    + CompressedVertex.cstruct.size * real_count * actual :
-                ]
                 interpolation_data = list(
-                    interpolation_struct.unpack(interpolation_buffer)
+                    interpolation_struct.unpack_from(
+                        buffer,
+                        offset
+                        + cls._header_struct.size
+                        + keys_struct.size
+                        + cls._compressed_header_struct.size
+                        + CompressedVertex.cstruct.size * real_count * actual,
+                    )
                 )
 
         return VertexAnimation(
