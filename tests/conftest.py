@@ -233,7 +233,6 @@ def node_with_children(vertex, face, matrix, node_basic):
 
 @pytest.fixture
 def scene(node_basic):
-    file = "foobar.xbf"
     version = 1
     FXData = b"FXDataHeader"
     textureNameData = b"foobar.tga\x00\x00"
@@ -250,7 +249,6 @@ def scene(node_basic):
     )
 
     decoded = Scene(
-        file=file,
         version=version,
         FXData=FXData,
         textureNameData=textureNameData,

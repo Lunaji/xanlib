@@ -28,5 +28,6 @@ def test_write_node_with_children(node_with_children):
 
 def test_save_xbf(mocker, scene):
     mock_open = mocker.patch("builtins.open", mocker.mock_open())
-    save_xbf(scene.decoded, scene.decoded.file)
-    mock_open.assert_called_once_with(scene.decoded.file, "wb")
+    file = "foo.xbf"
+    save_xbf(scene.decoded, file)
+    mock_open.assert_called_once_with(file, "wb")

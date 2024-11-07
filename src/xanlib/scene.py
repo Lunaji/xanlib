@@ -1,13 +1,11 @@
 from collections.abc import Iterator
 from dataclasses import dataclass, field
-from os import PathLike
 import re
 from xanlib.node import Node, traverse
 
 
 @dataclass
 class Scene:
-    file: str | PathLike
     version: int | None = None
     FXData: bytes = b""
     textureNameData: bytes = b""

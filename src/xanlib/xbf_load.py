@@ -5,7 +5,7 @@ from xanlib.scene import Scene
 
 
 def load_xbf(filename: str | PathLike) -> Scene:
-    scene = Scene(file=filename)
+    scene = Scene()
     with open(filename, "rb") as f:
         header_fmt = "<2i"
         header_size = calcsize(header_fmt)

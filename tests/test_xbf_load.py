@@ -48,6 +48,7 @@ def test_read_node_with_children(node_with_children):
 
 def test_load_xbf(mocker, scene):
     mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data=scene.encoded))
-    result = load_xbf(scene.decoded.file)
+    file = "foo.xbf"
+    result = load_xbf(file)
     assert result == scene.decoded
-    mock_open.assert_called_once_with(scene.decoded.file, "rb")
+    mock_open.assert_called_once_with(file, "rb")
