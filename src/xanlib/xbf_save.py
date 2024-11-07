@@ -11,8 +11,8 @@ def write_node(stream: BinaryIO, node: Node) -> None:
     flags = Node.Flags(0)
     if node.rgb is not None:
         flags |= Node.Flags.PRELIGHT
-    if node.faceData is not None:
-        flags |= Node.Flags.FACE_DATA
+    if node.smoothing_groups is not None:
+        flags |= Node.Flags.SMOOTHING_GROUPS
     if node.vertex_animation is not None:
         flags |= Node.Flags.VERTEX_ANIMATION
     if node.key_animation is not None:
@@ -42,8 +42,8 @@ def write_node(stream: BinaryIO, node: Node) -> None:
         rgb_fmt = Struct(f"<{3*len(node.rgb)}B")
         stream.write(rgb_fmt.pack(*(c for rgb in node.rgb for c in rgb)))
 
-    if node.faceData is not None:
-        stream.write(pack(f"<{len(node.faceData)}i", *node.faceData))
+    if node.smoothing_groups is not None:
+        stream.write(pack(f"<{len(node.smoothing_groups)}i", *node.smoothing_groups))
 
     if node.vertex_animation is not None:
         stream.write(bytes(node.vertex_animation))

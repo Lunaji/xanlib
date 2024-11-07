@@ -15,7 +15,7 @@ class Node:
 
     class Flags(IntFlag):
         PRELIGHT = 1
-        FACE_DATA = 2
+        SMOOTHING_GROUPS = 2
         VERTEX_ANIMATION = 4
         KEY_ANIMATION = 8
 
@@ -26,12 +26,12 @@ class Node:
     vertices: list[Vertex] = field(default_factory=list)
     faces: list[Face] = field(default_factory=list)
     rgb: list[tuple[int, int, int]] | None = None
-    faceData: list[int] | None = None
+    smoothing_groups: list[int] | None = None
     vertex_animation: VertexAnimation | None = None
     key_animation: KeyAnimation | None = None
     _header = Struct("<3i16dI")
     _rgb = Struct("<3B")
-    _face_data = "<{face_count}i"
+    _smoothing_groups = "<{face_count}i"
 
     def __iter__(self) -> Iterator["Node"]:
         yield self
@@ -82,9 +82,13 @@ class Node:
                 rgb_buffer = stream.read(cls._rgb.size * vertex_count)
                 node.rgb = [rgb_tuple for rgb_tuple in cls._rgb.iter_unpack(rgb_buffer)]
 
-            if Node.Flags.FACE_DATA in flags:
-                face_data = Struct(cls._face_data.format(face_count=face_count))
-                node.faceData = list(face_data.unpack(stream.read(face_data.size)))
+            if Node.Flags.SMOOTHING_GROUPS in flags:
+                smoothing_groups = Struct(
+                    cls._smoothing_groups.format(face_count=face_count)
+                )
+                node.smoothing_groups = list(
+                    smoothing_groups.unpack(stream.read(smoothing_groups.size))
+                )
 
             if Node.Flags.VERTEX_ANIMATION in flags:
                 node.vertex_animation = VertexAnimation.fromstream(stream)
