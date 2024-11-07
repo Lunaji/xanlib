@@ -31,6 +31,21 @@ class Scene:
     def __getitem__(self, name: str) -> Node:
         return next(node for node in self if node.name == name)
 
+    def __bytes__(self) -> bytes:
+        buffer = (
+            self._header.pack(self.version, len(self.FXData))
+            + self.FXData
+            + len(self.textureNameData).to_bytes(4, "little")
+            + self.textureNameData
+            + b"".join(bytes(node) for node in self.nodes)
+        )
+        if self.unparsed is not None:
+            buffer += self.unparsed
+        else:
+            buffer += (-1).to_bytes(4, "little", signed=True)  # EOF
+
+        return buffer
+
     @classmethod
     def fromstream(cls, stream: BinaryIO) -> "Scene":
         scene = Scene()

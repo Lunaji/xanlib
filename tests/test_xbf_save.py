@@ -26,6 +26,10 @@ def test_write_node_with_children(node_with_children):
     assert bytes(node_with_children.decoded) == node_with_children.encoded
 
 
+def test_write_scene(scene):
+    assert bytes(scene.decoded) == scene.encoded
+
+
 def test_save_xbf(mocker, scene):
     mock_open = mocker.patch("builtins.open", mocker.mock_open())
     file = "foo.xbf"
