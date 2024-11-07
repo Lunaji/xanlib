@@ -41,6 +41,7 @@ def test_read_node_basic(node_basic):
     stream = io.BytesIO(node_basic.encoded)
     result = Node.fromstream(stream)
     assert result == node_basic.decoded
+    assert Node.frombuffer(node_basic.encoded) == node_basic.decoded
 
 
 def test_read_node_with_children(node_with_children):
@@ -48,6 +49,7 @@ def test_read_node_with_children(node_with_children):
     result = Node.fromstream(stream)
     result.children[0].parent = None  # TODO: remove this line
     assert result == node_with_children.decoded
+    assert Node.frombuffer(node_with_children.encoded) == node_with_children.decoded
 
 
 def test_load_xbf(mocker, scene):

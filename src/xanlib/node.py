@@ -82,6 +82,64 @@ class Node:
         return buffer + extras
 
     @classmethod
+    def frombuffer(cls, buffer: bytes) -> "Node":
+        node = cls()
+        vertex_count = int.from_bytes(buffer[:4], "little", signed=True)
+        buffer = buffer[4:]
+
+        flags, face_count, child_count, *transform, name_length = cls._header.unpack(
+            buffer[: cls._header.size]
+        )
+        flags = Node.Flags(flags)
+        buffer = buffer[cls._header.size :]
+        node.transform = tuple(transform)
+        node.name = buffer[:name_length].decode("ascii")
+        buffer = buffer[name_length:]
+
+        for _ in range(child_count):
+            child = cls.frombuffer(buffer)
+            node.children.append(child)
+            buffer = buffer[len(bytes(child)) :]
+
+        vertices_size = Vertex.cstruct.size * vertex_count
+        faces_size = Face.cstruct.size * face_count
+        mesh_buffer = buffer[: vertices_size + faces_size]
+        buffer = buffer[vertices_size + faces_size :]
+
+        vertices_buffer = mesh_buffer[:vertices_size]
+        node.vertices = [
+            Vertex(*coords) for coords in Vertex.cstruct.iter_unpack(vertices_buffer)
+        ]
+
+        faces_buffer = mesh_buffer[vertices_size:]
+        node.faces = [
+            Face(*fields) for fields in Face.cstruct.iter_unpack(faces_buffer)
+        ]
+
+        if Node.Flags.PRELIGHT in flags:
+            rgb_buffer = buffer[: cls._rgb.size * vertex_count]
+            buffer = buffer[cls._rgb.size * vertex_count :]
+            node.rgb = [rgb_tuple for rgb_tuple in cls._rgb.iter_unpack(rgb_buffer)]
+
+        if Node.Flags.SMOOTHING_GROUPS in flags:
+            smoothing_groups = Struct(
+                cls._smoothing_groups.format(face_count=face_count)
+            )
+            node.smoothing_groups = list(
+                smoothing_groups.unpack(buffer[: smoothing_groups.size])
+            )
+            buffer = buffer[smoothing_groups.size :]
+
+        if Node.Flags.VERTEX_ANIMATION in flags:
+            node.vertex_animation = VertexAnimation.frombuffer(buffer)
+            buffer = buffer[len(bytes(node.vertex_animation)) :]
+
+        if Node.Flags.KEY_ANIMATION in flags:
+            node.key_animation = KeyAnimation.frombuffer(buffer)
+
+        return node
+
+    @classmethod
     def fromstream(cls, stream: BinaryIO, parent: Optional["Node"] = None) -> "Node":
         stream_position = stream.tell()
         try:
