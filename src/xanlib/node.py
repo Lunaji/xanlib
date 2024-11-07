@@ -45,6 +45,42 @@ class Node:
             yield node.parent
             node = node.parent
 
+    def __bytes__(self) -> bytes:
+        buffer = len(self.vertices).to_bytes(4, "little", signed=True)
+
+        extras = b""
+        flags = Node.Flags(0)
+        if self.rgb is not None:
+            flags |= self.Flags.PRELIGHT
+            extras += b"".join(self._rgb.pack(*rgb) for rgb in self.rgb)
+        if self.smoothing_groups is not None:
+            flags |= self.Flags.SMOOTHING_GROUPS
+            smoothing_groups = Struct(
+                self._smoothing_groups.format(face_count=len(self.faces))
+            )
+            extras += smoothing_groups.pack(*self.smoothing_groups)
+        if self.vertex_animation is not None:
+            flags |= self.Flags.VERTEX_ANIMATION
+            extras += bytes(self.vertex_animation)
+        if self.key_animation is not None:
+            flags |= self.Flags.KEY_ANIMATION
+            extras += bytes(self.key_animation)
+
+        assert self.transform is not None
+        buffer += self._header.pack(
+            flags,
+            len(self.faces),
+            len(self.children),
+            *self.transform,
+            len(self.name),
+        ) + self.name.encode("ascii")
+
+        buffer += b"".join(bytes(child) for child in self.children)
+        buffer += b"".join(bytes(vertex) for vertex in self.vertices)
+        buffer += b"".join(bytes(face) for face in self.faces)
+
+        return buffer + extras
+
     @classmethod
     def fromstream(cls, stream: BinaryIO, parent: Optional["Node"] = None) -> "Node":
         stream_position = stream.tell()

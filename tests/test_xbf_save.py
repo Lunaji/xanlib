@@ -1,14 +1,4 @@
-import io
-import pytest
-from xanlib.xbf_save import (
-    write_node,
-    save_xbf,
-)
-
-
-@pytest.fixture()
-def stream():
-    return io.BytesIO()
+from xanlib.xbf_save import save_xbf
 
 
 def test_write_vertex(vertex):
@@ -27,15 +17,13 @@ def test_write_key_animation(key_animation):
     assert bytes(key_animation.decoded) == key_animation.encoded
 
 
-def test_write_node_basic(stream, node_basic):
-    write_node(stream, node_basic.decoded)
-    assert stream.getvalue() == node_basic.encoded
+def test_write_node_basic(node_basic):
+    assert bytes(node_basic.decoded) == node_basic.encoded
 
 
-def test_write_node_with_children(stream, node_with_children):
+def test_write_node_with_children(node_with_children):
     node_with_children.decoded.children[0].parent = None  # TODO: remove this line
-    write_node(stream, node_with_children.decoded)
-    assert stream.getvalue() == node_with_children.encoded
+    assert bytes(node_with_children.decoded) == node_with_children.encoded
 
 
 def test_save_xbf(mocker, scene):
