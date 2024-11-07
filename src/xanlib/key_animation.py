@@ -58,10 +58,8 @@ class KeyAnimation:
             return buffer
 
     @classmethod
-    def frombuffer(cls, buffer: bytes) -> "KeyAnimation":
-        frame_count, flags = cls._header_struct.unpack(
-            buffer[: cls._header_struct.size]
-        )
+    def frombuffer(cls, buffer: bytes, offset: int = 0) -> "KeyAnimation":
+        frame_count, flags = cls._header_struct.unpack_from(buffer, offset)
         if flags in (-1, -2, -3):
             extra_size = 0
             if flags == -1:
@@ -70,50 +68,40 @@ class KeyAnimation:
                 matrix_struct = cls._matrix12_struct
             else:
                 extra_struct = Struct(cls._extra_fmt.format(count=frame_count + 1))
-                matrix_count, *extra_data = extra_struct.unpack(
-                    buffer[
-                        cls._header_struct.size : cls._header_struct.size
-                        + extra_struct.size
-                    ]
+                matrix_count, *extra_data = extra_struct.unpack_from(
+                    buffer, offset + cls._header_struct.size
                 )
                 matrix_struct = cls._matrix12_struct
                 extra_size = extra_struct.size
             matrices = [
-                matrix
-                for matrix in matrix_struct.iter_unpack(
-                    buffer[
-                        cls._header_struct.size
-                        + extra_size : cls._header_struct.size
-                        + extra_size
-                        + matrix_struct.size * (frame_count + 1)
-                    ]
+                matrix_struct.unpack_from(
+                    buffer,
+                    offset
+                    + cls._header_struct.size
+                    + extra_size
+                    + matrix_struct.size * i,
                 )
+                for i in range(frame_count + 1)
             ]
         else:
             frames = []
-            pos = cls._header_struct.size
-            while pos < len(buffer):
-                frame_id, flag = cls._pos.unpack(buffer[pos : pos + cls._pos.size])
-                pos += cls._pos.size
+            offset += cls._header_struct.size
+            for i in range(flags):
+                frame_id, flag = cls._pos.unpack_from(buffer, offset)
+                offset += cls._pos.size
                 assert not (flag & 0b1000111111111111)
 
                 rotation = scale = translation = None
                 if (flag >> 12) & 0b001:
-                    w, *v = cls._quaternion.unpack(
-                        buffer[pos : pos + cls._quaternion.size]
-                    )
+                    w, *v = cls._quaternion.unpack_from(buffer, offset)
                     rotation = Quaternion(w, Vector3(*v))
-                    pos += cls._quaternion.size
+                    offset += cls._quaternion.size
                 if (flag >> 12) & 0b010:
-                    scale = Vector3(
-                        *cls._vector3.unpack(buffer[pos : pos + cls._vector3.size])
-                    )
-                    pos += cls._vector3.size
+                    scale = Vector3(*cls._vector3.unpack_from(buffer, offset))
+                    offset += cls._vector3.size
                 if (flag >> 12) & 0b100:
-                    translation = Vector3(
-                        *cls._vector3.unpack(buffer[pos : pos + cls._vector3.size])
-                    )
-                    pos += cls._vector3.size
+                    translation = Vector3(*cls._vector3.unpack_from(buffer, offset))
+                    offset += cls._vector3.size
 
                 frames.append(
                     KeyAnimationFrame(frame_id, flag, rotation, scale, translation)
