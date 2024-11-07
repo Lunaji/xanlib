@@ -85,6 +85,8 @@ class Node:
     def frombuffer(cls, buffer: bytes) -> "Node":
         node = cls()
         vertex_count = int.from_bytes(buffer[:4], "little", signed=True)
+        if vertex_count == -1:
+            return node
         buffer = buffer[4:]
 
         flags, face_count, child_count, *transform, name_length = cls._header.unpack(

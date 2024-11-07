@@ -5,6 +5,7 @@ from xanlib.compressed_vertex import convert_signed_5bit
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
 from xanlib.node import Node
+from xanlib.scene import Scene
 from xanlib.xbf_load import load_xbf
 
 
@@ -50,6 +51,13 @@ def test_read_node_with_children(node_with_children):
     result.children[0].parent = None  # TODO: remove this line
     assert result == node_with_children.decoded
     assert Node.frombuffer(node_with_children.encoded) == node_with_children.decoded
+
+
+def test_read_scene(scene):
+    stream = io.BytesIO(scene.encoded)
+    result = Scene.fromstream(stream)
+    assert result == scene.decoded
+    assert Scene.frombuffer(scene.encoded) == scene.decoded
 
 
 def test_load_xbf(mocker, scene):

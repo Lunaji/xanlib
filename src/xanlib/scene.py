@@ -47,6 +47,38 @@ class Scene:
         return buffer
 
     @classmethod
+    def frombuffer(cls, buffer: bytes) -> "Scene":
+        scene = Scene()
+        scene.version, fxdata_size = cls._header.unpack(buffer[: cls._header.size])
+        scene.FXData = buffer[cls._header.size : cls._header.size + fxdata_size]
+        texture_data_size = int.from_bytes(
+            buffer[cls._header.size + fxdata_size : cls._header.size + fxdata_size + 4],
+            "little",
+        )
+        scene.textureNameData = buffer[
+            cls._header.size
+            + fxdata_size
+            + 4 : cls._header.size
+            + fxdata_size
+            + 4
+            + texture_data_size
+        ]
+        offset = cls._header.size + fxdata_size + 4 + texture_data_size
+        while offset < len(buffer):
+            try:
+                node = Node.frombuffer(buffer[offset:])
+                if node.transform is None:
+                    # assert eof
+                    return scene
+                scene.nodes.append(node)
+                offset += len(bytes(node))
+            except Exception as e:
+                scene.error = e
+                scene.unparsed = buffer[offset:]
+                return scene
+        return scene
+
+    @classmethod
     def fromstream(cls, stream: BinaryIO) -> "Scene":
         scene = Scene()
         scene.version, fxdata_size = cls._header.unpack(stream.read(cls._header.size))
