@@ -34,6 +34,7 @@ def test_read_key_animation(key_animation):
     stream = io.BytesIO(key_animation.encoded)
     result = KeyAnimation.fromstream(stream)
     assert result == key_animation.decoded
+    assert KeyAnimation.frombuffer(key_animation.encoded) == key_animation.decoded
 
 
 def test_read_node_basic(node_basic):
