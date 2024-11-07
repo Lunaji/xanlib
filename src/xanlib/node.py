@@ -7,7 +7,7 @@ from xanlib.vertex import Vertex
 from xanlib.face import Face
 from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
-from struct import unpack, calcsize, iter_unpack
+from struct import unpack, calcsize, iter_unpack, Struct
 
 
 @dataclass
@@ -29,6 +29,7 @@ class Node:
     faceData: list[int] | None = None
     vertex_animation: VertexAnimation | None = None
     key_animation: KeyAnimation | None = None
+    _header = Struct("<3i16dI")
 
     def __iter__(self) -> Iterator["Node"]:
         yield self
@@ -51,10 +52,8 @@ class Node:
             if vertex_count == -1:
                 return node
             node.parent = parent
-            header_fmt = "<3i16dI"
-            header_size = calcsize(header_fmt)
-            flags, face_count, child_count, *transform, name_length = unpack(
-                header_fmt, stream.read(header_size)
+            flags, face_count, child_count, *transform, name_length = (
+                cls._header.unpack(stream.read(cls._header.size))
             )
             flags = Node.Flags(flags)
             node.transform = tuple(transform)
