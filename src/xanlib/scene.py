@@ -59,9 +59,6 @@ class Scene:
         while offset < len(buffer):
             try:
                 node = Node.frombuffer(buffer, offset)
-                if node.transform is None:
-                    # assert eof
-                    return scene
                 scene.nodes.append(node)
                 offset += len(bytes(node))
             except Exception as e:
