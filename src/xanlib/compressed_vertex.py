@@ -24,7 +24,10 @@ class CompressedVertex:
     y: int
     z: int
     normal_packed: int
-    fmt = Struct("<3hH")
+    cstruct = Struct("<3hH")
+
+    def __bytes__(self) -> bytes:
+        return self.cstruct.pack(self.x, self.y, self.z, self.normal_packed)
 
     @property
     def position(self) -> Vector3:
@@ -40,7 +43,7 @@ class CompressedVertex:
         )
 
     def as_vertex(self) -> Vertex:
-        return Vertex(self.position, self.normal)
+        return Vertex(*self.position, *self.normal)
 
     def from_vertex(self, vertex: Vertex) -> None:
         """Warning: does not roundtrip"""

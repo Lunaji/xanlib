@@ -17,6 +17,7 @@ pytest-xdist = ">=3.6.1"
 pytest-mock = ">=3.14.0"
 mypy = ">=1.13.0"
 typeguard = ">=4.4.1"
+ipython = ">=8.29.0"
 
 [tool.poetry.group.examples]
 optional = true

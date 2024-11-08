@@ -1,7 +1,6 @@
 from .node import Node
 from .scene import Scene, traverse, print_node_names
-from .xbf_load import load_xbf
-from .xbf_save import save_xbf
+from .xbf_io import load_xbf, save_xbf
 
 __all__ = [
     "traverse",

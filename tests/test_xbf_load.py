@@ -1,52 +1,54 @@
-import io
-from xanlib.xbf_load import (
-    read_vertex,
-    read_face,
-    read_vertex_animation,
-    read_key_animation,
-    read_node,
-    load_xbf,
-)
+from xanlib.face import Face
+from xanlib.vertex import Vertex
 from xanlib.compressed_vertex import convert_signed_5bit
+from xanlib.vertex_animation import VertexAnimation
+from xanlib.key_animation import KeyAnimation
+from xanlib.node import Node
+from xanlib.scene import Scene
+from xanlib.xbf_io import load_xbf
 
 
 def test_convert_signed_5bit(signed_5bit):
     v, expected = signed_5bit
     assert convert_signed_5bit(v) == expected
 
+
 def test_read_vertex(vertex):
-    stream = io.BytesIO(vertex.encoded)
-    result = read_vertex(stream)
-    assert result == vertex.decoded
-    
+    assert Vertex(*Vertex.cstruct.unpack(vertex.encoded)) == vertex.decoded
+
+
 def test_read_face(face):
-    stream = io.BytesIO(face.encoded)
-    result = read_face(stream)
-    assert result == face.decoded
+    assert Face(*Face.cstruct.unpack(face.encoded)) == face.decoded
+
 
 def test_read_vertex_animation(vertex_animation):
-    stream = io.BytesIO(vertex_animation.encoded)
-    result = read_vertex_animation(stream)
-    assert result == vertex_animation.decoded
+    assert (
+        VertexAnimation.frombuffer(vertex_animation.encoded) == vertex_animation.decoded
+    )
+
 
 def test_read_key_animation(key_animation):
-    stream = io.BytesIO(key_animation.encoded)
-    result = read_key_animation(stream)
-    assert result == key_animation.decoded
+    assert KeyAnimation.frombuffer(key_animation.encoded) == key_animation.decoded
+
 
 def test_read_node_basic(node_basic):
-    stream = io.BytesIO(node_basic.encoded)
-    result = read_node(stream)
-    assert result == node_basic.decoded
+    assert Node.frombuffer(node_basic.encoded) == node_basic.decoded
+
 
 def test_read_node_with_children(node_with_children):
-    stream = io.BytesIO(node_with_children.encoded)
-    result = read_node(stream)
-    result.children[0].parent = None #TODO: remove this line
+    result = Node.frombuffer(node_with_children.encoded)
+    result.children[0].parent = None  # TODO: make this unnecessary
     assert result == node_with_children.decoded
 
+
+def test_read_scene(scene):
+    assert Scene.frombuffer(scene.encoded) == scene.decoded
+
+
 def test_load_xbf(mocker, scene):
-    mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data=scene.encoded))
-    result = load_xbf(scene.decoded.file)
+    file_data = scene.encoded + (-1).to_bytes(4, "little", signed=True)
+    mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data=file_data))
+    file = "foo.xbf"
+    result = load_xbf(file)
     assert result == scene.decoded
-    mock_open.assert_called_once_with(scene.decoded.file, 'rb')
+    mock_open.assert_called_once_with(file, "rb")
