@@ -1,4 +1,3 @@
-import io
 from xanlib.face import Face
 from xanlib.vertex import Vertex
 from xanlib.compressed_vertex import convert_signed_5bit
@@ -23,40 +22,25 @@ def test_read_face(face):
 
 
 def test_read_vertex_animation(vertex_animation):
-    stream = io.BytesIO(vertex_animation.encoded)
-    result = VertexAnimation.fromstream(stream)
-    assert result == vertex_animation.decoded
     assert (
         VertexAnimation.frombuffer(vertex_animation.encoded) == vertex_animation.decoded
     )
 
 
 def test_read_key_animation(key_animation):
-    stream = io.BytesIO(key_animation.encoded)
-    result = KeyAnimation.fromstream(stream)
-    assert result == key_animation.decoded
     assert KeyAnimation.frombuffer(key_animation.encoded) == key_animation.decoded
 
 
 def test_read_node_basic(node_basic):
-    stream = io.BytesIO(node_basic.encoded)
-    result = Node.fromstream(stream)
-    assert result == node_basic.decoded
     assert Node.frombuffer(node_basic.encoded) == node_basic.decoded
 
 
 def test_read_node_with_children(node_with_children):
-    stream = io.BytesIO(node_with_children.encoded)
-    result = Node.fromstream(stream)
-    result.children[0].parent = None  # TODO: remove this line
-    assert result == node_with_children.decoded
+    # result.children[0].parent = None  # TODO: remove this line
     assert Node.frombuffer(node_with_children.encoded) == node_with_children.decoded
 
 
 def test_read_scene(scene):
-    stream = io.BytesIO(scene.encoded)
-    result = Scene.fromstream(stream)
-    assert result == scene.decoded
     assert Scene.frombuffer(scene.encoded) == scene.decoded
 
 

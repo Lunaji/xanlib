@@ -1,4 +1,3 @@
-from typing import BinaryIO
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 import re
@@ -72,11 +71,6 @@ class Scene:
                 scene.unparsed = buffer[offset:]
                 return scene
         return scene
-
-    @classmethod
-    def fromstream(cls, stream: BinaryIO) -> "Scene":
-        buffer = stream.read()
-        return cls.frombuffer(buffer)
 
 
 def print_node_names(scene: Scene) -> None:
