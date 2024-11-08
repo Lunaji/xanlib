@@ -1,4 +1,4 @@
-from xanlib.xbf_save import save_xbf
+from xanlib.xbf_io import save_xbf
 
 
 def test_write_vertex(vertex):

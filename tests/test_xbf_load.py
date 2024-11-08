@@ -5,7 +5,7 @@ from xanlib.vertex_animation import VertexAnimation
 from xanlib.key_animation import KeyAnimation
 from xanlib.node import Node
 from xanlib.scene import Scene
-from xanlib.xbf_load import load_xbf
+from xanlib.xbf_io import load_xbf
 
 
 def test_convert_signed_5bit(signed_5bit):
