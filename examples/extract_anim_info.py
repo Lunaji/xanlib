@@ -88,7 +88,7 @@ if __name__ == "__main__":
         xbf_bytes = f.read()
 
     for animation_name in animation_names:
-        offset = xbf_bytes.find(animation_name.encode("ascii") + b"\x00")
+        offset = xbf_bytes.rfind(animation_name.encode("ascii") + b"\x00")
 
         if offset == -1:
             continue
