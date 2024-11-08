@@ -47,26 +47,21 @@ class Scene:
         return buffer
 
     @classmethod
-    def frombuffer(cls, buffer: bytes) -> "Scene":
+    def frombuffer(cls, buffer: bytes, offset: int = 0) -> "Scene":
         scene = Scene()
-        scene.version, fxdata_size = cls._header.unpack(buffer[: cls._header.size])
+        scene.version, fxdata_size = cls._header.unpack_from(buffer, offset)
         scene.FXData = buffer[cls._header.size : cls._header.size + fxdata_size]
+        offset += cls._header.size + fxdata_size
         texture_data_size = int.from_bytes(
-            buffer[cls._header.size + fxdata_size : cls._header.size + fxdata_size + 4],
+            buffer[offset : offset + 4],
             "little",
         )
-        scene.textureNameData = buffer[
-            cls._header.size
-            + fxdata_size
-            + 4 : cls._header.size
-            + fxdata_size
-            + 4
-            + texture_data_size
-        ]
-        offset = cls._header.size + fxdata_size + 4 + texture_data_size
+        offset += 4
+        scene.textureNameData = buffer[offset : offset + texture_data_size]
+        offset += texture_data_size
         while offset < len(buffer):
             try:
-                node = Node.frombuffer(buffer[offset:])
+                node = Node.frombuffer(buffer, offset)
                 if node.transform is None:
                     # assert eof
                     return scene
