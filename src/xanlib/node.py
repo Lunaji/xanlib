@@ -29,7 +29,7 @@ class Node:
     smoothing_groups: list[int] | None = None
     vertex_animation: VertexAnimation | None = None
     key_animation: KeyAnimation | None = None
-    _header = Struct("<3i16dI")
+    _header = Struct("<4i16dI")
     _rgb = Struct("<3B")
     _smoothing_groups = "<{face_count}i"
 
@@ -46,8 +46,6 @@ class Node:
             node = node.parent
 
     def __bytes__(self) -> bytes:
-        buffer = len(self.vertices).to_bytes(4, "little", signed=True)
-
         extras = b""
         flags = Node.Flags(0)
         if self.rgb is not None:
@@ -67,7 +65,8 @@ class Node:
             extras += bytes(self.key_animation)
 
         assert self.transform is not None
-        buffer += self._header.pack(
+        buffer = self._header.pack(
+            len(self.vertices),
             flags,
             len(self.faces),
             len(self.children),
@@ -85,14 +84,9 @@ class Node:
     def frombuffer(
         cls, buffer: bytes, offset: int = 0, parent: "Node | None" = None
     ) -> "Node":
-        node = cls()
-        vertex_count = int.from_bytes(
-            buffer[offset : offset + 4], "little", signed=True
-        )
-        node.parent = parent
-        offset += 4
+        node = cls(parent=parent)
 
-        flags, face_count, child_count, *transform, name_length = (
+        vertex_count, flags, face_count, child_count, *transform, name_length = (
             cls._header.unpack_from(buffer, offset)
         )
         offset += cls._header.size
