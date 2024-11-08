@@ -40,8 +40,6 @@ class Scene:
         )
         if self.unparsed is not None:
             buffer += self.unparsed
-        else:
-            buffer += (-1).to_bytes(4, "little", signed=True)  # EOF
 
         return buffer
 

@@ -46,7 +46,8 @@ def test_read_scene(scene):
 
 
 def test_load_xbf(mocker, scene):
-    mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data=scene.encoded))
+    file_data = scene.encoded + (-1).to_bytes(4, "little", signed=True)
+    mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data=file_data))
     file = "foo.xbf"
     result = load_xbf(file)
     assert result == scene.decoded

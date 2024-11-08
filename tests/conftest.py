@@ -245,7 +245,6 @@ def scene(node_basic):
         + len(textureNameData).to_bytes(4, "little")
         + textureNameData
         + node_basic.encoded
-        + (-1).to_bytes(4, "little", signed=True)  # EOF
     )
 
     decoded = Scene(

@@ -89,8 +89,6 @@ class Node:
         vertex_count = int.from_bytes(
             buffer[offset : offset + 4], "little", signed=True
         )
-        if vertex_count == -1:
-            return node
         node.parent = parent
         offset += 4
 
