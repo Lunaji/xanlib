@@ -64,11 +64,13 @@ class KeyAnimation:
             extra_size = 0
             if flags == -1:
                 matrix_struct = cls._matrix16_struct
+                real_count = frame_count + 1
             elif flags == -2:
                 matrix_struct = cls._matrix12_struct
+                real_count = frame_count + 1
             else:
                 extra_struct = Struct(cls._extra_fmt.format(count=frame_count + 1))
-                matrix_count, *extra_data = extra_struct.unpack_from(
+                real_count, *extra_data = extra_struct.unpack_from(
                     buffer, offset + cls._header_struct.size
                 )
                 matrix_struct = cls._matrix12_struct
@@ -81,7 +83,7 @@ class KeyAnimation:
                     + extra_size
                     + matrix_struct.size * i,
                 )
-                for i in range(frame_count + 1)
+                for i in range(real_count)
             ]
         else:
             frames = []
