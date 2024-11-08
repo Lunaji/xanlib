@@ -82,13 +82,16 @@ class Node:
         return buffer + extras
 
     @classmethod
-    def frombuffer(cls, buffer: bytes, offset: int = 0) -> "Node":
+    def frombuffer(
+        cls, buffer: bytes, offset: int = 0, parent: "Node | None" = None
+    ) -> "Node":
         node = cls()
         vertex_count = int.from_bytes(
             buffer[offset : offset + 4], "little", signed=True
         )
         if vertex_count == -1:
             return node
+        node.parent = parent
         offset += 4
 
         flags, face_count, child_count, *transform, name_length = (
@@ -101,7 +104,7 @@ class Node:
         offset += name_length
 
         for _ in range(child_count):
-            child = cls.frombuffer(buffer, offset)
+            child = cls.frombuffer(buffer, offset, parent=node)
             node.children.append(child)
             offset += len(bytes(child))
 

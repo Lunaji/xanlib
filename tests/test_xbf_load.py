@@ -36,8 +36,9 @@ def test_read_node_basic(node_basic):
 
 
 def test_read_node_with_children(node_with_children):
-    # result.children[0].parent = None  # TODO: remove this line
-    assert Node.frombuffer(node_with_children.encoded) == node_with_children.decoded
+    result = Node.frombuffer(node_with_children.encoded)
+    result.children[0].parent = None  # TODO: make this unnecessary
+    assert result == node_with_children.decoded
 
 
 def test_read_scene(scene):

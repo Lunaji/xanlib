@@ -22,7 +22,6 @@ def test_write_node_basic(node_basic):
 
 
 def test_write_node_with_children(node_with_children):
-    node_with_children.decoded.children[0].parent = None  # TODO: remove this line
     assert bytes(node_with_children.decoded) == node_with_children.encoded
 
 
